@@ -1,0 +1,17 @@
+Offline speech recognition components
+
+whisper.cpp
+Source: https://github.com/ggml-org/whisper.cpp
+License: MIT (see whisper.cpp.LICENSE.txt)
+
+GGML Whisper multilingual models
+Source: https://huggingface.co/ggerganov/whisper.cpp
+Primary model file: ggml-small.bin
+SHA-1: 55356645c2b361a969dfd0ef2c5a50d530afd8d5
+
+Fallback model
+Model file: ggml-base.bin
+SHA-1: 465707469ff3a37a2b9b8d8f89f2f99de7299dac
+
+The model is executed locally. Recorded spell audio is written only to the
+operating system's temporary cache and deleted after transcription.
