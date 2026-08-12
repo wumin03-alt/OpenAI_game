@@ -445,7 +445,7 @@ namespace PowerfulSpell
             }
             if (!ActiveSpeech.Available)
             {
-                feedback = "사용 가능한 마이크를 찾지 못했습니다. 음성 설정을 확인하세요.";
+                feedback = offlineSpeech.AvailabilityError;
                 return;
             }
             recognizedText = string.Empty;
@@ -608,8 +608,14 @@ namespace PowerfulSpell
             GUI.Label(new Rect(515, 330, 890, 30), $"마이크 상태: {MicrophoneSummary}", Left(smallStyle, microphonePermissionGranted ? new Color(.36f, .9f, .68f) : new Color(1f, .45f, .36f)));
 
             DrawPanel(new Rect(515, 385, 890, 110), new Color(.055f, .06f, .1f), new Color(.28f, .65f, .9f));
-            GUI.Label(new Rect(545, 402, 830, 38), "✓ 오프라인 Whisper 준비됨", headingStyle);
-            GUI.Label(new Rect(545, 447, 830, 30), "녹음 파일은 PC의 임시 폴더에서 처리 후 삭제되며 외부로 전송되지 않습니다.", smallStyle);
+            bool whisperReady = offlineSpeech.Available;
+            string whisperStatus = whisperReady ? "✓ 오프라인 Whisper 준비됨" : "! Whisper 준비 필요";
+            string whisperDetail = whisperReady
+                ? "녹음 파일은 PC의 임시 폴더에서 처리 후 삭제되며 외부로 전송되지 않습니다."
+                : offlineSpeech.AvailabilityError;
+            GUI.Label(new Rect(545, 402, 830, 38), whisperStatus,
+                Left(headingStyle, whisperReady ? new Color(.36f, .9f, .68f) : new Color(1f, .58f, .28f)));
+            GUI.Label(new Rect(545, 447, 830, 40), whisperDetail, smallStyle);
 
             GUI.Label(new Rect(515, 545, 890, 35), "입력 마이크 선택", bodyStyle);
             if (GUI.Button(new Rect(515, 590, 80, 54), "◀", buttonStyle)) CycleMicrophone(-1);

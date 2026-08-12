@@ -32,7 +32,8 @@ namespace PowerfulSpell
         }
 
         public string DisplayName => "오프라인 Whisper";
-        public bool Available => Microphone.devices.Length > 0 && File.Exists(ExecutablePath) && File.Exists(ModelPath);
+        public bool Available => string.IsNullOrEmpty(AvailabilityError);
+        public string AvailabilityError => GetAvailabilityError();
         public bool IsListening => recording != null || processing;
         public bool IsProcessing => processing;
         public float InputLevel => MeasureCurrentLevel();
@@ -59,7 +60,7 @@ namespace PowerfulSpell
             if (processing) return;
             if (!Available)
             {
-                onError?.Invoke("오프라인 Whisper 실행 파일, 한국어 모델 또는 마이크를 찾지 못했습니다.");
+                onError?.Invoke(AvailabilityError);
                 return;
             }
 
@@ -253,7 +254,7 @@ namespace PowerfulSpell
 
         private void StartLocalServer()
         {
-            if (!File.Exists(ServerExecutablePath) || !File.Exists(ModelPath)) return;
+            if (!File.Exists(ServerExecutablePath) || !HasUsableModel()) return;
             try
             {
                 serverProcess = Process.Start(new ProcessStartInfo
@@ -269,6 +270,31 @@ namespace PowerfulSpell
             {
                 UnityEngine.Debug.LogWarning("[Offline Whisper] 상주 서버 시작 실패, CLI를 사용합니다: " + exception.Message);
             }
+        }
+
+        private static bool HasUsableModel()
+        {
+            try { return File.Exists(ModelPath) && new FileInfo(ModelPath).Length > 100_000_000L; }
+            catch { return false; }
+        }
+
+        private static string GetAvailabilityError()
+        {
+            if (Microphone.devices.Length == 0)
+                return "마이크 장치를 찾지 못했습니다. 음성 설정과 Windows 마이크 권한을 확인하세요.";
+            if (!Directory.Exists(RuntimeDirectory))
+                return "Whisper 폴더가 누락되었습니다: Assets/StreamingAssets/OfflineSpeech";
+            if (!File.Exists(ExecutablePath) || !File.Exists(ServerExecutablePath))
+                return "Whisper 실행 파일이 누락되었습니다. Git에서 프로젝트 파일을 다시 받아주세요.";
+            string[] dlls = { "whisper.dll", "ggml.dll", "ggml-base.dll", "ggml-cpu.dll" };
+            foreach (string dll in dlls)
+                if (!File.Exists(Path.Combine(RuntimeDirectory, dll)))
+                    return $"Whisper 필수 파일이 누락되었습니다: {dll}";
+            if (!File.Exists(SmallModelPath) && !File.Exists(BaseModelPath))
+                return "Whisper 한국어 모델이 설치되지 않았습니다. Unity 상단 메뉴의 Powerful Spell → Whisper 모델 설치 및 확인을 실행하세요.";
+            if (!HasUsableModel())
+                return "Whisper 모델이 미완료 또는 손상된 파일입니다. Powerful Spell → Whisper 모델 설치 및 확인에서 다시 설치하세요.";
+            return string.Empty;
         }
 
         private IEnumerator WaitForLocalServer(float maxSeconds)
