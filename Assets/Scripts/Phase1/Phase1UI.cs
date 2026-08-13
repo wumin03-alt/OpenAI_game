@@ -69,22 +69,24 @@ namespace DemonCompany.Phase1
                 string status = entry.Decision == CandidateDecision.Hired ? "HIRED"
                     : entry.Decision == CandidateDecision.Rejected ? "REJECTED" : "PENDING";
                 Color color = ReferenceEquals(entry, controller.Selected) ? Accent : new Color(0.35f, 0.42f, 0.55f);
-                MakeButton(sidebar.transform, $"Candidate {i + 1}", new Vector2(20f, -88f - i * 112f), new Vector2(320f, 88f),
-                    $"{entry.Candidate.Name}  ·  {entry.Candidate.Species}\n{entry.Candidate.Role}  |  {status}", color,
-                    () => controller.ShowInterview(index));
+                MakeCandidateButton(sidebar.transform, entry.Candidate, status, new Vector2(20f, -88f - i * 130f),
+                    new Vector2(320f, 112f), color, () => controller.ShowInterview(index));
             }
 
             CandidateRuntime selected = controller.Selected;
             GameObject card = MakeFixedPanel(screenRoot.transform, "Candidate Card", new Vector2(420f, -132f),
                 new Vector2(620f, 840f), Panel);
-            MakeText(card.transform, "Name", new Vector2(28f, -24f), new Vector2(564f, 58f), 38,
+            MakeText(card.transform, "Name", new Vector2(28f, -24f), new Vector2(290f, 58f), 38,
                 TextAnchor.MiddleLeft, Color.white, FontStyle.Bold).text = selected.Candidate.Name;
-            MakeText(card.transform, "Profile", new Vector2(28f, -92f), new Vector2(564f, 130f), 25,
+            MakeText(card.transform, "Profile", new Vector2(28f, -92f), new Vector2(290f, 150f), 25,
                 TextAnchor.UpperLeft, new Color(0.78f, 0.84f, 0.94f), FontStyle.Normal).text =
                 $"Species    {selected.Candidate.Species}\nRole          {selected.Candidate.Role}\nSalary       {selected.Candidate.Salary}";
-            MakeText(card.transform, "Resume Label", new Vector2(28f, -236f), new Vector2(564f, 38f), 23,
+            GameObject portraitFrame = MakeFixedPanel(card.transform, "Portrait Frame", new Vector2(330f, -24f),
+                new Vector2(262f, 244f), new Color(0.025f, 0.04f, 0.075f, 1f));
+            MakePortrait(portraitFrame.transform, selected.Candidate, new Vector2(10f, -10f), new Vector2(242f, 224f));
+            MakeText(card.transform, "Resume Label", new Vector2(28f, -264f), new Vector2(564f, 38f), 23,
                 TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "RESUME";
-            MakeText(card.transform, "Resume", new Vector2(28f, -282f), new Vector2(564f, 140f), 24,
+            MakeText(card.transform, "Resume", new Vector2(28f, -310f), new Vector2(564f, 108f), 24,
                 TextAnchor.UpperLeft, Color.white, FontStyle.Normal).text = selected.Candidate.Resume;
 
             int remaining = Phase1GameController.QuestionLimit - selected.InterviewHistory.Count;
@@ -359,6 +361,54 @@ namespace DemonCompany.Phase1
             Text text = MakeText(obj.transform, "Label", Vector2.zero, size - new Vector2(24f, 12f), 23,
                 TextAnchor.MiddleCenter, new Color(0.035f, 0.045f, 0.065f), FontStyle.Bold, false, new Vector2(0.5f, 0.5f));
             return button;
+        }
+
+        private static Button MakeCandidateButton(Transform parent, Candidate candidate, string status, Vector2 position,
+            Vector2 size, Color accentColor, UnityEngine.Events.UnityAction action)
+        {
+            GameObject obj = new GameObject(candidate.Name + " Candidate", typeof(RectTransform), typeof(Image), typeof(Button));
+            obj.transform.SetParent(parent, false);
+            RectTransform rect = obj.GetComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            obj.GetComponent<Image>().color = new Color(0.105f, 0.135f, 0.205f, 1f);
+            Button button = obj.GetComponent<Button>();
+            ColorBlock colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.12f, 1.12f, 1.12f);
+            colors.pressedColor = new Color(0.76f, 0.76f, 0.76f);
+            button.colors = colors;
+            button.onClick.AddListener(action);
+
+            GameObject accent = MakePanel(obj.transform, "Selection Accent", new Vector2(0f, 0f), new Vector2(0f, 1f),
+                Vector2.zero, new Vector2(7f, 0f), accentColor);
+            accent.GetComponent<RectTransform>().pivot = new Vector2(0f, 0.5f);
+            MakePortrait(obj.transform, candidate, new Vector2(14f, -10f), new Vector2(92f, 92f));
+            MakeText(obj.transform, "Candidate Name", new Vector2(118f, -12f), new Vector2(188f, 34f), 25,
+                TextAnchor.MiddleLeft, Color.white, FontStyle.Bold).text = candidate.Name;
+            MakeText(obj.transform, "Candidate Details", new Vector2(118f, -48f), new Vector2(188f, 52f), 19,
+                TextAnchor.UpperLeft, new Color(0.74f, 0.81f, 0.91f), FontStyle.Normal).text =
+                $"{candidate.Species} · {candidate.Role}\n{status}";
+            return button;
+        }
+
+        private static Image MakePortrait(Transform parent, Candidate candidate, Vector2 position, Vector2 size)
+        {
+            GameObject obj = new GameObject(candidate.Name + " Portrait", typeof(RectTransform), typeof(Image));
+            obj.transform.SetParent(parent, false);
+            RectTransform rect = obj.GetComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            Image portrait = obj.GetComponent<Image>();
+            portrait.sprite = Resources.Load<Sprite>(candidate.PortraitResource);
+            portrait.preserveAspect = true;
+            portrait.raycastTarget = false;
+            portrait.color = portrait.sprite == null ? new Color(0.4f, 0.45f, 0.55f, 0.35f) : Color.white;
+            return portrait;
         }
 
         private static InputField MakeInput(Transform parent, string name, Vector2 position, Vector2 size, string placeholder)

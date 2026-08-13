@@ -11,7 +11,8 @@
 - Unity `6000.5.5f1`
 - C# 런타임 UI 및 2D 도형 렌더링
 - 씬: `Assets/Scenes/Prototype.unity`
-- 외부 아트, 폰트, 사운드 에셋 없음
+- 외부 패키지, 커스텀 폰트, 사운드 에셋 없음
+- 지원자 3명의 개별 픽셀 아트 초상화와 투명 PNG 리소스
 
 마스터 문서의 브라우저용 TypeScript/Vite/Phaser 제안 대신, 이 저장소와 작업 요청의 실행 대상에 맞춰 Unity 프로젝트로 구현했습니다. 게임 규칙과 Phase 1 범위는 동일하게 유지했습니다.
 
@@ -118,6 +119,11 @@ Trait 3개를 한 번에 모두 확인하려면 채용 한도가 2명이므로 �
 
 ```text
 Assets/
+  Resources/
+    CandidatePortraits/
+      gruk.png
+      rokka.png
+      mellu.png
   Scenes/
     Prototype.unity
   Scripts/
