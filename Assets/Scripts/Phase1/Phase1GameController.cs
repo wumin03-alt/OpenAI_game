@@ -180,7 +180,7 @@ namespace DemonCompany.Phase1
             ApplyOpeningTraits();
             nextEnemySpawn = Time.time + 0.6f;
             ui.ShowBattle();
-            LogBattleEvent("WAVE 1 START · Enemy Warriors 5명 접근 중");
+            LogBattleEvent("1차 공세 시작 · 적 전사 5명 접근 중");
         }
 
         public void RestartGame()
@@ -204,12 +204,12 @@ namespace DemonCompany.Phase1
             CreateWorldShape("Battlefield", new Vector2(0f, -0.15f), new Vector2(18f, 7.2f), new Color(0.035f, 0.055f, 0.1f), -5);
             CreateWorldShape("Lane", new Vector2(0f, -1.15f), new Vector2(17f, 1.45f), new Color(0.09f, 0.12f, 0.18f), -3);
             CreateWorldShape("Dungeon Gate", new Vector2(-7.2f, -0.35f), new Vector2(1.25f, 4.2f), new Color(0.42f, 0.22f, 0.55f), 0);
-            CreateWorldLabel("DUNGEON\nGATE", new Vector2(-7.2f, 1.25f), 44, new Color(0.9f, 0.7f, 1f));
-            CreateWorldLabel("ENEMY SPAWN  →", new Vector2(6.2f, 2.15f), 34, new Color(1f, 0.55f, 0.4f));
+            CreateWorldLabel("던전\n입구", new Vector2(-7.2f, 1.25f), 44, new Color(0.9f, 0.7f, 1f));
+            CreateWorldLabel("적 출현  →", new Vector2(6.2f, 2.15f), 34, new Color(1f, 0.55f, 0.4f));
             for (int i = 0; i < slotPositions.Length; i++)
             {
                 CreateWorldShape($"Slot {i + 1}", slotPositions[i], new Vector2(1.25f, 1.85f), new Color(0.2f, 0.32f, 0.42f, 0.42f), -1);
-                CreateWorldLabel($"SLOT {i + 1}", slotPositions[i] + Vector2.down * 1.18f, 26, new Color(0.5f, 0.7f, 0.85f));
+                CreateWorldLabel($"배치 {i + 1}", slotPositions[i] + Vector2.down * 1.18f, 26, new Color(0.5f, 0.7f, 0.85f));
             }
         }
 
@@ -233,7 +233,7 @@ namespace DemonCompany.Phase1
                     Position = position,
                     TargetPosition = position,
                     Hp = runtime.Candidate.Stats.MaxHp,
-                    Record = new PerformanceRecord { Candidate = runtime.Candidate, TraitEvent = "No trait incident." }
+                    Record = new PerformanceRecord { Candidate = runtime.Candidate, TraitEvent = "특성과 관련된 사건 없음." }
                 };
                 monsters.Add(monster);
             }
@@ -247,9 +247,9 @@ namespace DemonCompany.Phase1
                 {
                     monster.TargetPosition = new Vector2(2.15f, -1.15f);
                     monster.RecklessCharging = true;
-                    monster.Record.TraitEvent = "Broke formation and charged the enemy.";
-                    CreateWorldLabel("RECKLESS!\nFORMATION BREAK", monster.Position + Vector2.up * 1.55f, 28, new Color(1f, 0.38f, 0.25f), monster.View.transform);
-                    LogBattleEvent($"{monster.Runtime.Candidate.Name}: RECKLESS — 대형을 이탈해 돌진!");
+                    monster.Record.TraitEvent = "대형을 이탈하고 적에게 돌진함.";
+                    CreateWorldLabel("무모함!\n대형 이탈", monster.Position + Vector2.up * 1.55f, 28, new Color(1f, 0.38f, 0.25f), monster.View.transform);
+                    LogBattleEvent($"{monster.Runtime.Candidate.Name}: 무모함 — 대형을 이탈해 돌진!");
                 }
                 else if (monster.Runtime.Candidate.Trait == TraitId.TeamPlayer)
                 {
@@ -263,10 +263,10 @@ namespace DemonCompany.Phase1
                     GameObject aura = CreateWorldShape("Team Aura", monster.Position, new Vector2(4.2f, 2.7f), new Color(0.15f, 0.8f, 1f, 0.16f), -2);
                     aura.transform.SetParent(monster.View.transform, true);
                     monster.Record.TraitEvent = buffed > 0
-                        ? $"Boosted {buffed} nearby ally's Attack Speed by 20%."
-                        : "Team aura activated, but no ally was in range.";
-                    CreateWorldLabel("TEAM PLAYER AURA\nALLY ATK SPD +20%", monster.Position + Vector2.up * 1.55f, 26, new Color(0.35f, 0.95f, 1f), monster.View.transform);
-                    LogBattleEvent($"{monster.Runtime.Candidate.Name}: TEAM_PLAYER — 주변 아군 {buffed}명 공격속도 +20%");
+                        ? $"근처 아군 {buffed}명의 공격 속도를 20% 증가시킴."
+                        : "팀워크 오라가 활성화됐지만 범위 안에 아군이 없었음.";
+                    CreateWorldLabel("팀워크 오라\n아군 공속 +20%", monster.Position + Vector2.up * 1.55f, 26, new Color(0.35f, 0.95f, 1f), monster.View.transform);
+                    LogBattleEvent($"{monster.Runtime.Candidate.Name}: 팀플레이어 — 주변 아군 {buffed}명 공격 속도 +20%");
                 }
             }
         }
@@ -348,10 +348,10 @@ namespace DemonCompany.Phase1
                                 && !assigned.Fleeing)
                             {
                                 assigned.Fleeing = true;
-                                assigned.Record.TraitEvent = "Ran away from battle below 50% HP.";
-                                CreateWorldLabel("COWARD!\nRUNNING AWAY", assigned.Position + Vector2.up * 1.55f, 30,
+                                assigned.Record.TraitEvent = "체력이 50% 이하로 떨어지자 전장에서 도주함.";
+                                CreateWorldLabel("겁쟁이!\n전장 이탈", assigned.Position + Vector2.up * 1.55f, 30,
                                     new Color(1f, 0.85f, 0.25f), assigned.View.transform);
-                                LogBattleEvent($"{assigned.Runtime.Candidate.Name}: COWARD — HP 50% 이하, 전장에서 도주!");
+                                LogBattleEvent($"{assigned.Runtime.Candidate.Name}: 겁쟁이 — 체력 50% 이하, 전장에서 도주!");
                             }
                             else if (assigned.Hp <= 0f)
                             {
@@ -375,7 +375,7 @@ namespace DemonCompany.Phase1
                     if (enemy.Position.x <= -6.45f)
                     {
                         dungeonHp = Mathf.Max(0, dungeonHp - 20);
-                        LogBattleEvent($"Dungeon Gate 피격! HP {dungeonHp}/100");
+                        LogBattleEvent($"던전 입구 피격! 내구도 {dungeonHp}/100");
                         ResolveEnemy(enemy, true);
                     }
                 }
@@ -391,9 +391,9 @@ namespace DemonCompany.Phase1
         private void SpawnEnemy(int index)
         {
             Vector2 position = new Vector2(7.4f + index * 0.35f, -1.15f);
-            GameObject view = CreateWorldShape($"Enemy Warrior {index + 1}", position, new Vector2(0.78f, 1.22f),
+            GameObject view = CreateWorldShape($"적 전사 {index + 1}", position, new Vector2(0.78f, 1.22f),
                 new Color(0.95f, 0.72f, 0.2f), 2);
-            CreateWorldLabel($"HERO {index + 1}", position + Vector2.up * 0.92f, 24, new Color(1f, 0.85f, 0.42f), view.transform);
+            CreateWorldLabel($"용사 {index + 1}", position + Vector2.up * 0.92f, 24, new Color(1f, 0.85f, 0.42f), view.transform);
             List<BattleMonster> activeTargets = monsters.Where(monster => monster.Active).ToList();
             BattleEnemy enemy = new BattleEnemy
             {
@@ -413,7 +413,7 @@ namespace DemonCompany.Phase1
             enemy.Active = false;
             enemy.View.SetActive(false);
             enemiesResolved++;
-            if (!reachedGate) LogBattleEvent($"Enemy Warrior 처치 · {enemiesResolved}/5 해결");
+            if (!reachedGate) LogBattleEvent($"적 전사 처치 · {enemiesResolved}/5 격퇴");
         }
 
         private IEnumerator FinishBattle(bool allEnemiesResolved)
@@ -421,7 +421,7 @@ namespace DemonCompany.Phase1
             if (battleEnding) yield break;
             battleEnding = true;
             bool victory = dungeonHp > 0 && allEnemiesResolved;
-            LogBattleEvent(victory ? "WAVE CLEAR" : "GAME OVER");
+            LogBattleEvent(victory ? "공세 방어 성공" : "게임 오버");
             ui.UpdateBattleHud();
             yield return new WaitForSeconds(1.6f);
             phase = GamePhase.Review;
@@ -434,8 +434,8 @@ namespace DemonCompany.Phase1
             return string.Join("\n", monsters.Select(monster =>
             {
                 float shownHp = Mathf.Max(0f, monster.Hp);
-                string state = monster.Fleeing ? "FLEEING" : !monster.Active ? "OUT" : "ACTIVE";
-                return $"{monster.Runtime.Candidate.Name,-8}  HP {shownHp:0}/{monster.Runtime.Candidate.Stats.MaxHp:0}  [{state}]";
+                string state = monster.Fleeing ? "도주 중" : !monster.Active ? "전투 불능" : "전투 중";
+                return $"{monster.Runtime.Candidate.Name,-8}  체력 {shownHp:0}/{monster.Runtime.Candidate.Stats.MaxHp:0}  [{state}]";
             }));
         }
 

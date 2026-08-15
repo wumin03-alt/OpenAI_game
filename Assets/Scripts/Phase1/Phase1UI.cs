@@ -55,7 +55,7 @@ namespace DemonCompany.Phase1
         public void ShowInterview()
         {
             BuildScreen("Interview Screen");
-            phaseText.text = "01  INTERVIEW  ·  FACE TO FACE";
+            phaseText.text = "01  면접  ·  대면 심사";
             UpdateBudget();
 
             Color wall = new Color(0.11f, 0.085f, 0.085f, 1f);
@@ -75,14 +75,14 @@ namespace DemonCompany.Phase1
             GameObject waitingRoom = MakeFixedPanel(screenRoot.transform, "Waiting Room", new Vector2(28f, -128f),
                 new Vector2(238f, 426f), new Color(0.04f, 0.045f, 0.065f, 0.96f));
             MakeText(waitingRoom.transform, "Waiting Header", new Vector2(14f, -12f), new Vector2(210f, 38f), 20,
-                TextAnchor.MiddleLeft, Gold, FontStyle.Bold).text = "WAITING ROOM";
+                TextAnchor.MiddleLeft, Gold, FontStyle.Bold).text = "지원자 대기실";
 
             for (int i = 0; i < controller.Candidates.Count; i++)
             {
                 int index = i;
                 CandidateRuntime entry = controller.Candidates[i];
-                string status = entry.Decision == CandidateDecision.Hired ? "HIRED"
-                    : entry.Decision == CandidateDecision.Rejected ? "REJECTED" : "PENDING";
+                string status = entry.Decision == CandidateDecision.Hired ? "채용"
+                    : entry.Decision == CandidateDecision.Rejected ? "거절" : "대기";
                 Color color = ReferenceEquals(entry, controller.Selected) ? Accent : new Color(0.35f, 0.42f, 0.55f);
                 MakeCandidateTab(waitingRoom.transform, entry.Candidate, status, new Vector2(12f, -60f - i * 116f),
                     new Vector2(214f, 102f), color, () => controller.ShowInterview(index));
@@ -103,7 +103,7 @@ namespace DemonCompany.Phase1
                 new Vector2(42f, 42f), new Color(0.92f, 0.9f, 0.82f, 0.98f));
             speechTail.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
             string spokenLine = selected.InterviewHistory.Count == 0
-                ? $"I'm {selected.Candidate.Name}. Thank you for meeting me.\nWhat would you like to know?"
+                ? $"저는 {selected.Candidate.Name}입니다. 면접 기회를 주셔서 감사합니다.\n무엇이든 질문해 주세요."
                 : selected.InterviewHistory[selected.InterviewHistory.Count - 1].Answer;
             MakeText(speech.transform, "Speaker", new Vector2(26f, -18f), new Vector2(656f, 36f), 22,
                 TextAnchor.MiddleLeft, new Color(0.38f, 0.22f, 0.12f), FontStyle.Bold).text = selected.Candidate.Name.ToUpperInvariant();
@@ -114,21 +114,21 @@ namespace DemonCompany.Phase1
                 new Vector2(426f, 300f), parchment);
             MakeFixedPanel(clipboard.transform, "Clipboard Clip", new Vector2(138f, 10f), new Vector2(150f, 26f), new Color(0.3f, 0.24f, 0.2f, 1f));
             MakeText(clipboard.transform, "Candidate File", new Vector2(24f, -26f), new Vector2(378f, 40f), 22,
-                TextAnchor.MiddleLeft, new Color(0.28f, 0.16f, 0.08f), FontStyle.Bold).text = "CANDIDATE DOSSIER";
+                TextAnchor.MiddleLeft, new Color(0.28f, 0.16f, 0.08f), FontStyle.Bold).text = "지원자 서류";
             MakeText(clipboard.transform, "Profile", new Vector2(24f, -72f), new Vector2(378f, 72f), 21,
                 TextAnchor.UpperLeft, new Color(0.16f, 0.11f, 0.08f), FontStyle.Bold).text =
-                $"{selected.Candidate.Species}  ·  {selected.Candidate.Role}\nSalary  {selected.Candidate.Salary}";
+                $"종족  {selected.Candidate.Species}  ·  역할  {selected.Candidate.Role}\n급여  {selected.Candidate.Salary}";
             MakeText(clipboard.transform, "Resume", new Vector2(24f, -148f), new Vector2(378f, 124f), 20,
                 TextAnchor.UpperLeft, new Color(0.2f, 0.13f, 0.09f), FontStyle.Normal).text = selected.Candidate.Resume;
 
             GameObject transcript = MakeFixedPanel(screenRoot.transform, "Transcript", new Vector2(28f, -566f),
                 new Vector2(360f, 226f), new Color(0.04f, 0.045f, 0.065f, 0.94f));
             MakeText(transcript.transform, "Transcript Header", new Vector2(16f, -10f), new Vector2(328f, 34f), 19,
-                TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "INTERVIEW NOTES";
+                TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "면접 기록";
             string history = selected.InterviewHistory.Count == 0
-                ? "No questions recorded yet."
+                ? "아직 기록된 질문이 없습니다."
                 : string.Join("\n\n", selected.InterviewHistory.Select((message, index) =>
-                    $"Q{index + 1}. {message.Question}\nA. {message.Answer}"));
+                    $"질문 {index + 1}. {message.Question}\n답변. {message.Answer}"));
             MakeText(transcript.transform, "History", new Vector2(16f, -50f), new Vector2(328f, 164f), 14,
                 TextAnchor.UpperLeft, Color.white, FontStyle.Normal).text = history;
 
@@ -144,30 +144,30 @@ namespace DemonCompany.Phase1
             int remaining = Phase1GameController.QuestionLimit - selected.InterviewHistory.Count;
             MakeText(desk.transform, "Interviewer Label", new Vector2(34f, -22f), new Vector2(500f, 36f), 20,
                 TextAnchor.MiddleLeft, new Color(0.94f, 0.77f, 0.42f), FontStyle.Bold).text =
-                $"YOU · INTERVIEWER     QUESTIONS {remaining} / 3";
+                $"당신 · 면접관     남은 질문 {remaining} / 3";
             InputField questionInput = MakeInput(desk.transform, "Question Input", new Vector2(34f, -68f), new Vector2(692f, 66f),
-                "Ask face-to-face... (e.g. What do you do when danger comes?)");
-            Button askButton = MakeButton(desk.transform, "Ask", new Vector2(744f, -68f), new Vector2(248f, 66f), "ASK", Accent,
+                "질문을 입력하세요. (예: 위험하면 어떻게 행동하나요?)");
+            Button askButton = MakeButton(desk.transform, "Ask", new Vector2(744f, -68f), new Vector2(248f, 66f), "질문하기", Accent,
                 () => controller.AskQuestion(questionInput.text));
             askButton.interactable = remaining > 0;
 
             bool pending = selected.Decision == CandidateDecision.Pending;
-            Button hire = MakeButton(desk.transform, "Hire", new Vector2(34f, -158f), new Vector2(220f, 66f), "HIRE", new Color(0.28f, 0.86f, 0.5f),
+            Button hire = MakeButton(desk.transform, "Hire", new Vector2(34f, -158f), new Vector2(220f, 66f), "채용", new Color(0.28f, 0.86f, 0.5f),
                 controller.HireSelected);
-            Button reject = MakeButton(desk.transform, "Reject", new Vector2(270f, -158f), new Vector2(220f, 66f), "REJECT", new Color(0.82f, 0.3f, 0.32f),
+            Button reject = MakeButton(desk.transform, "Reject", new Vector2(270f, -158f), new Vector2(220f, 66f), "거절", new Color(0.82f, 0.3f, 0.32f),
                 controller.RejectSelected);
             hire.interactable = pending;
             reject.interactable = pending;
             MakeText(desk.transform, "Decision", new Vector2(512f, -158f), new Vector2(480f, 66f), 19,
                 TextAnchor.MiddleLeft, new Color(0.86f, 0.8f, 0.7f), FontStyle.Bold).text =
-                selected.Decision == CandidateDecision.Pending ? "TRAIT: CONFIDENTIAL UNTIL REVIEW" : $"DECISION: {selected.Decision.ToString().ToUpperInvariant()}";
+                selected.Decision == CandidateDecision.Pending ? "특성: 성과 평가 전까지 비공개" : $"결정: {DecisionName(selected.Decision)}";
 
             GameObject roster = MakeFixedPanel(screenRoot.transform, "Roster", new Vector2(1442f, -770f), new Vector2(426f, 282f), PanelLight);
             string hiredNames = string.Join(", ", controller.Candidates.Where(entry => entry.Decision == CandidateDecision.Hired).Select(entry => entry.Candidate.Name));
-            if (hiredNames.Length == 0) hiredNames = "No hires yet";
+            if (hiredNames.Length == 0) hiredNames = "채용된 지원자 없음";
             MakeText(roster.transform, "Roster Text", new Vector2(22f, -18f), new Vector2(382f, 92f), 22,
-                TextAnchor.UpperLeft, Color.white, FontStyle.Bold).text = $"HIRED  {controller.HiredCount} / 2\n{hiredNames}";
-            Button deploy = MakeButton(roster.transform, "Deploy", new Vector2(22f, -132f), new Vector2(382f, 76f), "DEPLOY TEAM  →", Gold,
+                TextAnchor.UpperLeft, Color.white, FontStyle.Bold).text = $"채용 인원  {controller.HiredCount} / 2\n{hiredNames}";
+            Button deploy = MakeButton(roster.transform, "Deploy", new Vector2(22f, -132f), new Vector2(382f, 76f), "팀 배치하기  →", Gold,
                 controller.BeginDeployment);
             deploy.interactable = controller.HiredCount > 0;
         }
@@ -180,7 +180,7 @@ namespace DemonCompany.Phase1
         public void ShowDeployment()
         {
             BuildScreen("Deployment Screen");
-            phaseText.text = "02  DEPLOYMENT";
+            phaseText.text = "02  전투 배치";
             UpdateBudget();
             MakeText(screenRoot.transform, "Instructions", new Vector2(0f, -132f), new Vector2(1700f, 68f), 29,
                 TextAnchor.MiddleCenter, Color.white, FontStyle.Bold, false, new Vector2(0.5f, 1f)).text =
@@ -190,13 +190,13 @@ namespace DemonCompany.Phase1
                 .Where(i => controller.Candidates[i].Decision == CandidateDecision.Hired).ToList();
             GameObject hires = MakeFixedPanel(screenRoot.transform, "Hired List", new Vector2(80f, -245f), new Vector2(520f, 580f), Panel);
             MakeText(hires.transform, "Header", new Vector2(28f, -24f), new Vector2(464f, 48f), 27,
-                TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "HIRED MONSTERS";
+                TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "채용 몬스터";
             for (int i = 0; i < hiredIndices.Count; i++)
             {
                 int candidateIndex = hiredIndices[i];
                 CandidateRuntime runtime = controller.Candidates[candidateIndex];
                 bool selected = candidateIndex == controller.SelectedDeploymentCandidate;
-                string placement = runtime.SlotIndex < 0 ? "UNASSIGNED" : $"SLOT {runtime.SlotIndex + 1}";
+                string placement = runtime.SlotIndex < 0 ? "미배치" : $"배치 {runtime.SlotIndex + 1}";
                 MakeButton(hires.transform, "Hire " + i, new Vector2(28f, -100f - i * 142f), new Vector2(464f, 112f),
                     $"{runtime.Candidate.Name} · {runtime.Candidate.Species}\n{runtime.Candidate.Role}  |  {placement}",
                     selected ? Accent : new Color(0.4f, 0.48f, 0.62f), () => controller.SelectDeploymentCandidate(candidateIndex));
@@ -204,20 +204,20 @@ namespace DemonCompany.Phase1
 
             GameObject slots = MakeFixedPanel(screenRoot.transform, "Defense Slots", new Vector2(650f, -245f), new Vector2(1190f, 580f), Panel);
             MakeText(slots.transform, "Header", new Vector2(28f, -24f), new Vector2(1134f, 48f), 27,
-                TextAnchor.MiddleLeft, Gold, FontStyle.Bold).text = "DEFENSE FORMATION · DUNGEON GATE  ←";
+                TextAnchor.MiddleLeft, Gold, FontStyle.Bold).text = "방어 대형 · 던전 입구  ←";
             for (int i = 0; i < 3; i++)
             {
                 int slotIndex = i;
                 CandidateRuntime occupant = controller.Candidates.FirstOrDefault(entry => entry.SlotIndex == slotIndex);
-                string label = occupant == null ? $"SLOT {i + 1}\nEMPTY" : $"SLOT {i + 1}\n{occupant.Candidate.Name}\n{occupant.Candidate.Role}";
+                string label = occupant == null ? $"배치 {i + 1}\n비어 있음" : $"배치 {i + 1}\n{occupant.Candidate.Name}\n{occupant.Candidate.Role}";
                 Color color = occupant == null ? new Color(0.28f, 0.35f, 0.48f) : Accent;
                 MakeButton(slots.transform, "Slot " + i, new Vector2(48f + i * 366f, -155f), new Vector2(314f, 285f), label, color,
                     () => controller.AssignSelectedToSlot(slotIndex));
             }
 
-            MakeButton(screenRoot.transform, "Back", new Vector2(80f, -875f), new Vector2(270f, 74f), "←  INTERVIEW", new Color(0.42f, 0.48f, 0.58f),
+            MakeButton(screenRoot.transform, "Back", new Vector2(80f, -875f), new Vector2(270f, 74f), "←  면접으로", new Color(0.42f, 0.48f, 0.58f),
                 controller.BackToInterview);
-            Button begin = MakeButton(screenRoot.transform, "Begin Battle", new Vector2(-80f, -875f), new Vector2(420f, 74f), "START AUTO BATTLE  →", Gold,
+            Button begin = MakeButton(screenRoot.transform, "Begin Battle", new Vector2(-80f, -875f), new Vector2(420f, 74f), "자동 전투 시작  →", Gold,
                 controller.BeginBattle, true);
             begin.interactable = controller.Candidates.Where(entry => entry.Decision == CandidateDecision.Hired).All(entry => entry.SlotIndex >= 0);
         }
@@ -225,7 +225,7 @@ namespace DemonCompany.Phase1
         public void ShowBattle()
         {
             BuildScreen("Battle HUD", false);
-            phaseText.text = "03  AUTO BATTLE · WAVE 1";
+            phaseText.text = "03  자동 전투 · 1차 공세";
             UpdateBudget();
             GameObject leftHud = MakeFixedPanel(screenRoot.transform, "Dungeon HUD", new Vector2(30f, -130f), new Vector2(500f, 205f),
                 new Color(0.055f, 0.075f, 0.12f, 0.92f));
@@ -244,23 +244,23 @@ namespace DemonCompany.Phase1
         public void UpdateBattleHud()
         {
             if (battleDungeonText == null) return;
-            battleDungeonText.text = $"DUNGEON HP   {controller.DungeonHp} / 100";
+            battleDungeonText.text = $"던전 내구도   {controller.DungeonHp} / 100";
             battleDungeonText.color = controller.DungeonHp <= 40 ? new Color(1f, 0.35f, 0.3f) : new Color(0.8f, 0.55f, 1f);
             battleRosterText.text = controller.GetBattleRosterText();
-            battleEventText.text = "TRAIT & BATTLE EVENTS\n" + controller.GetBattleEventText();
+            battleEventText.text = "특성 및 전투 상황\n" + controller.GetBattleEventText();
         }
 
         public void ShowReview(bool victory, IReadOnlyList<PerformanceRecord> records)
         {
             BuildScreen("Performance Review");
-            phaseText.text = "04  PERFORMANCE REVIEW";
+            phaseText.text = "04  성과 평가";
             UpdateBudget();
             MakeText(screenRoot.transform, "Result", new Vector2(0f, -136f), new Vector2(1600f, 86f), 48,
                 TextAnchor.MiddleCenter, victory ? Accent : new Color(1f, 0.36f, 0.3f), FontStyle.Bold, false, new Vector2(0.5f, 1f)).text =
-                victory ? "WAVE CLEAR" : "GAME OVER";
+                victory ? "공세 방어 성공" : "게임 오버";
             MakeText(screenRoot.transform, "Result Detail", new Vector2(0f, -218f), new Vector2(1600f, 48f), 25,
                 TextAnchor.MiddleCenter, Color.white, FontStyle.Normal, false, new Vector2(0.5f, 1f)).text =
-                $"Dungeon HP {controller.DungeonHp}/100 · 면접에서 들은 말과 실제 Trait 행동을 비교하세요.";
+                $"던전 내구도 {controller.DungeonHp}/100 · 면접에서 들은 말과 실제 특성 행동을 비교하세요.";
 
             float cardWidth = records.Count == 1 ? 760f : 760f;
             float totalWidth = records.Count * cardWidth + Mathf.Max(0, records.Count - 1) * 40f;
@@ -273,16 +273,16 @@ namespace DemonCompany.Phase1
                     TextAnchor.MiddleLeft, Color.white, FontStyle.Bold).text = $"{record.Candidate.Name} · {record.Candidate.Species} {record.Candidate.Role}";
                 MakeText(card.transform, "Stats", new Vector2(28f, -104f), new Vector2(cardWidth - 56f, 142f), 27,
                     TextAnchor.UpperLeft, new Color(0.82f, 0.88f, 0.96f), FontStyle.Bold).text =
-                    $"Damage              {record.Damage:0}\nKills                    {record.Kills}\nDamage Taken     {record.DamageTaken:0}";
+                    $"누적 피해        {record.Damage:0}\n처치 수            {record.Kills}\n받은 피해        {record.DamageTaken:0}";
                 MakeText(card.transform, "Incident Label", new Vector2(28f, -270f), new Vector2(cardWidth - 56f, 38f), 23,
-                    TextAnchor.MiddleLeft, Gold, FontStyle.Bold).text = "INCIDENT";
+                    TextAnchor.MiddleLeft, Gold, FontStyle.Bold).text = "사건 기록";
                 MakeText(card.transform, "Incident", new Vector2(28f, -316f), new Vector2(cardWidth - 56f, 74f), 23,
                     TextAnchor.UpperLeft, Color.white, FontStyle.Normal).text = record.TraitEvent;
                 MakeText(card.transform, "Trait", new Vector2(28f, -420f), new Vector2(cardWidth - 56f, 54f), 26,
-                    TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = $"DISCOVERED TRAIT   {TraitName(record.Candidate.Trait)}";
+                    TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = $"발견된 특성   {TraitName(record.Candidate.Trait)}";
             }
 
-            MakeButton(screenRoot.transform, "Restart", new Vector2(0f, -878f), new Vector2(420f, 76f), "RESTART GAME", Accent,
+            MakeButton(screenRoot.transform, "Restart", new Vector2(0f, -878f), new Vector2(420f, 76f), "처음부터 다시 시작", Accent,
                 controller.RestartGame, false, new Vector2(0.5f, 1f));
         }
 
@@ -325,12 +325,17 @@ namespace DemonCompany.Phase1
 
         private void UpdateBudget()
         {
-            budgetText.text = $"SALARY BUDGET   {controller.CurrentBudget} / {Phase1GameController.SalaryBudget}    ·    HIRED   {controller.HiredCount} / 2";
+            budgetText.text = $"급여 예산   {controller.CurrentBudget} / {Phase1GameController.SalaryBudget}    ·    채용   {controller.HiredCount} / 2";
         }
 
         private static string TraitName(TraitId trait)
         {
-            return trait == TraitId.Coward ? "COWARD" : trait == TraitId.Reckless ? "RECKLESS" : "TEAM_PLAYER";
+            return trait == TraitId.Coward ? "겁쟁이" : trait == TraitId.Reckless ? "무모함" : "팀플레이어";
+        }
+
+        private static string DecisionName(CandidateDecision decision)
+        {
+            return decision == CandidateDecision.Hired ? "채용" : decision == CandidateDecision.Rejected ? "거절" : "대기";
         }
 
         private static GameObject MakeFixedPanel(Transform parent, string name, Vector2 topLeft, Vector2 size, Color color, bool rightAnchored = false)
