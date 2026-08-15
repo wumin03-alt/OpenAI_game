@@ -31,6 +31,7 @@ namespace DemonCompany.Phase1
             Canvas canvas = gameObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 100;
+            canvas.pixelPerfect = true;
             CanvasScaler scaler = gameObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -74,7 +75,7 @@ namespace DemonCompany.Phase1
 
             GameObject waitingRoom = MakeFixedPanel(screenRoot.transform, "Waiting Room", new Vector2(28f, -128f),
                 new Vector2(238f, 426f), new Color(0.04f, 0.045f, 0.065f, 0.96f));
-            MakeText(waitingRoom.transform, "Waiting Header", new Vector2(14f, -12f), new Vector2(210f, 38f), 20,
+            MakeText(waitingRoom.transform, "Waiting Header", new Vector2(14f, -12f), new Vector2(210f, 38f), 22,
                 TextAnchor.MiddleLeft, Gold, FontStyle.Bold).text = "지원자 대기실";
 
             for (int i = 0; i < controller.Candidates.Count; i++)
@@ -123,13 +124,13 @@ namespace DemonCompany.Phase1
 
             GameObject transcript = MakeFixedPanel(screenRoot.transform, "Transcript", new Vector2(28f, -566f),
                 new Vector2(360f, 226f), new Color(0.04f, 0.045f, 0.065f, 0.94f));
-            MakeText(transcript.transform, "Transcript Header", new Vector2(16f, -10f), new Vector2(328f, 34f), 19,
+            MakeText(transcript.transform, "Transcript Header", new Vector2(16f, -10f), new Vector2(328f, 34f), 22,
                 TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "면접 기록";
             string history = selected.InterviewHistory.Count == 0
                 ? "아직 기록된 질문이 없습니다."
                 : string.Join("\n\n", selected.InterviewHistory.Select((message, index) =>
                     $"질문 {index + 1}. {message.Question}\n답변. {message.Answer}"));
-            MakeText(transcript.transform, "History", new Vector2(16f, -50f), new Vector2(328f, 164f), 14,
+            MakeText(transcript.transform, "History", new Vector2(16f, -50f), new Vector2(328f, 164f), 18,
                 TextAnchor.UpperLeft, Color.white, FontStyle.Normal).text = history;
 
             MakeFixedPanel(screenRoot.transform, "Desk Top", new Vector2(326f, -724f), new Vector2(1098f, 46f), woodLight);
@@ -147,27 +148,29 @@ namespace DemonCompany.Phase1
                 $"당신 · 면접관     남은 질문 {remaining} / 3";
             InputField questionInput = MakeInput(desk.transform, "Question Input", new Vector2(34f, -68f), new Vector2(692f, 66f),
                 "질문을 입력하세요. (예: 위험하면 어떻게 행동하나요?)");
-            Button askButton = MakeButton(desk.transform, "Ask", new Vector2(744f, -68f), new Vector2(248f, 66f), "질문하기", Accent,
+            Button askButton = MakeButton(desk.transform, "Ask", new Vector2(744f, -68f), new Vector2(248f, 66f), "질문 보내기", Accent,
                 () => controller.AskQuestion(questionInput.text));
             askButton.interactable = remaining > 0;
 
             bool pending = selected.Decision == CandidateDecision.Pending;
-            Button hire = MakeButton(desk.transform, "Hire", new Vector2(34f, -158f), new Vector2(220f, 66f), "채용", new Color(0.28f, 0.86f, 0.5f),
+            Button hire = MakeButton(desk.transform, "Hire", new Vector2(34f, -158f), new Vector2(220f, 66f), "이 지원자 채용", new Color(0.18f, 0.72f, 0.38f),
                 controller.HireSelected);
-            Button reject = MakeButton(desk.transform, "Reject", new Vector2(270f, -158f), new Vector2(220f, 66f), "거절", new Color(0.82f, 0.3f, 0.32f),
+            Button reject = MakeButton(desk.transform, "Reject", new Vector2(270f, -158f), new Vector2(220f, 66f), "지원 거절", new Color(0.76f, 0.18f, 0.22f),
                 controller.RejectSelected);
             hire.interactable = pending;
             reject.interactable = pending;
-            MakeText(desk.transform, "Decision", new Vector2(512f, -158f), new Vector2(480f, 66f), 19,
+            MakeText(desk.transform, "Decision", new Vector2(512f, -154f), new Vector2(480f, 76f), 21,
                 TextAnchor.MiddleLeft, new Color(0.86f, 0.8f, 0.7f), FontStyle.Bold).text =
-                selected.Decision == CandidateDecision.Pending ? "특성: 성과 평가 전까지 비공개" : $"결정: {DecisionName(selected.Decision)}";
+                selected.Decision == CandidateDecision.Pending
+                    ? "지원자를 채용하거나 거절하세요.\n특성은 성과 평가 전까지 비공개입니다."
+                    : $"지원자 결정 완료: {DecisionName(selected.Decision)}";
 
             GameObject roster = MakeFixedPanel(screenRoot.transform, "Roster", new Vector2(1442f, -770f), new Vector2(426f, 282f), PanelLight);
             string hiredNames = string.Join(", ", controller.Candidates.Where(entry => entry.Decision == CandidateDecision.Hired).Select(entry => entry.Candidate.Name));
             if (hiredNames.Length == 0) hiredNames = "채용된 지원자 없음";
             MakeText(roster.transform, "Roster Text", new Vector2(22f, -18f), new Vector2(382f, 92f), 22,
                 TextAnchor.UpperLeft, Color.white, FontStyle.Bold).text = $"채용 인원  {controller.HiredCount} / 2\n{hiredNames}";
-            Button deploy = MakeButton(roster.transform, "Deploy", new Vector2(22f, -132f), new Vector2(382f, 76f), "팀 배치하기  →", Gold,
+            Button deploy = MakeButton(roster.transform, "Deploy", new Vector2(22f, -132f), new Vector2(382f, 76f), "전투 배치로 이동  →", Gold,
                 controller.BeginDeployment);
             deploy.interactable = controller.HiredCount > 0;
         }
@@ -386,6 +389,13 @@ namespace DemonCompany.Phase1
             text.color = color;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
             text.verticalOverflow = VerticalWrapMode.Overflow;
+            if (color.grayscale >= 0.55f)
+            {
+                Shadow shadow = obj.AddComponent<Shadow>();
+                shadow.effectColor = new Color(0f, 0f, 0f, 0.82f);
+                shadow.effectDistance = new Vector2(2f, -2f);
+                shadow.useGraphicAlpha = true;
+            }
             return text;
         }
 
@@ -410,8 +420,18 @@ namespace DemonCompany.Phase1
             colors.disabledColor = new Color(0.3f, 0.3f, 0.35f, 0.65f);
             button.colors = colors;
             button.onClick.AddListener(action);
-            Text text = MakeText(obj.transform, "Label", Vector2.zero, size - new Vector2(24f, 12f), 23,
-                TextAnchor.MiddleCenter, new Color(0.035f, 0.045f, 0.065f), FontStyle.Bold, false, new Vector2(0.5f, 0.5f));
+            Outline border = obj.AddComponent<Outline>();
+            border.effectColor = new Color(0.01f, 0.015f, 0.025f, 0.9f);
+            border.effectDistance = new Vector2(2f, -2f);
+            border.useGraphicAlpha = true;
+
+            Text text = MakeText(obj.transform, "Label", Vector2.zero, size - new Vector2(24f, 12f), 24,
+                TextAnchor.MiddleCenter, Color.white, FontStyle.Bold, false, new Vector2(0.5f, 0.5f));
+            Outline textOutline = text.gameObject.AddComponent<Outline>();
+            textOutline.effectColor = new Color(0f, 0f, 0f, 0.96f);
+            textOutline.effectDistance = new Vector2(1.8f, -1.8f);
+            textOutline.useGraphicAlpha = true;
+            text.text = label;
             return button;
         }
 
@@ -437,9 +457,9 @@ namespace DemonCompany.Phase1
 
             MakeFixedPanel(obj.transform, "Selection", Vector2.zero, new Vector2(6f, size.y), accentColor);
             MakePortrait(obj.transform, candidate, new Vector2(10f, -10f), new Vector2(82f, 82f));
-            MakeText(obj.transform, "Name", new Vector2(98f, -12f), new Vector2(106f, 30f), 21,
+            MakeText(obj.transform, "Name", new Vector2(98f, -10f), new Vector2(106f, 32f), 23,
                 TextAnchor.MiddleLeft, Color.white, FontStyle.Bold).text = candidate.Name;
-            MakeText(obj.transform, "Details", new Vector2(98f, -43f), new Vector2(106f, 48f), 16,
+            MakeText(obj.transform, "Details", new Vector2(98f, -43f), new Vector2(106f, 50f), 19,
                 TextAnchor.UpperLeft, new Color(0.74f, 0.81f, 0.91f), FontStyle.Normal).text =
                 $"{candidate.Role}\n{status}";
             return button;
@@ -523,7 +543,7 @@ namespace DemonCompany.Phase1
             Text inputText = MakeText(obj.transform, "Text", new Vector2(18f, -8f), size - new Vector2(36f, 16f), 23,
                 TextAnchor.MiddleLeft, Color.white, FontStyle.Normal);
             Text placeholderText = MakeText(obj.transform, "Placeholder", new Vector2(18f, -8f), size - new Vector2(36f, 16f), 22,
-                TextAnchor.MiddleLeft, new Color(0.52f, 0.57f, 0.68f), FontStyle.Italic);
+                TextAnchor.MiddleLeft, new Color(0.8f, 0.84f, 0.92f), FontStyle.Normal);
             placeholderText.text = placeholder;
             input.textComponent = inputText;
             input.placeholder = placeholderText;
