@@ -201,15 +201,35 @@ namespace DemonCompany.Phase1
         {
             ClearBattleWorld();
             battleRoot = new GameObject("Phase 1 Battle World");
-            CreateWorldShape("Battlefield", new Vector2(0f, -0.15f), new Vector2(18f, 7.2f), new Color(0.035f, 0.055f, 0.1f), -5);
-            CreateWorldShape("Lane", new Vector2(0f, -1.15f), new Vector2(17f, 1.45f), new Color(0.09f, 0.12f, 0.18f), -3);
-            CreateWorldShape("Dungeon Gate", new Vector2(-7.2f, -0.35f), new Vector2(1.25f, 4.2f), new Color(0.42f, 0.22f, 0.55f), 0);
-            CreateWorldLabel("던전\n입구", new Vector2(-7.2f, 1.25f), 44, new Color(0.9f, 0.7f, 1f));
-            CreateWorldLabel("적 출현  →", new Vector2(6.2f, 2.15f), 34, new Color(1f, 0.55f, 0.4f));
+            CreateWorldShape("Battlefield Backdrop", new Vector2(0f, -0.2f), new Vector2(19.5f, 9.8f), new Color(0.055f, 0.07f, 0.095f), -10);
+            CreateWorldShape("Upper Dungeon Wall", new Vector2(0f, 3.25f), new Vector2(19.5f, 2.25f), new Color(0.105f, 0.105f, 0.14f), -9);
+            CreateWorldShape("Lower Dungeon Wall", new Vector2(0f, -4.05f), new Vector2(19.5f, 2.15f), new Color(0.085f, 0.085f, 0.115f), -9);
+            CreateWorldShape("Defense Lane Border", new Vector2(0f, -1.15f), new Vector2(18.5f, 2.75f), new Color(0.18f, 0.16f, 0.19f), -7);
+            CreateWorldShape("Defense Lane", new Vector2(0f, -1.15f), new Vector2(18f, 2.35f), new Color(0.19f, 0.2f, 0.23f), -6);
+            CreateWorldShape("Defense Line", new Vector2(0.55f, -1.15f), new Vector2(0.12f, 2.55f), new Color(0.35f, 0.85f, 0.78f, 0.48f), -4);
+
+            for (int i = 0; i < 13; i++)
+            {
+                float x = -7.25f + i * 1.2f;
+                Color stone = i % 2 == 0 ? new Color(0.25f, 0.25f, 0.29f) : new Color(0.21f, 0.22f, 0.26f);
+                CreateWorldShape("Lane Stone " + i, new Vector2(x, -0.08f), new Vector2(1.02f, 0.1f), stone, -5);
+                CreateWorldShape("Lane Stone Lower " + i, new Vector2(x, -2.22f), new Vector2(1.02f, 0.1f), stone, -5);
+            }
+
+            CreateWorldShape("Dungeon Gate Outer", new Vector2(-8.15f, -0.75f), new Vector2(2.05f, 5.25f), new Color(0.27f, 0.18f, 0.35f), -2);
+            CreateWorldShape("Dungeon Gate Inner", new Vector2(-7.95f, -0.9f), new Vector2(0.95f, 3.35f), new Color(0.2f, 0.08f, 0.23f), 0);
+            CreateWorldShape("Dungeon Gate Rune", new Vector2(-7.45f, -0.9f), new Vector2(0.12f, 2.7f), new Color(0.72f, 0.38f, 0.95f), 1);
+            CreateWorldLabel("던전\n입구", new Vector2(-8.05f, 2.15f), 42, new Color(0.92f, 0.72f, 1f));
+
+            CreateWorldShape("Enemy Portal Outer", new Vector2(8.2f, -1.15f), new Vector2(1.45f, 3.15f), new Color(0.38f, 0.09f, 0.12f), -2);
+            CreateWorldShape("Enemy Portal", new Vector2(8.2f, -1.15f), new Vector2(0.7f, 2.55f), new Color(0.96f, 0.22f, 0.15f, 0.78f), -1);
+            CreateWorldLabel("적 소환문", new Vector2(7.75f, 1.05f), 32, new Color(1f, 0.62f, 0.38f));
+            CreateWorldLabel("방어 구역", new Vector2(-2.7f, 2.45f), 34, new Color(0.42f, 1f, 0.86f));
             for (int i = 0; i < slotPositions.Length; i++)
             {
-                CreateWorldShape($"Slot {i + 1}", slotPositions[i], new Vector2(1.25f, 1.85f), new Color(0.2f, 0.32f, 0.42f, 0.42f), -1);
-                CreateWorldLabel($"배치 {i + 1}", slotPositions[i] + Vector2.down * 1.18f, 26, new Color(0.5f, 0.7f, 0.85f));
+                CreateWorldShape($"Defense Slot Glow {i + 1}", slotPositions[i], new Vector2(1.42f, 1.95f), new Color(0.18f, 0.58f, 0.62f, 0.24f), -3);
+                CreateWorldShape($"Defense Slot Base {i + 1}", slotPositions[i] + Vector2.down * 0.88f, new Vector2(1.38f, 0.22f), new Color(0.26f, 0.72f, 0.68f), -1);
+                CreateWorldLabel($"수비 {i + 1}", slotPositions[i] + Vector2.down * 1.22f, 26, new Color(0.58f, 0.92f, 0.88f));
             }
         }
 
@@ -224,7 +244,7 @@ namespace DemonCompany.Phase1
                     : runtime.Candidate.Trait == TraitId.Reckless
                         ? new Color(0.95f, 0.33f, 0.23f)
                         : new Color(0.25f, 0.82f, 0.95f);
-                GameObject view = CreateWorldShape(runtime.Candidate.Name, position, new Vector2(0.92f, 1.32f), color, 2);
+                GameObject view = CreateBattleMonsterView(runtime, position, color);
                 CreateWorldLabel(runtime.Candidate.Name, position + Vector2.up * 0.98f, 30, Color.white, view.transform);
                 BattleMonster monster = new BattleMonster
                 {
@@ -391,8 +411,7 @@ namespace DemonCompany.Phase1
         private void SpawnEnemy(int index)
         {
             Vector2 position = new Vector2(7.4f + index * 0.35f, -1.15f);
-            GameObject view = CreateWorldShape($"적 전사 {index + 1}", position, new Vector2(0.78f, 1.22f),
-                new Color(0.95f, 0.72f, 0.2f), 2);
+            GameObject view = CreateEnemyView(index, position);
             CreateWorldLabel($"용사 {index + 1}", position + Vector2.up * 0.92f, 24, new Color(1f, 0.85f, 0.42f), view.transform);
             List<BattleMonster> activeTargets = monsters.Where(monster => monster.Active).ToList();
             BattleEnemy enemy = new BattleEnemy
@@ -455,6 +474,66 @@ namespace DemonCompany.Phase1
             GameObject obj = GameBootstrap.CreateActor(name, position, scale, color, order);
             obj.transform.SetParent(battleRoot.transform, true);
             return obj;
+        }
+
+        private GameObject CreateBattleMonsterView(CandidateRuntime runtime, Vector2 position, Color accent)
+        {
+            GameObject root = new GameObject(runtime.Candidate.Name + " 전투 유닛");
+            root.transform.SetParent(battleRoot.transform, false);
+            root.transform.position = position;
+
+            GameObject glow = CreateWorldShape(runtime.Candidate.Name + " 오라", position,
+                new Vector2(1.28f, 1.72f), new Color(accent.r, accent.g, accent.b, 0.2f), 0);
+            glow.transform.SetParent(root.transform, true);
+            GameObject shadow = CreateWorldShape(runtime.Candidate.Name + " 그림자", position + Vector2.down * 0.72f,
+                new Vector2(1.2f, 0.2f), new Color(0.01f, 0.015f, 0.025f, 0.72f), 1);
+            shadow.transform.SetParent(root.transform, true);
+
+            Sprite portrait = Resources.Load<Sprite>(runtime.Candidate.PortraitResource);
+            if (portrait != null)
+            {
+                GameObject art = new GameObject(runtime.Candidate.Name + " 픽셀 아트", typeof(SpriteRenderer));
+                art.transform.SetParent(root.transform, false);
+                art.transform.localPosition = new Vector3(0f, 0.08f, -0.05f);
+                float scale = 1.62f / Mathf.Max(0.01f, portrait.bounds.size.y);
+                art.transform.localScale = new Vector3(scale, scale, 1f);
+                SpriteRenderer renderer = art.GetComponent<SpriteRenderer>();
+                renderer.sprite = portrait;
+                renderer.sortingOrder = 25;
+            }
+            else
+            {
+                GameObject fallback = CreateWorldShape(runtime.Candidate.Name + " 몸체", position,
+                    new Vector2(0.92f, 1.32f), accent, 2);
+                fallback.transform.SetParent(root.transform, true);
+            }
+
+            return root;
+        }
+
+        private GameObject CreateEnemyView(int index, Vector2 position)
+        {
+            GameObject root = new GameObject($"적 전사 {index + 1}");
+            root.transform.SetParent(battleRoot.transform, false);
+            root.transform.position = position;
+
+            GameObject shadow = CreateWorldShape("적 그림자", position + Vector2.down * 0.66f,
+                new Vector2(0.95f, 0.18f), new Color(0.01f, 0.015f, 0.02f, 0.75f), 1);
+            shadow.transform.SetParent(root.transform, true);
+            GameObject body = CreateWorldShape("적 몸체", position + Vector2.down * 0.08f,
+                new Vector2(0.58f, 1.05f), new Color(0.72f, 0.16f, 0.12f), 2);
+            body.transform.SetParent(root.transform, true);
+            GameObject head = CreateWorldShape("적 투구", position + Vector2.up * 0.57f,
+                new Vector2(0.48f, 0.38f), new Color(0.92f, 0.68f, 0.28f), 3);
+            head.transform.SetParent(root.transform, true);
+            GameObject shield = CreateWorldShape("적 방패", position + new Vector2(-0.4f, -0.02f),
+                new Vector2(0.38f, 0.72f), new Color(0.42f, 0.45f, 0.5f), 3);
+            shield.transform.SetParent(root.transform, true);
+            GameObject sword = CreateWorldShape("적 검", position + new Vector2(0.38f, 0.1f),
+                new Vector2(0.1f, 0.9f), new Color(0.78f, 0.82f, 0.88f), 3);
+            sword.transform.rotation = Quaternion.Euler(0f, 0f, -24f);
+            sword.transform.SetParent(root.transform, true);
+            return root;
         }
 
         private void CreateWorldLabel(string label, Vector2 position, int fontSize, Color color, Transform parent = null)

@@ -15,6 +15,7 @@ namespace DemonCompany.Phase1
         private static readonly Color Gold = new Color(1f, 0.75f, 0.28f, 1f);
         private Phase1GameController controller;
         private RectTransform canvasRoot;
+        private GameObject canvasBackground;
         private GameObject screenRoot;
         private Text phaseText;
         private Text budgetText;
@@ -39,8 +40,8 @@ namespace DemonCompany.Phase1
             gameObject.AddComponent<GraphicRaycaster>();
             canvasRoot = gameObject.GetComponent<RectTransform>();
 
-            GameObject background = MakePanel(canvasRoot, "Background", new Vector2(0f, 0f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero, Background);
-            background.transform.SetAsFirstSibling();
+            canvasBackground = MakePanel(canvasRoot, "Background", new Vector2(0f, 0f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero, Background);
+            canvasBackground.transform.SetAsFirstSibling();
             GameObject header = MakePanel(canvasRoot, "Header", new Vector2(0f, 1f), new Vector2(1f, 1f),
                 new Vector2(0f, -104f), Vector2.zero, new Color(0.055f, 0.075f, 0.125f, 1f));
             phaseText = MakeText(header.transform, "Phase", new Vector2(32f, -18f), new Vector2(1240f, 66f), 34,
@@ -306,6 +307,7 @@ namespace DemonCompany.Phase1
 
         private void BuildScreen(string name, bool opaqueBackground = true)
         {
+            if (canvasBackground != null) canvasBackground.SetActive(opaqueBackground);
             if (screenRoot != null)
             {
                 screenRoot.SetActive(false);
