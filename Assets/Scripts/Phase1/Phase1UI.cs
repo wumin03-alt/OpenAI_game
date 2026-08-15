@@ -22,6 +22,7 @@ namespace DemonCompany.Phase1
         private Text battleDungeonText;
         private Text battleRosterText;
         private Text battleEventText;
+        private InterviewSpriteAnimator interviewAnimator;
         private Coroutine noticeRoutine;
 
         public void Build(Phase1GameController gameController)
@@ -54,13 +55,27 @@ namespace DemonCompany.Phase1
         public void ShowInterview()
         {
             BuildScreen("Interview Screen");
-            phaseText.text = "01  INTERVIEW  →  HIRE";
+            phaseText.text = "01  INTERVIEW  ·  FACE TO FACE";
             UpdateBudget();
 
-            GameObject sidebar = MakeFixedPanel(screenRoot.transform, "Candidate List", new Vector2(32f, -132f),
-                new Vector2(360f, 840f), Panel);
-            MakeText(sidebar.transform, "Candidate Header", new Vector2(20f, -18f), new Vector2(320f, 52f), 26,
-                TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "CANDIDATE FILES";
+            Color wall = new Color(0.11f, 0.085f, 0.085f, 1f);
+            Color wallInset = new Color(0.075f, 0.058f, 0.065f, 1f);
+            Color wood = new Color(0.27f, 0.145f, 0.075f, 1f);
+            Color woodLight = new Color(0.48f, 0.275f, 0.12f, 1f);
+            Color parchment = new Color(0.86f, 0.78f, 0.61f, 1f);
+
+            MakeFixedPanel(screenRoot.transform, "Interview Room Wall", new Vector2(0f, -104f), new Vector2(1920f, 690f), wall);
+            MakeFixedPanel(screenRoot.transform, "Lower Wall", new Vector2(0f, -626f), new Vector2(1920f, 168f), wallInset);
+            MakeFixedPanel(screenRoot.transform, "Floor", new Vector2(0f, -794f), new Vector2(1920f, 286f), new Color(0.045f, 0.038f, 0.045f, 1f));
+            MakeFixedPanel(screenRoot.transform, "Left Column", new Vector2(286f, -104f), new Vector2(26f, 690f), new Color(0.16f, 0.105f, 0.075f, 1f));
+            MakeFixedPanel(screenRoot.transform, "Right Column", new Vector2(1404f, -104f), new Vector2(26f, 690f), new Color(0.16f, 0.105f, 0.075f, 1f));
+            MakeFixedPanel(screenRoot.transform, "Warm Window", new Vector2(668f, -142f), new Vector2(370f, 330f), new Color(0.36f, 0.18f, 0.075f, 1f));
+            MakeFixedPanel(screenRoot.transform, "Window Glow", new Vector2(687f, -161f), new Vector2(332f, 292f), new Color(0.93f, 0.56f, 0.2f, 0.13f));
+
+            GameObject waitingRoom = MakeFixedPanel(screenRoot.transform, "Waiting Room", new Vector2(28f, -128f),
+                new Vector2(238f, 426f), new Color(0.04f, 0.045f, 0.065f, 0.96f));
+            MakeText(waitingRoom.transform, "Waiting Header", new Vector2(14f, -12f), new Vector2(210f, 38f), 20,
+                TextAnchor.MiddleLeft, Gold, FontStyle.Bold).text = "WAITING ROOM";
 
             for (int i = 0; i < controller.Candidates.Count; i++)
             {
@@ -69,65 +84,97 @@ namespace DemonCompany.Phase1
                 string status = entry.Decision == CandidateDecision.Hired ? "HIRED"
                     : entry.Decision == CandidateDecision.Rejected ? "REJECTED" : "PENDING";
                 Color color = ReferenceEquals(entry, controller.Selected) ? Accent : new Color(0.35f, 0.42f, 0.55f);
-                MakeCandidateButton(sidebar.transform, entry.Candidate, status, new Vector2(20f, -88f - i * 130f),
-                    new Vector2(320f, 112f), color, () => controller.ShowInterview(index));
+                MakeCandidateTab(waitingRoom.transform, entry.Candidate, status, new Vector2(12f, -60f - i * 116f),
+                    new Vector2(214f, 102f), color, () => controller.ShowInterview(index));
             }
 
             CandidateRuntime selected = controller.Selected;
-            GameObject card = MakeFixedPanel(screenRoot.transform, "Candidate Card", new Vector2(420f, -132f),
-                new Vector2(620f, 840f), Panel);
-            MakeText(card.transform, "Name", new Vector2(28f, -24f), new Vector2(290f, 58f), 38,
-                TextAnchor.MiddleLeft, Color.white, FontStyle.Bold).text = selected.Candidate.Name;
-            MakeText(card.transform, "Profile", new Vector2(28f, -92f), new Vector2(290f, 150f), 25,
-                TextAnchor.UpperLeft, new Color(0.78f, 0.84f, 0.94f), FontStyle.Normal).text =
-                $"Species    {selected.Candidate.Species}\nRole          {selected.Candidate.Role}\nSalary       {selected.Candidate.Salary}";
-            GameObject portraitFrame = MakeFixedPanel(card.transform, "Portrait Frame", new Vector2(330f, -24f),
-                new Vector2(262f, 244f), new Color(0.025f, 0.04f, 0.075f, 1f));
-            MakePortrait(portraitFrame.transform, selected.Candidate, new Vector2(10f, -10f), new Vector2(242f, 224f));
-            MakeText(card.transform, "Resume Label", new Vector2(28f, -264f), new Vector2(564f, 38f), 23,
-                TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "RESUME";
-            MakeText(card.transform, "Resume", new Vector2(28f, -310f), new Vector2(564f, 108f), 24,
-                TextAnchor.UpperLeft, Color.white, FontStyle.Normal).text = selected.Candidate.Resume;
+            GameObject chair = MakeFixedPanel(screenRoot.transform, "Candidate Chair", new Vector2(524f, -450f),
+                new Vector2(654f, 290f), new Color(0.065f, 0.045f, 0.055f, 1f));
+            MakeFixedPanel(chair.transform, "Chair Back", new Vector2(58f, -44f), new Vector2(538f, 246f), new Color(0.095f, 0.055f, 0.06f, 1f));
+            Image candidateImage = MakeAnimatedCandidate(screenRoot.transform, selected.Candidate,
+                new Vector2(490f, -166f), new Vector2(730f, 600f));
+            interviewAnimator = candidateImage.gameObject.AddComponent<InterviewSpriteAnimator>();
+            interviewAnimator.Configure(candidateImage, selected.Candidate.InterviewSpriteSheetResource);
+
+            GameObject speech = MakeFixedPanel(screenRoot.transform, "Speech Bubble", new Vector2(1160f, -164f),
+                new Vector2(708f, 250f), new Color(0.92f, 0.9f, 0.82f, 0.98f));
+            GameObject speechTail = MakeFixedPanel(screenRoot.transform, "Speech Tail", new Vector2(1144f, -300f),
+                new Vector2(42f, 42f), new Color(0.92f, 0.9f, 0.82f, 0.98f));
+            speechTail.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            string spokenLine = selected.InterviewHistory.Count == 0
+                ? $"I'm {selected.Candidate.Name}. Thank you for meeting me.\nWhat would you like to know?"
+                : selected.InterviewHistory[selected.InterviewHistory.Count - 1].Answer;
+            MakeText(speech.transform, "Speaker", new Vector2(26f, -18f), new Vector2(656f, 36f), 22,
+                TextAnchor.MiddleLeft, new Color(0.38f, 0.22f, 0.12f), FontStyle.Bold).text = selected.Candidate.Name.ToUpperInvariant();
+            MakeText(speech.transform, "Latest Answer", new Vector2(26f, -62f), new Vector2(656f, 164f), 25,
+                TextAnchor.UpperLeft, new Color(0.12f, 0.095f, 0.085f), FontStyle.Normal).text = spokenLine;
+
+            GameObject clipboard = MakeFixedPanel(screenRoot.transform, "Resume Clipboard", new Vector2(1442f, -442f),
+                new Vector2(426f, 300f), parchment);
+            MakeFixedPanel(clipboard.transform, "Clipboard Clip", new Vector2(138f, 10f), new Vector2(150f, 26f), new Color(0.3f, 0.24f, 0.2f, 1f));
+            MakeText(clipboard.transform, "Candidate File", new Vector2(24f, -26f), new Vector2(378f, 40f), 22,
+                TextAnchor.MiddleLeft, new Color(0.28f, 0.16f, 0.08f), FontStyle.Bold).text = "CANDIDATE DOSSIER";
+            MakeText(clipboard.transform, "Profile", new Vector2(24f, -72f), new Vector2(378f, 72f), 21,
+                TextAnchor.UpperLeft, new Color(0.16f, 0.11f, 0.08f), FontStyle.Bold).text =
+                $"{selected.Candidate.Species}  ·  {selected.Candidate.Role}\nSalary  {selected.Candidate.Salary}";
+            MakeText(clipboard.transform, "Resume", new Vector2(24f, -148f), new Vector2(378f, 124f), 20,
+                TextAnchor.UpperLeft, new Color(0.2f, 0.13f, 0.09f), FontStyle.Normal).text = selected.Candidate.Resume;
+
+            GameObject transcript = MakeFixedPanel(screenRoot.transform, "Transcript", new Vector2(28f, -566f),
+                new Vector2(360f, 226f), new Color(0.04f, 0.045f, 0.065f, 0.94f));
+            MakeText(transcript.transform, "Transcript Header", new Vector2(16f, -10f), new Vector2(328f, 34f), 19,
+                TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "INTERVIEW NOTES";
+            string history = selected.InterviewHistory.Count == 0
+                ? "No questions recorded yet."
+                : string.Join("\n\n", selected.InterviewHistory.Select((message, index) =>
+                    $"Q{index + 1}. {message.Question}\nA. {message.Answer}"));
+            MakeText(transcript.transform, "History", new Vector2(16f, -50f), new Vector2(328f, 164f), 14,
+                TextAnchor.UpperLeft, Color.white, FontStyle.Normal).text = history;
+
+            MakeFixedPanel(screenRoot.transform, "Desk Top", new Vector2(326f, -724f), new Vector2(1098f, 46f), woodLight);
+            GameObject desk = MakeFixedPanel(screenRoot.transform, "Interviewer Desk", new Vector2(362f, -770f),
+                new Vector2(1026f, 282f), wood);
+            MakeFixedPanel(desk.transform, "Desk Inlay", new Vector2(32f, -30f), new Vector2(962f, 214f), new Color(0.22f, 0.105f, 0.055f, 1f));
+            GameObject namePlate = MakeFixedPanel(screenRoot.transform, "Name Plate", new Vector2(694f, -681f),
+                new Vector2(370f, 72f), new Color(0.12f, 0.075f, 0.045f, 1f));
+            MakeText(namePlate.transform, "Name", Vector2.zero, new Vector2(370f, 72f), 29,
+                TextAnchor.MiddleCenter, Gold, FontStyle.Bold).text = $"{selected.Candidate.Name}  ·  {selected.Candidate.Role}";
 
             int remaining = Phase1GameController.QuestionLimit - selected.InterviewHistory.Count;
-            MakeText(card.transform, "Question Count", new Vector2(28f, -442f), new Vector2(564f, 42f), 24,
-                TextAnchor.MiddleLeft, Gold, FontStyle.Bold).text = $"QUESTIONS REMAINING   {remaining} / 3";
-            InputField questionInput = MakeInput(card.transform, "Question Input", new Vector2(28f, -500f), new Vector2(564f, 64f),
-                "질문을 입력하세요 (예: 위험하면 도망가나요?)");
-            Button askButton = MakeButton(card.transform, "Ask", new Vector2(28f, -578f), new Vector2(270f, 64f), "ASK QUESTION", Accent,
+            MakeText(desk.transform, "Interviewer Label", new Vector2(34f, -22f), new Vector2(500f, 36f), 20,
+                TextAnchor.MiddleLeft, new Color(0.94f, 0.77f, 0.42f), FontStyle.Bold).text =
+                $"YOU · INTERVIEWER     QUESTIONS {remaining} / 3";
+            InputField questionInput = MakeInput(desk.transform, "Question Input", new Vector2(34f, -68f), new Vector2(692f, 66f),
+                "Ask face-to-face... (e.g. What do you do when danger comes?)");
+            Button askButton = MakeButton(desk.transform, "Ask", new Vector2(744f, -68f), new Vector2(248f, 66f), "ASK", Accent,
                 () => controller.AskQuestion(questionInput.text));
             askButton.interactable = remaining > 0;
 
             bool pending = selected.Decision == CandidateDecision.Pending;
-            Button hire = MakeButton(card.transform, "Hire", new Vector2(28f, -704f), new Vector2(270f, 72f), "HIRE", new Color(0.28f, 0.86f, 0.5f),
+            Button hire = MakeButton(desk.transform, "Hire", new Vector2(34f, -158f), new Vector2(220f, 66f), "HIRE", new Color(0.28f, 0.86f, 0.5f),
                 controller.HireSelected);
-            Button reject = MakeButton(card.transform, "Reject", new Vector2(322f, -704f), new Vector2(270f, 72f), "REJECT", new Color(0.82f, 0.3f, 0.32f),
+            Button reject = MakeButton(desk.transform, "Reject", new Vector2(270f, -158f), new Vector2(220f, 66f), "REJECT", new Color(0.82f, 0.3f, 0.32f),
                 controller.RejectSelected);
             hire.interactable = pending;
             reject.interactable = pending;
-            MakeText(card.transform, "Decision", new Vector2(28f, -782f), new Vector2(564f, 34f), 22,
-                TextAnchor.MiddleCenter, new Color(0.72f, 0.78f, 0.88f), FontStyle.Bold).text =
-                selected.Decision == CandidateDecision.Pending ? "TRAIT: HIDDEN UNTIL PERFORMANCE REVIEW" : $"DECISION: {selected.Decision.ToString().ToUpperInvariant()}";
+            MakeText(desk.transform, "Decision", new Vector2(512f, -158f), new Vector2(480f, 66f), 19,
+                TextAnchor.MiddleLeft, new Color(0.86f, 0.8f, 0.7f), FontStyle.Bold).text =
+                selected.Decision == CandidateDecision.Pending ? "TRAIT: CONFIDENTIAL UNTIL REVIEW" : $"DECISION: {selected.Decision.ToString().ToUpperInvariant()}";
 
-            GameObject historyPanel = MakeFixedPanel(screenRoot.transform, "Interview History", new Vector2(1068f, -132f),
-                new Vector2(820f, 650f), Panel);
-            MakeText(historyPanel.transform, "History Header", new Vector2(24f, -18f), new Vector2(772f, 48f), 26,
-                TextAnchor.MiddleLeft, Accent, FontStyle.Bold).text = "INTERVIEW HISTORY";
-            string history = selected.InterviewHistory.Count == 0
-                ? "아직 질문하지 않았습니다.\n키워드에 따라 지원자의 준비된 답변이 달라집니다."
-                : string.Join("\n\n", selected.InterviewHistory.Select((message, index) =>
-                    $"Q{index + 1}. {message.Question}\nA. {message.Answer}"));
-            MakeText(historyPanel.transform, "History", new Vector2(24f, -82f), new Vector2(772f, 530f), 23,
-                TextAnchor.UpperLeft, Color.white, FontStyle.Normal).text = history;
-
-            GameObject roster = MakeFixedPanel(screenRoot.transform, "Roster", new Vector2(1068f, -806f), new Vector2(820f, 166f), PanelLight);
+            GameObject roster = MakeFixedPanel(screenRoot.transform, "Roster", new Vector2(1442f, -770f), new Vector2(426f, 282f), PanelLight);
             string hiredNames = string.Join(", ", controller.Candidates.Where(entry => entry.Decision == CandidateDecision.Hired).Select(entry => entry.Candidate.Name));
-            if (hiredNames.Length == 0) hiredNames = "없음";
-            MakeText(roster.transform, "Roster Text", new Vector2(24f, -16f), new Vector2(520f, 126f), 24,
-                TextAnchor.MiddleLeft, Color.white, FontStyle.Bold).text = $"HIRED  {controller.HiredCount} / 2\n{hiredNames}";
-            Button deploy = MakeButton(roster.transform, "Deploy", new Vector2(566f, -42f), new Vector2(228f, 82f), "DEPLOY  →", Gold,
+            if (hiredNames.Length == 0) hiredNames = "No hires yet";
+            MakeText(roster.transform, "Roster Text", new Vector2(22f, -18f), new Vector2(382f, 92f), 22,
+                TextAnchor.UpperLeft, Color.white, FontStyle.Bold).text = $"HIRED  {controller.HiredCount} / 2\n{hiredNames}";
+            Button deploy = MakeButton(roster.transform, "Deploy", new Vector2(22f, -132f), new Vector2(382f, 76f), "DEPLOY TEAM  →", Gold,
                 controller.BeginDeployment);
             deploy.interactable = controller.HiredCount > 0;
+        }
+
+        public void PlayCandidateResponse()
+        {
+            if (interviewAnimator != null) interviewAnimator.PlayTalking();
         }
 
         public void ShowDeployment()
@@ -363,6 +410,36 @@ namespace DemonCompany.Phase1
             return button;
         }
 
+        private static Button MakeCandidateTab(Transform parent, Candidate candidate, string status, Vector2 position,
+            Vector2 size, Color accentColor, UnityEngine.Events.UnityAction action)
+        {
+            GameObject obj = new GameObject(candidate.Name + " Waiting Tab", typeof(RectTransform), typeof(Image), typeof(Button));
+            obj.transform.SetParent(parent, false);
+            RectTransform rect = obj.GetComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            obj.GetComponent<Image>().color = new Color(0.105f, 0.105f, 0.135f, 1f);
+
+            Button button = obj.GetComponent<Button>();
+            ColorBlock colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.12f, 1.12f, 1.12f);
+            colors.pressedColor = new Color(0.76f, 0.76f, 0.76f);
+            button.colors = colors;
+            button.onClick.AddListener(action);
+
+            MakeFixedPanel(obj.transform, "Selection", Vector2.zero, new Vector2(6f, size.y), accentColor);
+            MakePortrait(obj.transform, candidate, new Vector2(10f, -10f), new Vector2(82f, 82f));
+            MakeText(obj.transform, "Name", new Vector2(98f, -12f), new Vector2(106f, 30f), 21,
+                TextAnchor.MiddleLeft, Color.white, FontStyle.Bold).text = candidate.Name;
+            MakeText(obj.transform, "Details", new Vector2(98f, -43f), new Vector2(106f, 48f), 16,
+                TextAnchor.UpperLeft, new Color(0.74f, 0.81f, 0.91f), FontStyle.Normal).text =
+                $"{candidate.Role}\n{status}";
+            return button;
+        }
+
         private static Button MakeCandidateButton(Transform parent, Candidate candidate, string status, Vector2 position,
             Vector2 size, Color accentColor, UnityEngine.Events.UnityAction action)
         {
@@ -409,6 +486,22 @@ namespace DemonCompany.Phase1
             portrait.raycastTarget = false;
             portrait.color = portrait.sprite == null ? new Color(0.4f, 0.45f, 0.55f, 0.35f) : Color.white;
             return portrait;
+        }
+
+        private static Image MakeAnimatedCandidate(Transform parent, Candidate candidate, Vector2 position, Vector2 size)
+        {
+            GameObject obj = new GameObject(candidate.Name + " Interview Character", typeof(RectTransform), typeof(Image));
+            obj.transform.SetParent(parent, false);
+            RectTransform rect = obj.GetComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            Image image = obj.GetComponent<Image>();
+            image.sprite = Resources.Load<Sprite>(candidate.PortraitResource);
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            return image;
         }
 
         private static InputField MakeInput(Transform parent, string name, Vector2 position, Vector2 size, string placeholder)

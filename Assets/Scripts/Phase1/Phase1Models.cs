@@ -45,6 +45,7 @@ namespace DemonCompany.Phase1
         public int Salary;
         public string Resume;
         public string PortraitResource;
+        public string InterviewSpriteSheetResource;
         public TraitId Trait;
         public CandidateStats Stats;
         public string HiddenIncident;

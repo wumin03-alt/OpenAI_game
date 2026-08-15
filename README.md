@@ -9,10 +9,10 @@
 ## 구현 플랫폼
 
 - Unity `6000.5.5f1`
-- C# 런타임 UI 및 2D 도형 렌더링
+- C# 런타임 UI, 2D 도형 렌더링 및 UI 스프라이트 애니메이션
 - 씬: `Assets/Scenes/Prototype.unity`
 - 외부 패키지, 커스텀 폰트, 사운드 에셋 없음
-- 지원자 3명의 개별 픽셀 아트 초상화와 투명 PNG 리소스
+- 지원자 3명의 개별 픽셀 아트 초상화와 4프레임 투명 PNG 스프라이트 시트
 
 마스터 문서의 브라우저용 TypeScript/Vite/Phaser 제안 대신, 이 저장소와 작업 요청의 실행 대상에 맞춰 Unity 프로젝트로 구현했습니다. 게임 규칙과 Phase 1 범위는 동일하게 유지했습니다.
 
@@ -36,6 +36,9 @@
 
 ### 면접
 
+- 지원자와 책상을 사이에 두고 마주 보는 면접실 구도
+- 대형 지원자 캐릭터, 최신 답변 말풍선, 이력서 클립보드, 축소된 면접 기록 표시
+- 대기 중 눈 깜빡임/호흡 애니메이션과 답변 직후 말하기 애니메이션
 - 지원자 이름, 종족, 역할, 급여, 이력서 표시
 - 지원자별 자유 텍스트 질문 최대 3회
 - 질문/답변 히스토리 표시
@@ -100,8 +103,9 @@ Trait 효과와 관련 사건은 전투 로그 및 성과 평가에 함께 기�
 
 ## Acceptance Test 순서
 
-1. Play 후 Candidate Files에서 Gruk, Rokka, Mellu 세 명을 차례로 확인합니다.
+1. Play 후 Waiting Room에서 Gruk, Rokka, Mellu 세 명을 차례로 선택하고 각 캐릭터의 대기 애니메이션을 확인합니다.
 2. Gruk을 선택하고 `위험하면 도망가나요?`를 포함해 최대 3회 질문합니다.
+   - 답변 말풍선이 갱신되고 캐릭터가 약 2.6초 동안 말하기 프레임을 재생하는지 확인합니다.
 3. Rokka에게 `명령과 대형을 지키나요?`라고 질문합니다.
 4. 두 명을 Hire하고 세 번째 Hire가 차단되는지 확인합니다.
 5. `DEPLOY`를 누른 뒤 채용 몬스터를 각각 다른 슬롯에 배치합니다.
@@ -124,6 +128,10 @@ Assets/
       gruk.png
       rokka.png
       mellu.png
+    InterviewSprites/
+      gruk-interview-sheet.png
+      rokka-interview-sheet.png
+      mellu-interview-sheet.png
   Scenes/
     Prototype.unity
   Scripts/
@@ -131,6 +139,7 @@ Assets/
     Phase1/
       CandidateDatabase.cs
       FakeInterviewProvider.cs
+      InterviewSpriteAnimator.cs
       Phase1GameController.cs
       Phase1Models.cs
       Phase1UI.cs
@@ -139,6 +148,7 @@ Assets/
 - `GameBootstrap`: 카메라, EventSystem, 게임 컨트롤러 생성
 - `CandidateDatabase`: 고정 지원자와 실제 스탯/Trait
 - `FakeInterviewProvider`: 교체 가능한 면접 공급자 인터페이스와 키워드 답변
+- `InterviewSpriteAnimator`: 4프레임 시트를 런타임에 분할해 대기/말하기 상태 애니메이션 재생
 - `Phase1GameController`: 채용 상태, 배치, 전투, Trait, 승패, 재시작
 - `Phase1UI`: Interview, Deployment, Battle HUD, Performance Review 런타임 UI
 
@@ -151,11 +161,11 @@ Assets/
 
 ## 현재 알려진 제한
 
-- 도형과 기본 런타임 폰트를 사용하는 기능 검증용 화면입니다.
+- 면접실 배경과 가구는 도형 기반이며, 캐릭터만 픽셀 아트 스프라이트를 사용합니다.
 - 자동 전투는 단일 직선 전장과 단일 근접 Enemy Warrior만 사용합니다.
 - 실제 OpenAI 연결은 없으며 `FakeInterviewProvider` 답변만 사용합니다.
 - UI는 1920×1080 기준으로 설계되어 극단적인 종횡비에서는 여백이 달라질 수 있습니다.
-- Unity 배치 검증 환경의 라이선스 클라이언트가 연결되지 않아 자동 Play Mode 화면 캡처는 수행하지 못했습니다. Unity 내장 Roslyn 컴파일과 순수 데이터/면접 로직 테스트는 통과했습니다.
+- 자동 Play Mode 화면 캡처는 수행하지 않았습니다. Unity Roslyn 컴파일과 이미지 크기·알파 채널 검증은 통과했습니다.
 
 ## 다음 권장 단계
 

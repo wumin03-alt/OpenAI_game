@@ -92,6 +92,7 @@ namespace DemonCompany.Phase1
                 UsedLie = response.UsedLie
             });
             ui.ShowInterview();
+            ui.PlayCandidateResponse();
         }
 
         public void HireSelected()
