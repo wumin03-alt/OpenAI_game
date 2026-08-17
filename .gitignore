@@ -37,3 +37,6 @@ crashlytics-build.properties
 *.apk
 *.aab
 *.unitypackage
+
+# Local scratch project created from Unity's default URP template.
+/My project/
