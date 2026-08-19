@@ -1,77 +1,103 @@
+using System;
 using UnityEngine;
 
-/// <summary>플레이어 행동 종류</summary>
 public enum ActionType { Melee, Ranged, Parry, Dash }
-
-/// <summary>플레이어 주력 전투 스타일</summary>
 public enum DominantStyle { None, Melee, Ranged }
+public enum MobilityStyle { None, Grounded, Airborne }
+public enum EvasionBias { Balanced, Left, Right }
 
 /// <summary>
-/// 학습형 보스의 데이터 소스.
-/// 플레이어 행동을 실시간 카운트하고, Phase 2에서 주력 스타일을 판정합니다.
-/// Player 오브젝트에 부착합니다.
+/// 학습형 보스의 데이터 소스. 공격 선택, 공중 체류, 이동 방향과 패링을 관찰합니다.
+/// 성공한 패링은 데이터를 오염시켜 Phase 2 카운터의 정확도를 낮춥니다.
 /// </summary>
 public class PlayerCombatTracker : MonoBehaviour
 {
     public static PlayerCombatTracker Instance { get; private set; }
 
     [Header("── 기록 상태 ──")]
-    [Tooltip("Phase 1 동안만 true. 보스가 50%에 도달하면 꺼집니다")]
     [SerializeField] private bool isRecording = true;
 
     [Header("── 판정 기준 ──")]
-    [Tooltip("이 횟수 미만이면 표본 부족으로 봅니다 (그래도 판정은 내립니다)")]
     [SerializeField] private int minSampleCount = 4;
+    [SerializeField] private float movementSampleInterval = 0.1f;
+    [Tooltip("성공한 패링 1회가 학습 데이터에 주는 오염도")]
+    [Range(0.05f, 0.5f)]
+    [SerializeField] private float corruptionPerParry = 0.18f;
 
     [Header("── 디버그 ──")]
-    [Tooltip("G 키로 현재 기록을 Console에 출력")]
     [SerializeField] private bool debugReportKey = true;
-    [Tooltip("행동할 때마다 Console에 로그")]
     [SerializeField] private bool logEveryAction = false;
 
-    // ── 핵심 카운터 (Phase 2 판정에 사용) ──
     public int MeleeCount { get; private set; }
     public int RangedCount { get; private set; }
-
-    // ── 보조 카운터 (분석 UI 표시용) ──
-    public int ParryCount { get; private set; }          // 패링 시도
-    public int ParrySuccessCount { get; private set; }   // 패링 성공
+    public int ParryCount { get; private set; }
+    public int ParrySuccessCount { get; private set; }
     public int DashCount { get; private set; }
+    public int GroundedSamples { get; private set; }
+    public int AirborneSamples { get; private set; }
+    public int LeftMovementSamples { get; private set; }
+    public int RightMovementSamples { get; private set; }
 
     public bool IsRecording => isRecording;
     public int TotalAttackCount => MeleeCount + RangedCount;
     public bool HasEnoughSamples => TotalAttackCount >= minSampleCount;
+    public float DataCorruption { get; private set; }
+    public float DataIntegrity => 1f - DataCorruption;
+    public float ParrySuccessRate => ParryCount <= 0 ? 0f : (float)ParrySuccessCount / ParryCount;
 
-    /// <summary>확정된 주력 스타일. 판정 전에는 None</summary>
+    public DominantStyle ObservedStyle { get; private set; } = DominantStyle.None;
     public DominantStyle LockedStyle { get; private set; } = DominantStyle.None;
+    public MobilityStyle LockedMobility { get; private set; } = MobilityStyle.None;
+    public EvasionBias LockedEvasion { get; private set; } = EvasionBias.Balanced;
 
-    private ActionType lastAttackType = ActionType.Ranged;   // 동점 타이브레이크용
+    public event Action ParrySucceeded;
+
+    private ActionType lastAttackType = ActionType.Ranged;
     private bool hasAnyAttack;
     private Health health;
+    private PlayerController controller;
+    private float sampleTimer;
+    private float lastSampleX;
 
     private void Awake()
     {
         Instance = this;
-
-        // 패링 성공을 자동 구독 (Inspector 연결 불필요)
+        controller = GetComponent<PlayerController>();
         health = GetComponent<Health>();
+        lastSampleX = transform.position.x;
+
         if (health != null && health.onParrySuccess != null)
             health.onParrySuccess.AddListener(RecordParrySuccess);
     }
 
     private void OnDestroy()
     {
+        if (health != null && health.onParrySuccess != null)
+            health.onParrySuccess.RemoveListener(RecordParrySuccess);
         if (Instance == this) Instance = null;
     }
 
     private void Update()
     {
-        if (debugReportKey && Input.GetKeyDown(KeyCode.G))
-            Debug.Log(BuildReport());
+        if (isRecording) SampleMovement();
+        if (debugReportKey && Input.GetKeyDown(KeyCode.G)) Debug.Log(BuildReport());
     }
 
-    // ───────────────────────── 기록 ─────────────────────────
-    /// <summary>PlayerController에서 행동할 때마다 호출합니다.</summary>
+    private void SampleMovement()
+    {
+        sampleTimer += Time.deltaTime;
+        if (sampleTimer < movementSampleInterval) return;
+        sampleTimer = 0f;
+
+        if (controller != null && controller.IsGrounded) GroundedSamples++;
+        else AirborneSamples++;
+
+        float delta = transform.position.x - lastSampleX;
+        if (delta < -0.025f) LeftMovementSamples++;
+        else if (delta > 0.025f) RightMovementSamples++;
+        lastSampleX = transform.position.x;
+    }
+
     public void RecordAction(ActionType type)
     {
         if (!isRecording) return;
@@ -83,78 +109,106 @@ public class PlayerCombatTracker : MonoBehaviour
                 lastAttackType = ActionType.Melee;
                 hasAnyAttack = true;
                 break;
-
             case ActionType.Ranged:
                 RangedCount++;
                 lastAttackType = ActionType.Ranged;
                 hasAnyAttack = true;
                 break;
-
             case ActionType.Parry:
                 ParryCount++;
                 break;
-
             case ActionType.Dash:
                 DashCount++;
+                if (controller != null && controller.Facing < 0) LeftMovementSamples += 3;
+                else RightMovementSamples += 3;
                 break;
         }
 
         if (logEveryAction)
-            Debug.Log($"[Tracker] {type}  |  M:{MeleeCount} R:{RangedCount} P:{ParryCount} D:{DashCount}");
+            Debug.Log($"[Tracker] {type} | M:{MeleeCount} R:{RangedCount} P:{ParryCount} D:{DashCount}");
     }
 
     private void RecordParrySuccess()
     {
-        if (!isRecording) return;
+        // Phase 2에서도 패링 성공 이벤트는 보스 경직/교란에 사용합니다.
         ParrySuccessCount++;
+        DataCorruption = Mathf.Clamp01(DataCorruption + corruptionPerParry);
+        ParrySucceeded?.Invoke();
+        Debug.Log($"[Tracker] FALSE DATA INJECTED | integrity {DataIntegrity * 100f:F0}%");
     }
 
-    // ───────────────────────── 판정 ─────────────────────────
-    /// <summary>
-    /// 주력 스타일을 판정합니다. melee / ranged 만 사용합니다.
-    /// parry / dash 는 분석 UI 표시용 보조 데이터입니다.
-    /// (확장 시 이 함수 안에서만 규칙을 추가하면 됩니다)
-    /// </summary>
     public DominantStyle GetDominantStyle()
     {
         if (!hasAnyAttack) return DominantStyle.None;
-
         if (MeleeCount > RangedCount) return DominantStyle.Melee;
         if (RangedCount > MeleeCount) return DominantStyle.Ranged;
-
-        // 동점 — 마지막으로 사용한 공격 타입으로 결정
-        return lastAttackType == ActionType.Melee
-            ? DominantStyle.Melee
-            : DominantStyle.Ranged;
+        return lastAttackType == ActionType.Melee ? DominantStyle.Melee : DominantStyle.Ranged;
     }
 
-    /// <summary>기록을 멈추고 스타일을 확정합니다. 보스가 HP 50%에서 호출합니다.</summary>
+    public MobilityStyle GetMobilityStyle()
+    {
+        if (GroundedSamples + AirborneSamples <= 0) return MobilityStyle.None;
+        return AirborneSamples > GroundedSamples * 0.45f ? MobilityStyle.Airborne : MobilityStyle.Grounded;
+    }
+
+    public EvasionBias GetEvasionBias()
+    {
+        int movement = LeftMovementSamples + RightMovementSamples;
+        if (movement < 5) return EvasionBias.Balanced;
+        float rightRatio = (float)RightMovementSamples / movement;
+        if (rightRatio > 0.62f) return EvasionBias.Right;
+        if (rightRatio < 0.38f) return EvasionBias.Left;
+        return EvasionBias.Balanced;
+    }
+
+    /// <summary>오염도가 55% 이상이면 보스가 실제 성향과 반대로 학습합니다.</summary>
     public DominantStyle LockAndStopRecording()
     {
-        isRecording = false;
-        LockedStyle = GetDominantStyle();
+        if (!isRecording && LockedStyle != DominantStyle.None) return LockedStyle;
 
-        Debug.Log($"[Tracker] 분석 완료 → {LockedStyle}\n{BuildReport()}");
+        isRecording = false;
+        ObservedStyle = GetDominantStyle();
+        LockedStyle = ObservedStyle;
+        LockedMobility = GetMobilityStyle();
+        LockedEvasion = GetEvasionBias();
+
+        if (DataCorruption >= 0.55f)
+        {
+            if (ObservedStyle == DominantStyle.Melee) LockedStyle = DominantStyle.Ranged;
+            else if (ObservedStyle == DominantStyle.Ranged) LockedStyle = DominantStyle.Melee;
+        }
+
+        Debug.Log($"[Tracker] 분석 완료 → observed:{ObservedStyle}, learned:{LockedStyle}\n{BuildReport()}");
         return LockedStyle;
     }
 
-    public void StartRecording() => isRecording = true;
+    public void StartRecording()
+    {
+        isRecording = true;
+        lastSampleX = transform.position.x;
+    }
+
     public void StopRecording() => isRecording = false;
 
-    /// <summary>재시작 시 초기화</summary>
     public void ResetAll()
     {
         MeleeCount = RangedCount = ParryCount = ParrySuccessCount = DashCount = 0;
+        GroundedSamples = AirborneSamples = LeftMovementSamples = RightMovementSamples = 0;
+        DataCorruption = 0f;
+        sampleTimer = 0f;
         hasAnyAttack = false;
+        ObservedStyle = DominantStyle.None;
         LockedStyle = DominantStyle.None;
+        LockedMobility = MobilityStyle.None;
+        LockedEvasion = EvasionBias.Balanced;
         isRecording = true;
+        lastSampleX = transform.position.x;
     }
 
-    // ───────────────── 분석 UI가 사용할 표시용 문자열 ─────────────────
-    /// <summary>"CLOSE RANGE" / "LONG RANGE" — 10단계 AnalysisUI에서 사용</summary>
     public string GetStyleLabel()
     {
-        switch (GetDominantStyle())
+        DominantStyle style = isRecording ? GetDominantStyle() : LockedStyle;
+        switch (style)
         {
             case DominantStyle.Melee: return "CLOSE RANGE";
             case DominantStyle.Ranged: return "LONG RANGE";
@@ -162,19 +216,37 @@ public class PlayerCombatTracker : MonoBehaviour
         }
     }
 
-    /// <summary>주력 스타일이 전체 공격에서 차지하는 비율 (0~1)</summary>
+    public string GetMobilityLabel()
+    {
+        MobilityStyle style = isRecording ? GetMobilityStyle() : LockedMobility;
+        return style == MobilityStyle.Airborne ? "AIRBORNE" : style == MobilityStyle.Grounded ? "GROUNDED" : "UNKNOWN";
+    }
+
+    public string GetEvasionLabel()
+    {
+        EvasionBias bias = isRecording ? GetEvasionBias() : LockedEvasion;
+        return bias == EvasionBias.Left ? "LEFT BIAS" : bias == EvasionBias.Right ? "RIGHT BIAS" : "BALANCED";
+    }
+
+    public string GetCounterProtocolLabel()
+    {
+        string attackCounter = LockedStyle == DominantStyle.Melee ? "REPULSION" :
+            LockedStyle == DominantStyle.Ranged ? "PURSUIT" : "STANDARD";
+        string mobilityCounter = LockedMobility == MobilityStyle.Airborne ? "ANTI-AIR" : "GROUND PREDICTION";
+        return $"{attackCounter} + {mobilityCounter}";
+    }
+
     public float GetDominantRatio()
     {
         if (TotalAttackCount == 0) return 0f;
-        int dominant = Mathf.Max(MeleeCount, RangedCount);
-        return (float)dominant / TotalAttackCount;
+        return (float)Mathf.Max(MeleeCount, RangedCount) / TotalAttackCount;
     }
 
     public string BuildReport()
     {
-        return $"[Tracker] MELEE:{MeleeCount}  RANGED:{RangedCount}  " +
-               $"PARRY:{ParryCount}(성공 {ParrySuccessCount})  DASH:{DashCount}  " +
-               $"→ {GetDominantStyle()} ({GetDominantRatio() * 100f:F0}%)  " +
-               $"기록중:{isRecording}  표본충분:{HasEnoughSamples}";
+        return $"[Tracker] MELEE:{MeleeCount} RANGED:{RangedCount} " +
+               $"PARRY:{ParryCount}(success {ParrySuccessCount}) DASH:{DashCount} " +
+               $"AIR:{AirborneSamples} GROUND:{GroundedSamples} MOVE L:{LeftMovementSamples} R:{RightMovementSamples} " +
+               $"INTEGRITY:{DataIntegrity * 100f:F0}% → {GetDominantStyle()} / {GetMobilityStyle()} / {GetEvasionBias()}";
     }
 }

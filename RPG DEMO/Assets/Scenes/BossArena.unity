@@ -1549,7 +1549,7 @@ MonoBehaviour:
   analysisUI: {fileID: 1975299017}
   phase2Threshold: 0.5
   phaseLabel: {fileID: 869795539}
-  debugHoverKeys: 1
+  debugHoverKeys: 0
   debugForceAttack: 0
   forcedAttack: 0
 --- !u!114 &775362975

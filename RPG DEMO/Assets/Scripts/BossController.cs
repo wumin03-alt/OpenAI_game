@@ -102,6 +102,19 @@ public class BossController : MonoBehaviour
 
     [Header("── 경직 (패링 성공 시) ──")]
     [SerializeField] private Color staggerColor = new Color(0.6f, 0.8f, 1f);
+    [SerializeField] private float parryStaggerTime = 1.15f;
+    [Tooltip("Phase 2에서 패링 1회가 적응 강도를 낮추는 비율")]
+    [Range(0.05f, 0.5f)]
+    [SerializeField] private float disruptionPerParry = 0.22f;
+
+    [Header("── 적응 패턴 ──")]
+    [Tooltip("Barrage의 연속 투사체 파동 수")]
+    [SerializeField] private int barrageWaves = 2;
+    [SerializeField] private float barrageWaveDelay = 0.38f;
+    [SerializeField] private float predictionDistance = 2.4f;
+    [Tooltip("SkyDive 경고 구역의 폭")]
+    [SerializeField] private float skyDiveWidth = 3.8f;
+    [SerializeField] private float skyDiveHoldTime = 0.45f;
 
     // ★ 10단계 ① : 페이즈 전환
     [Header("── 페이즈 전환 ──")]
@@ -127,6 +140,14 @@ public class BossController : MonoBehaviour
     // ── 외부에서 읽는 값 ──
     public BossState State { get; private set; } = BossState.Idle;
     public int Phase { get; private set; } = 1;
+    public DominantStyle AdaptedStyle => adaptedStyle;
+    public MobilityStyle AdaptedMobility => adaptedMobility;
+    public EvasionBias AdaptedEvasion => adaptedEvasion;
+    public float AdaptationDisruption => adaptationDisruption;
+    public float AdaptationStrength => 1f - adaptationDisruption;
+    public string CounterProtocol => PlayerCombatTracker.Instance == null
+        ? "SCANNING"
+        : PlayerCombatTracker.Instance.GetCounterProtocolLabel();
     public bool IsLowHovering => baseY < (hoverHighY + hoverLowY) * 0.5f;
     public float HorizontalDistanceToPlayer =>
         player == null ? 999f : Mathf.Abs(player.position.x - transform.position.x);
@@ -161,8 +182,13 @@ public class BossController : MonoBehaviour
 
     // ★ 11단계 : 적응 상태
     private DominantStyle adaptedStyle = DominantStyle.None;
+    private MobilityStyle adaptedMobility = MobilityStyle.None;
+    private EvasionBias adaptedEvasion = EvasionBias.Balanced;
+    private float adaptationDisruption;
     private float lowTailBonusCurrent;      // 런타임에 조절되는 TailSweep 배율
     private float repositionChanceCurrent;  // 런타임에 조절되는 재배치 확률
+    private PlayerCombatTracker tracker;
+    private AdaptiveBossVisual adaptiveVisual;
 
     // 패턴 가중치 — 11단계에서 이 테이블만 교체합니다
     private readonly Dictionary<BossAttack, int> weights = new Dictionary<BossAttack, int>();
@@ -187,6 +213,11 @@ public class BossController : MonoBehaviour
             if (visualSr != null) visualBaseColor = visualSr.color;
         }
 
+        adaptiveVisual = GetComponent<AdaptiveBossVisual>();
+        if (adaptiveVisual == null) adaptiveVisual = gameObject.AddComponent<AdaptiveBossVisual>();
+        adaptiveVisual.Initialize(visualSr);
+        if (visualSr != null) visualBaseColor = visualSr.color;
+
         if (telegraphMark != null) telegraphMark.SetActive(false);
         if (groundWarning != null) groundWarning.SetActive(false);
         if (tailHitbox != null) tailHitbox.SetActive(false);
@@ -198,6 +229,13 @@ public class BossController : MonoBehaviour
     {
         GameObject p = GameObject.FindGameObjectWithTag("Player");
         if (p != null) player = p.transform;
+
+        tracker = PlayerCombatTracker.Instance;
+        if (tracker != null) tracker.ParrySucceeded += OnPlayerParrySucceeded;
+
+        BossLearningHUD hud = GetComponent<BossLearningHUD>();
+        if (hud == null) hud = gameObject.AddComponent<BossLearningHUD>();
+        hud.Initialize(this, health, tracker, p != null ? p.GetComponent<Health>() : null);
 
         currentSlot = Mathf.Clamp(slotX.Length / 2, 0, Mathf.Max(0, slotX.Length - 1));
         targetX = slotX.Length > 0 ? slotX[currentSlot] : transform.position.x;
@@ -211,6 +249,11 @@ public class BossController : MonoBehaviour
         ApplyPhaseWeights();
 
         aiRoutine = StartCoroutine(AIRoutine());
+    }
+
+    private void OnDestroy()
+    {
+        if (tracker != null) tracker.ParrySucceeded -= OnPlayerParrySucceeded;
     }
 
     private void Update()
@@ -280,50 +323,59 @@ public class BossController : MonoBehaviour
             weights[BossAttack.Descend] = 3;
             weights[BossAttack.TailSweep] = 4;
             weights[BossAttack.Ascend] = 1;
+            weights[BossAttack.Barrage] = 1;
+            weights[BossAttack.SkyDive] = 1;
 
             Debug.Log("[Boss] Phase 1 가중치 (균등 · 분석 중)");
             return;
         }
 
-        // ───────── Phase 2 이상 : 적응 ─────────
+        // Phase 2: 모든 패턴을 남겨두고 학습한 항목만 보너스를 줍니다.
+        // 패링으로 adaptationDisruption이 쌓이면 보너스가 줄어들어 다시 균형형에 가까워집니다.
+        weights[BossAttack.PlasmaBreath] = 2;
+        weights[BossAttack.Descend] = 2;
+        weights[BossAttack.TailSweep] = 2;
+        weights[BossAttack.Ascend] = 1;
+        weights[BossAttack.Barrage] = 1;
+        weights[BossAttack.SkyDive] = 1;
+
+        float strength = AdaptationStrength;
         switch (adaptedStyle)
         {
             case DominantStyle.Melee:
-                // 근접형 카운터 : 붙기 어렵게 만들되 완전히 막지는 않음
-                weights[BossAttack.PlasmaBreath] = 4;   // 원거리 견제 증가
-                weights[BossAttack.TailSweep] = 6;   // 근접 응징
-                weights[BossAttack.Ascend] = 4;   // 붙으면 상공으로 도망
-                weights[BossAttack.Descend] = 1;   // 근접 기회는 남겨둠 (0 아님)
-
-                lowTailBonusCurrent = 2f;
-                repositionChanceCurrent = 0.7f;         // 자주 자리를 옮김
-
-                Debug.Log("[Boss] Phase 2 가중치 → vs MELEE (넉백·이탈 중심)");
+                AddAdaptiveWeight(BossAttack.TailSweep, 5, strength);
+                AddAdaptiveWeight(BossAttack.Ascend, 3, strength);
+                AddAdaptiveWeight(BossAttack.PlasmaBreath, 2, strength);
+                lowTailBonusCurrent = Mathf.Lerp(1.2f, 2.1f, strength);
+                repositionChanceCurrent = Mathf.Lerp(0.4f, 0.75f, strength);
                 break;
 
             case DominantStyle.Ranged:
-                // 원거리형 카운터 : 거리를 못 벌리게 계속 따라붙음
-                weights[BossAttack.Descend] = 5;   // 플레이어 위로 강하
-                weights[BossAttack.TailSweep] = 2;
-                weights[BossAttack.PlasmaBreath] = 2;   // 원거리 공방은 줄임
-                weights[BossAttack.Ascend] = 1;   // 거의 안 올라감 (0 아님)
-
-                lowTailBonusCurrent = 1.2f;
-                repositionChanceCurrent = 0.25f;        // 자리를 잘 안 뜸
-
-                Debug.Log("[Boss] Phase 2 가중치 → vs RANGED (추격·접근 중심)");
-                break;
-
-            default:
-                // 판정 실패 시 Phase 1과 동일
-                weights[BossAttack.PlasmaBreath] = 3;
-                weights[BossAttack.Descend] = 3;
-                weights[BossAttack.TailSweep] = 4;
-                weights[BossAttack.Ascend] = 1;
-
-                Debug.LogWarning("[Boss] DominantStyle이 None입니다. 기본 가중치 사용");
+                AddAdaptiveWeight(BossAttack.Descend, 4, strength);
+                AddAdaptiveWeight(BossAttack.SkyDive, 4, strength);
+                lowTailBonusCurrent = Mathf.Lerp(1.1f, 1.35f, strength);
+                repositionChanceCurrent = Mathf.Lerp(0.4f, 0.2f, strength);
                 break;
         }
+
+        if (adaptedMobility == MobilityStyle.Airborne)
+        {
+            AddAdaptiveWeight(BossAttack.Barrage, 5, strength);
+            AddAdaptiveWeight(BossAttack.PlasmaBreath, 2, strength);
+        }
+        else if (adaptedMobility == MobilityStyle.Grounded)
+        {
+            AddAdaptiveWeight(BossAttack.SkyDive, 4, strength);
+            AddAdaptiveWeight(BossAttack.TailSweep, 2, strength);
+        }
+
+        Debug.Log($"[Boss] Phase 2 → {adaptedStyle}/{adaptedMobility}/{adaptedEvasion}, adaptation {strength * 100f:F0}%");
+    }
+
+    private void AddAdaptiveWeight(BossAttack attack, int bonus, float strength)
+    {
+        if (!weights.ContainsKey(attack)) weights[attack] = 1;
+        weights[attack] += Mathf.RoundToInt(bonus * strength);
     }
 
     /// <summary>현재 위치 상태에서 사용 가능한 공격인지</summary>
@@ -335,7 +387,9 @@ public class BossController : MonoBehaviour
             case BossAttack.Descend: return !IsLowHovering;
             case BossAttack.TailSweep: return IsLowHovering;
             case BossAttack.Ascend: return IsLowHovering;
-            default: return false;   // 확장 공격은 아직 미구현
+            case BossAttack.Barrage: return !IsLowHovering;
+            case BossAttack.SkyDive: return !IsLowHovering;
+            default: return false;
         }
     }
 
@@ -470,6 +524,18 @@ public class BossController : MonoBehaviour
 
             case BossAttack.Ascend:
                 subRoutine = StartCoroutine(Atk_Ascend());
+                yield return subRoutine;
+                subRoutine = null;
+                break;
+
+            case BossAttack.Barrage:
+                subRoutine = StartCoroutine(Atk_Barrage());
+                yield return subRoutine;
+                subRoutine = null;
+                break;
+
+            case BossAttack.SkyDive:
+                subRoutine = StartCoroutine(Atk_SkyDive());
                 yield return subRoutine;
                 subRoutine = null;
                 break;
@@ -613,6 +679,73 @@ public class BossController : MonoBehaviour
         Debug.Log("[Boss] 상공 복귀");
     }
 
+    // ───────────────── 공격 5 : Barrage (공중 체류 카운터) ─────────────────
+    private IEnumerator Atk_Barrage()
+    {
+        Vector2 aim = ComputePredictedAimDirection();
+        Vector2[] dirs = BuildFan(aim, Mathf.Max(3, breathShots + 2), breathSpreadAngle * 0.65f);
+        ShowGroundWarningForFan(dirs);
+
+        bool ok = true;
+        yield return StartCoroutine(Telegraph(telegraphTime + 0.2f, r => ok = r));
+        HideGroundWarning();
+        if (!ok) yield break;
+
+        State = BossState.Attack;
+        int waves = Mathf.Max(1, barrageWaves);
+        for (int wave = 0; wave < waves; wave++)
+        {
+            // 두 번째 파동은 회피 방향을 다시 읽어 한 박자 늦게 쫓아갑니다.
+            if (wave > 0) dirs = BuildFan(ComputePredictedAimDirection(), dirs.Length, breathSpreadAngle * 0.65f);
+
+            for (int i = 0; i < dirs.Length; i++)
+            {
+                if (staggerLeft > 0f) yield break;
+                SpawnProjectile(dirs[i]);
+                if (breathShotInterval > 0f) yield return new WaitForSeconds(breathShotInterval);
+            }
+
+            if (wave + 1 < waves) yield return new WaitForSeconds(barrageWaveDelay);
+        }
+    }
+
+    // ───────────────── 공격 6 : SkyDive (지상/원거리 카운터) ─────────────────
+    private IEnumerator Atk_SkyDive()
+    {
+        float predictedX = GetPredictedPlayerX();
+        targetX = predictedX;
+        ShowGroundWarningAt(predictedX, skyDiveWidth);
+
+        bool ok = true;
+        yield return StartCoroutine(Telegraph(telegraphTime + 0.25f, r => ok = r));
+        HideGroundWarning();
+        if (!ok) yield break;
+
+        State = BossState.Attack;
+        float previousVerticalSpeed = verticalSpeed;
+        verticalSpeed *= 2.4f;
+        targetY = hoverLowY;
+
+        float timeout = verticalMoveTimeout;
+        while (!ArrivedAtTargetY && timeout > 0f && staggerLeft <= 0f)
+        {
+            timeout -= Time.deltaTime;
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(skyDiveHoldTime);
+        verticalSpeed = previousVerticalSpeed;
+        targetY = hoverHighY;
+        MoveToFarthestSlot();
+
+        timeout = verticalMoveTimeout;
+        while (!ArrivedAtTargetY && timeout > 0f && staggerLeft <= 0f)
+        {
+            timeout -= Time.deltaTime;
+            yield return null;
+        }
+    }
+
     // ───────────────────── 조준 / 부채꼴 ─────────────────────
     private Vector2 ComputeAimDirection()
     {
@@ -631,6 +764,41 @@ public class BossController : MonoBehaviour
             dir.Normalize();
         }
         return dir;
+    }
+
+    private Vector2 ComputePredictedAimDirection()
+    {
+        Vector2 origin = firePoint != null ? (Vector2)firePoint.position : (Vector2)transform.position;
+        Vector2 target = player != null
+            ? (Vector2)player.position + Vector2.up * aimVerticalOffset
+            : origin + Vector2.down;
+
+        float direction = adaptedEvasion == EvasionBias.Left ? -1f : adaptedEvasion == EvasionBias.Right ? 1f : 0f;
+        target.x += direction * predictionDistance * AdaptationStrength;
+
+        Vector2 dir = (target - origin).normalized;
+        if (dir.sqrMagnitude < 0.01f) dir = Vector2.down;
+        if (dir.y > minDownwardY)
+        {
+            dir.y = minDownwardY;
+            dir.Normalize();
+        }
+        return dir;
+    }
+
+    private float GetPredictedPlayerX()
+    {
+        float x = player != null ? player.position.x : transform.position.x;
+        float direction = adaptedEvasion == EvasionBias.Left ? -1f : adaptedEvasion == EvasionBias.Right ? 1f : 0f;
+        return Mathf.Clamp(x + direction * predictionDistance * AdaptationStrength, arenaMinX, arenaMaxX);
+    }
+
+    private void SpawnProjectile(Vector2 direction)
+    {
+        if (breathPrefab == null || firePoint == null) return;
+        GameObject go = Instantiate(breathPrefab, firePoint.position, Quaternion.identity);
+        Projectile projectile = go.GetComponent<Projectile>();
+        if (projectile != null) projectile.Launch(direction);
     }
 
     private Vector2[] BuildFan(Vector2 center, int count, float stepAngle)
@@ -742,6 +910,20 @@ public class BossController : MonoBehaviour
         Debug.Log($"[Boss] STAGGERED {duration}s");
     }
 
+    private void OnPlayerParrySucceeded()
+    {
+        if (State == BossState.Dead) return;
+
+        Stagger(parryStaggerTime);
+        if (adaptiveVisual != null) adaptiveVisual.PulseDisruption();
+
+        if (Phase < 2) return;
+
+        adaptationDisruption = Mathf.Clamp01(adaptationDisruption + disruptionPerParry);
+        ApplyPhaseWeights();
+        Debug.Log($"[Boss] ADAPTATION DISRUPTED → strength {AdaptationStrength * 100f:F0}%");
+    }
+
     // ───────────────── 코루틴 / 표시 정리 헬퍼 ─────────────────
     /// <summary>
     /// 진행 중인 AI/공격 코루틴만 중단합니다.
@@ -812,17 +994,21 @@ public class BossController : MonoBehaviour
         // ── 5) 페이즈 갱신 ──
         // ★ 11단계 : 확정된 스타일을 보스에 반영
         if (PlayerCombatTracker.Instance != null)
+        {
             adaptedStyle = PlayerCombatTracker.Instance.LockedStyle;
+            adaptedMobility = PlayerCombatTracker.Instance.LockedMobility;
+            adaptedEvasion = PlayerCombatTracker.Instance.LockedEvasion;
+            adaptationDisruption = PlayerCombatTracker.Instance.DataCorruption * 0.45f;
+        }
 
         Phase = 2;
         ApplyPhaseWeights();
+        if (adaptiveVisual != null) adaptiveVisual.SetPhase(2);
         ResetStats();   // Phase 2 통계를 따로 집계
 
         if (phaseLabel != null)
         {
-            phaseLabel.text = adaptedStyle == DominantStyle.Melee
-                ? "PHASE 2 - COUNTER: CLOSE RANGE"
-                : "PHASE 2 - COUNTER: LONG RANGE";
+            phaseLabel.text = "PHASE 2 - " + CounterProtocol;
         }
 
         phaseTransitionRunning = false;
@@ -914,6 +1100,7 @@ public class BossController : MonoBehaviour
 
         ClearAttackVisuals();
         SetVisualColor(new Color(0.35f, 0.35f, 0.4f));
+        if (adaptiveVisual != null) adaptiveVisual.SetDefeated();
 
         Debug.Log("[Boss] DEFEATED");
     }

@@ -85,8 +85,10 @@ public class AnalysisUI : MonoBehaviour
         {
             $"MELEE   : {tracker.MeleeCount}",
             $"RANGED  : {tracker.RangedCount}",
-            $"PARRY   : {tracker.ParryCount}",
-            $"DASH    : {tracker.DashCount}"
+            $"MOBILITY: {tracker.GetMobilityLabel()}",
+            $"EVASION : {tracker.GetEvasionLabel()}",
+            $"PARRY   : {tracker.ParrySuccessCount}/{tracker.ParryCount}",
+            $"DATA INTEGRITY : {tracker.DataIntegrity * 100f:F0}%"
         };
 
         string acc = "";
@@ -109,7 +111,7 @@ public class AnalysisUI : MonoBehaviour
         }
         yield return new WaitForSecondsRealtime(suspenseDelay);
 
-        // ── 6) 로딩 점 애니메이션 ──
+        // ── 6) 보스가 실제로 장착할 카운터를 공개 ──
         float t = 0f;
         int dots = 0;
         while (t < loadingTime)
@@ -126,7 +128,7 @@ public class AnalysisUI : MonoBehaviour
         if (protocolText != null)
         {
             protocolText.color = completeColor;
-            protocolText.text = completeLine;
+            protocolText.text = completeLine + "\n" + tracker.GetCounterProtocolLabel();
         }
         yield return new WaitForSecondsRealtime(completeHold);
 
