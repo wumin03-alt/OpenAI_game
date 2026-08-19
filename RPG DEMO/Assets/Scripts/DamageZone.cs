@@ -70,6 +70,10 @@ public class DamageZone : MonoBehaviour
         // 4) 데미지
         hp.TakeDamage(damage);
 
+        // Player Q가 실제 Boss에게 맞힌 횟수는 입력 횟수보다 중요한 분석 데이터입니다.
+        if (hp.CompareTag("Boss") && transform.root.CompareTag("Player") && PlayerCombatTracker.Instance != null)
+            PlayerCombatTracker.Instance.RecordBossHit(ActionType.Melee);
+
         // 5) 넉백
         if (knockbackForce > 0f)
         {

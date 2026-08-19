@@ -49,6 +49,17 @@ public class EnemyController : MonoBehaviour
     private float hitStunLeft;
     private float visualScaleX = 1f;
 
+    /// <summary>
+    /// 고정 아레나 전용 설정. 프리팹 기본 AI 값은 유지하고, 런타임에 생성된
+    /// 적만 아레나 전체에서 플레이어를 추적하도록 합니다.
+    /// </summary>
+    public void ConfigureArenaPursuit(float newDetectRange, float newLoseRange)
+    {
+        detectRange = Mathf.Max(0f, newDetectRange);
+        loseRange = Mathf.Max(detectRange, newLoseRange);
+        doPatrol = false;
+    }
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();

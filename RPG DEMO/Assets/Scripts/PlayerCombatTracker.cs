@@ -1,60 +1,73 @@
 using UnityEngine;
 
-/// <summary>플레이어 행동 종류</summary>
-public enum ActionType { Melee, Ranged, Parry, Dash }
+/// <summary>분석에 기록하는 플레이어 행동 종류입니다.</summary>
+public enum ActionType { Melee, Ranged, Parry, Dash, Jump }
 
-/// <summary>플레이어 주력 전투 스타일</summary>
-public enum DominantStyle { None, Melee, Ranged }
+/// <summary>보스가 대응할 플레이 스타일입니다.</summary>
+public enum DominantStyle { None, Balanced, Melee, Ranged, Evasive, Airborne }
+
+/// <summary>한 Phase 동안 모은 전투 데이터와 판정 결과입니다.</summary>
+public struct CombatAnalysis
+{
+    public DominantStyle style;
+    public int meleeUses;
+    public int meleeHits;
+    public int rangedUses;
+    public int rangedHits;
+    public int dashUses;
+    public int jumpUses;
+    public float averageDistance;
+    public float closeRatio;
+    public float farRatio;
+    public float confidence;
+}
 
 /// <summary>
-/// 학습형 보스의 데이터 소스.
-/// 플레이어 행동을 실시간 카운트하고, Phase 2에서 주력 스타일을 판정합니다.
-/// Player 오브젝트에 부착합니다.
+/// BossArena의 규칙 기반 적응 AI가 읽는 행동 데이터 소스입니다.
+/// 입력과 실제 보스 피격을 분리해 Phase마다 독립된 분석 윈도우를 만듭니다.
 /// </summary>
 public class PlayerCombatTracker : MonoBehaviour
 {
     public static PlayerCombatTracker Instance { get; private set; }
 
-    [Header("── 기록 상태 ──")]
-    [Tooltip("Phase 1 동안만 true. 보스가 50%에 도달하면 꺼집니다")]
+    [Header("Analysis Window")]
     [SerializeField] private bool isRecording = true;
-
-    [Header("── 판정 기준 ──")]
-    [Tooltip("이 횟수 미만이면 표본 부족으로 봅니다 (그래도 판정은 내립니다)")]
     [SerializeField] private int minSampleCount = 4;
+    [SerializeField] private float closeDistance = 3.5f;
+    [SerializeField] private float farDistance = 6.5f;
 
-    [Header("── 디버그 ──")]
-    [Tooltip("G 키로 현재 기록을 Console에 출력")]
+    [Header("Debug")]
     [SerializeField] private bool debugReportKey = true;
-    [Tooltip("행동할 때마다 Console에 로그")]
-    [SerializeField] private bool logEveryAction = false;
+    [SerializeField] private bool logEveryAction;
 
-    // ── 핵심 카운터 (Phase 2 판정에 사용) ──
     public int MeleeCount { get; private set; }
+    public int MeleeHitCount { get; private set; }
     public int RangedCount { get; private set; }
-
-    // ── 보조 카운터 (분석 UI 표시용) ──
-    public int ParryCount { get; private set; }          // 패링 시도
-    public int ParrySuccessCount { get; private set; }   // 패링 성공
+    public int RangedHitCount { get; private set; }
+    public int ParryCount { get; private set; }
+    public int ParrySuccessCount { get; private set; }
     public int DashCount { get; private set; }
-
+    public int JumpCount { get; private set; }
     public bool IsRecording => isRecording;
     public int TotalAttackCount => MeleeCount + RangedCount;
     public bool HasEnoughSamples => TotalAttackCount >= minSampleCount;
-
-    /// <summary>확정된 주력 스타일. 판정 전에는 None</summary>
     public DominantStyle LockedStyle { get; private set; } = DominantStyle.None;
+    public CombatAnalysis LastAnalysis { get; private set; }
 
-    private ActionType lastAttackType = ActionType.Ranged;   // 동점 타이브레이크용
-    private bool hasAnyAttack;
     private Health health;
+    private Rigidbody2D body;
+    private Transform boss;
+    private float distanceTotal;
+    private float distanceSampleTime;
+    private float closeTime;
+    private float farTime;
+    private bool wasRising;
 
     private void Awake()
     {
         Instance = this;
-
-        // 패링 성공을 자동 구독 (Inspector 연결 불필요)
         health = GetComponent<Health>();
+        body = GetComponent<Rigidbody2D>();
         if (health != null && health.onParrySuccess != null)
             health.onParrySuccess.AddListener(RecordParrySuccess);
     }
@@ -66,115 +79,180 @@ public class PlayerCombatTracker : MonoBehaviour
 
     private void Update()
     {
-        if (debugReportKey && Input.GetKeyDown(KeyCode.G))
-            Debug.Log(BuildReport());
+        if (isRecording)
+        {
+            RecordSpacing();
+            RecordJumpFromMotion();
+        }
+
+#if UNITY_EDITOR
+        if (debugReportKey && Input.GetKeyDown(KeyCode.G)) Debug.Log(BuildReport());
+#endif
     }
 
-    // ───────────────────────── 기록 ─────────────────────────
-    /// <summary>PlayerController에서 행동할 때마다 호출합니다.</summary>
+    private void RecordSpacing()
+    {
+        if (boss == null)
+        {
+            GameObject bossObject = GameObject.FindGameObjectWithTag("Boss");
+            if (bossObject != null) boss = bossObject.transform;
+        }
+        if (boss == null) return;
+
+        float distance = Vector2.Distance(transform.position, boss.position);
+        distanceTotal += distance * Time.deltaTime;
+        distanceSampleTime += Time.deltaTime;
+        if (distance <= closeDistance) closeTime += Time.deltaTime;
+        if (distance >= farDistance) farTime += Time.deltaTime;
+    }
+
+    // PlayerController의 점프 입력을 건드리지 않고 실제 상승 시작을 한 번만 기록합니다.
+    private void RecordJumpFromMotion()
+    {
+        bool rising = body != null && body.linearVelocity.y > 2.5f;
+        if (rising && !wasRising) JumpCount++;
+        wasRising = rising;
+    }
+
+    /// <summary>PlayerController가 유효한 행동을 실행했을 때 호출합니다.</summary>
     public void RecordAction(ActionType type)
     {
         if (!isRecording) return;
 
         switch (type)
         {
-            case ActionType.Melee:
-                MeleeCount++;
-                lastAttackType = ActionType.Melee;
-                hasAnyAttack = true;
-                break;
-
-            case ActionType.Ranged:
-                RangedCount++;
-                lastAttackType = ActionType.Ranged;
-                hasAnyAttack = true;
-                break;
-
-            case ActionType.Parry:
-                ParryCount++;
-                break;
-
-            case ActionType.Dash:
-                DashCount++;
-                break;
+            case ActionType.Melee: MeleeCount++; break;
+            case ActionType.Ranged: RangedCount++; break;
+            case ActionType.Parry: ParryCount++; break;
+            case ActionType.Dash: DashCount++; break;
+            case ActionType.Jump: JumpCount++; break;
         }
 
-        if (logEveryAction)
-            Debug.Log($"[Tracker] {type}  |  M:{MeleeCount} R:{RangedCount} P:{ParryCount} D:{DashCount}");
+        if (logEveryAction) Debug.Log($"[Tracker] {type} | {BuildReport()}");
+    }
+
+    /// <summary>DamageZone/Projectile이 실제 Boss Health에 적중했을 때 호출합니다.</summary>
+    public void RecordBossHit(ActionType type)
+    {
+        if (!isRecording) return;
+        if (type == ActionType.Melee) MeleeHitCount++;
+        else if (type == ActionType.Ranged) RangedHitCount++;
     }
 
     private void RecordParrySuccess()
     {
-        if (!isRecording) return;
-        ParrySuccessCount++;
+        if (isRecording) ParrySuccessCount++;
     }
 
-    // ───────────────────────── 판정 ─────────────────────────
-    /// <summary>
-    /// 주력 스타일을 판정합니다. melee / ranged 만 사용합니다.
-    /// parry / dash 는 분석 UI 표시용 보조 데이터입니다.
-    /// (확장 시 이 함수 안에서만 규칙을 추가하면 됩니다)
-    /// </summary>
-    public DominantStyle GetDominantStyle()
-    {
-        if (!hasAnyAttack) return DominantStyle.None;
-
-        if (MeleeCount > RangedCount) return DominantStyle.Melee;
-        if (RangedCount > MeleeCount) return DominantStyle.Ranged;
-
-        // 동점 — 마지막으로 사용한 공격 타입으로 결정
-        return lastAttackType == ActionType.Melee
-            ? DominantStyle.Melee
-            : DominantStyle.Ranged;
-    }
-
-    /// <summary>기록을 멈추고 스타일을 확정합니다. 보스가 HP 50%에서 호출합니다.</summary>
-    public DominantStyle LockAndStopRecording()
+    /// <summary>현재 분석 윈도우를 확정하고 다음 Phase가 읽을 결과를 반환합니다.</summary>
+    public CombatAnalysis FinishWindow()
     {
         isRecording = false;
-        LockedStyle = GetDominantStyle();
-
+        LastAnalysis = BuildAnalysis();
+        LockedStyle = LastAnalysis.style;
         Debug.Log($"[Tracker] 분석 완료 → {LockedStyle}\n{BuildReport()}");
-        return LockedStyle;
+        return LastAnalysis;
+    }
+
+    /// <summary>새 Phase용 데이터를 0부터 다시 수집합니다.</summary>
+    public void BeginNewWindow()
+    {
+        MeleeCount = MeleeHitCount = RangedCount = RangedHitCount = 0;
+        ParryCount = ParrySuccessCount = DashCount = JumpCount = 0;
+        distanceTotal = distanceSampleTime = closeTime = farTime = 0f;
+        isRecording = true;
     }
 
     public void StartRecording() => isRecording = true;
     public void StopRecording() => isRecording = false;
 
-    /// <summary>재시작 시 초기화</summary>
     public void ResetAll()
     {
-        MeleeCount = RangedCount = ParryCount = ParrySuccessCount = DashCount = 0;
-        hasAnyAttack = false;
         LockedStyle = DominantStyle.None;
-        isRecording = true;
+        LastAnalysis = new CombatAnalysis { style = DominantStyle.None };
+        BeginNewWindow();
     }
 
-    // ───────────────── 분석 UI가 사용할 표시용 문자열 ─────────────────
-    /// <summary>"CLOSE RANGE" / "LONG RANGE" — 10단계 AnalysisUI에서 사용</summary>
-    public string GetStyleLabel()
+    private CombatAnalysis BuildAnalysis()
     {
-        switch (GetDominantStyle())
+        float sampleTime = Mathf.Max(0.01f, distanceSampleTime);
+        float averageDistance = distanceTotal / sampleTime;
+        float closeRatio = closeTime / sampleTime;
+        float farRatio = farTime / sampleTime;
+        int actionSamples = TotalAttackCount + DashCount + JumpCount;
+
+        float meleeScore = MeleeHitCount * 2.5f + MeleeCount * 0.8f + closeRatio * 4f;
+        float rangedScore = RangedHitCount * 2.5f + RangedCount * 0.8f + farRatio * 4f + Mathf.Clamp01(averageDistance / farDistance);
+        float evasiveScore = DashCount * 1.7f + (float)DashCount / Mathf.Max(1, TotalAttackCount) * 3f + farRatio * 1.5f;
+        float airborneScore = JumpCount * 1.6f + (float)JumpCount / Mathf.Max(1, TotalAttackCount) * 3f;
+
+        DominantStyle style = DominantStyle.Balanced;
+        float bestScore = 0f;
+        float secondScore = 0f;
+        SelectBest(DominantStyle.Melee, meleeScore, ref style, ref bestScore, ref secondScore);
+        SelectBest(DominantStyle.Ranged, rangedScore, ref style, ref bestScore, ref secondScore);
+        SelectBest(DominantStyle.Evasive, evasiveScore, ref style, ref bestScore, ref secondScore);
+        SelectBest(DominantStyle.Airborne, airborneScore, ref style, ref bestScore, ref secondScore);
+
+        // 표본 부족 또는 비슷한 점수면 억지로 스타일을 뒤집지 않습니다.
+        if (actionSamples < minSampleCount || bestScore < 3f || bestScore - secondScore < 1.15f)
+            style = DominantStyle.Balanced;
+
+        return new CombatAnalysis
         {
-            case DominantStyle.Melee: return "CLOSE RANGE";
-            case DominantStyle.Ranged: return "LONG RANGE";
+            style = style,
+            meleeUses = MeleeCount,
+            meleeHits = MeleeHitCount,
+            rangedUses = RangedCount,
+            rangedHits = RangedHitCount,
+            dashUses = DashCount,
+            jumpUses = JumpCount,
+            averageDistance = averageDistance,
+            closeRatio = closeRatio,
+            farRatio = farRatio,
+            confidence = bestScore <= 0f ? 0f : Mathf.Clamp01((bestScore - secondScore + 1f) / (bestScore + 1f))
+        };
+    }
+
+    private static void SelectBest(DominantStyle candidate, float score, ref DominantStyle style, ref float best, ref float second)
+    {
+        if (score > best)
+        {
+            second = best;
+            best = score;
+            style = candidate;
+        }
+        else if (score > second)
+        {
+            second = score;
+        }
+    }
+
+    public string GetStyleLabel(DominantStyle style)
+    {
+        switch (style)
+        {
+            case DominantStyle.Melee: return "MELEE";
+            case DominantStyle.Ranged: return "RANGED";
+            case DominantStyle.Evasive: return "EVASIVE";
+            case DominantStyle.Airborne: return "AIRBORNE";
+            case DominantStyle.Balanced: return "BALANCED";
             default: return "UNKNOWN";
         }
     }
 
-    /// <summary>주력 스타일이 전체 공격에서 차지하는 비율 (0~1)</summary>
-    public float GetDominantRatio()
+    public string GetDistanceLabel(float distance)
     {
-        if (TotalAttackCount == 0) return 0f;
-        int dominant = Mathf.Max(MeleeCount, RangedCount);
-        return (float)dominant / TotalAttackCount;
+        if (distance >= farDistance) return "HIGH";
+        if (distance <= closeDistance) return "LOW";
+        return "MEDIUM";
     }
 
     public string BuildReport()
     {
-        return $"[Tracker] MELEE:{MeleeCount}  RANGED:{RangedCount}  " +
-               $"PARRY:{ParryCount}(성공 {ParrySuccessCount})  DASH:{DashCount}  " +
-               $"→ {GetDominantStyle()} ({GetDominantRatio() * 100f:F0}%)  " +
-               $"기록중:{isRecording}  표본충분:{HasEnoughSamples}";
+        CombatAnalysis current = isRecording ? BuildAnalysis() : LastAnalysis;
+        return $"[Tracker] Q {MeleeHitCount}/{MeleeCount}  W {RangedHitCount}/{RangedCount}  " +
+               $"Dash:{DashCount} Jump:{JumpCount} AvgDist:{current.averageDistance:F1} " +
+               $"→ {GetStyleLabel(current.style)}  기록중:{isRecording}";
     }
 }

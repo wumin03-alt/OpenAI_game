@@ -38,6 +38,8 @@ public class AnalysisUI : MonoBehaviour
     [Header("── 스타일 색상 ──")]
     [SerializeField] private Color meleeColor = new Color(1f, 0.45f, 0.3f);
     [SerializeField] private Color rangedColor = new Color(0.4f, 0.8f, 1f);
+    [SerializeField] private Color evasiveColor = new Color(0.9f, 0.7f, 0.3f);
+    [SerializeField] private Color airborneColor = new Color(0.72f, 0.5f, 1f);
     [SerializeField] private Color completeColor = new Color(0.4f, 1f, 0.55f);
 
     [Header("── 문구 ──")]
@@ -52,8 +54,16 @@ public class AnalysisUI : MonoBehaviour
         if (panelRoot != null) panelRoot.SetActive(false);
     }
 
-    /// <summary>보스가 HP 50%에 도달했을 때 호출합니다. 연출이 끝날 때까지 대기합니다.</summary>
+    /// <summary>기존 호출 호환용. 현재 윈도우를 확정해 분석 연출을 재생합니다.</summary>
     public IEnumerator PlayAnalysis(PlayerCombatTracker tracker)
+    {
+        if (tracker == null) yield break;
+        CombatAnalysis analysis = tracker.FinishWindow();
+        yield return StartCoroutine(PlayAnalysis(tracker, analysis, DominantStyle.None));
+    }
+
+    /// <summary>Phase별 분석 결과와 이전 전략을 보여 준 뒤 Counter Strategy 갱신을 알립니다.</summary>
+    public IEnumerator PlayAnalysis(PlayerCombatTracker tracker, CombatAnalysis analysis, DominantStyle previousStyle)
     {
         if (tracker == null)
         {
@@ -63,8 +73,8 @@ public class AnalysisUI : MonoBehaviour
 
         IsPlaying = true;
 
-        // ── 데이터 확정 (기록 중단 + 스타일 락) ──
-        DominantStyle style = tracker.LockAndStopRecording();
+        DominantStyle style = analysis.style;
+        bool tacticChanged = previousStyle != DominantStyle.None && previousStyle != style;
 
         // ── 화면 정지 ──
         float prevScale = Time.timeScale;
@@ -77,16 +87,17 @@ public class AnalysisUI : MonoBehaviour
         yield return StartCoroutine(Fade(0f, 1f, fadeInTime));
 
         // ── 2) 타이틀 타이핑 ──
-        yield return StartCoroutine(TypeText(titleText, titleLine));
+        string header = tacticChanged ? "TACTIC CHANGE DETECTED" : titleLine;
+        yield return StartCoroutine(TypeText(titleText, header));
         yield return new WaitForSecondsRealtime(lineDelay);
 
         // ── 3) 스탯 한 줄씩 ──
         string[] lines =
         {
-            $"MELEE   : {tracker.MeleeCount}",
-            $"RANGED  : {tracker.RangedCount}",
-            $"PARRY   : {tracker.ParryCount}",
-            $"DASH    : {tracker.DashCount}"
+            $"MELEE HIT   : {analysis.meleeHits}/{analysis.meleeUses}",
+            $"RANGED HIT  : {analysis.rangedHits}/{analysis.rangedUses}",
+            $"AVG DISTANCE: {tracker.GetDistanceLabel(analysis.averageDistance)}",
+            $"DASH USAGE  : {UsageLabel(analysis.dashUses)}"
         };
 
         string acc = "";
@@ -98,14 +109,14 @@ public class AnalysisUI : MonoBehaviour
         }
 
         // ── 4) 뜸들이기 ──
-        if (styleLabel != null) styleLabel.text = "DOMINANT STYLE";
+        if (styleLabel != null) styleLabel.text = "PLAYSTYLE";
         yield return new WaitForSecondsRealtime(suspenseDelay);
 
         // ── 5) 스타일 공개 ──
         if (styleValue != null)
         {
-            styleValue.color = style == DominantStyle.Melee ? meleeColor : rangedColor;
-            yield return StartCoroutine(TypeText(styleValue, tracker.GetStyleLabel()));
+            styleValue.color = GetStyleColor(style);
+            yield return StartCoroutine(TypeText(styleValue, tracker.GetStyleLabel(style)));
         }
         yield return new WaitForSecondsRealtime(suspenseDelay);
 
@@ -115,7 +126,9 @@ public class AnalysisUI : MonoBehaviour
         while (t < loadingTime)
         {
             if (protocolText != null)
-                protocolText.text = loadingLine + new string('.', dots % 4);
+                protocolText.text = tacticChanged
+                    ? $"{tracker.GetStyleLabel(previousStyle)} -> {tracker.GetStyleLabel(style)}\nCOUNTER STRATEGY UPDATING" + new string('.', dots % 4)
+                    : loadingLine + new string('.', dots % 4);
 
             dots++;
             t += 0.18f;
@@ -137,7 +150,26 @@ public class AnalysisUI : MonoBehaviour
         Time.timeScale = prevScale <= 0f ? 1f : prevScale;
 
         IsPlaying = false;
-        Debug.Log($"[AnalysisUI] 연출 종료 → {style}");
+        Debug.Log($"[AnalysisUI] 연출 종료 → {style} (변경:{tacticChanged})");
+    }
+
+    private Color GetStyleColor(DominantStyle style)
+    {
+        switch (style)
+        {
+            case DominantStyle.Melee: return meleeColor;
+            case DominantStyle.Ranged: return rangedColor;
+            case DominantStyle.Evasive: return evasiveColor;
+            case DominantStyle.Airborne: return airborneColor;
+            default: return completeColor;
+        }
+    }
+
+    private static string UsageLabel(int count)
+    {
+        if (count >= 7) return "HIGH";
+        if (count >= 3) return "MEDIUM";
+        return "LOW";
     }
 
     // ───────────────────────── 유틸 ─────────────────────────

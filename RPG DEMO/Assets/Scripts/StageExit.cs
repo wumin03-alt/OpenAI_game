@@ -1,10 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Game.SceneManagement;
-using Game.Core;
-using Game.Save;
-using Game.UI;
-using UnityEngine.UI;
 
 /// <summary>
 /// 스테이지 끝 트리거. 플레이어가 닿으면 다음 씬(보스 아레나)으로 이동합니다.
@@ -21,7 +16,7 @@ public class StageExit : MonoBehaviour
 
     [Header("── 진입 조건 ──")]
     [Tooltip("체크하면 Tag가 Enemy인 오브젝트가 모두 사라져야 통과 가능")]
-    [SerializeField] private bool requireAllEnemiesDead = true;
+    [SerializeField] private bool requireAllEnemiesDead = false;
 
     [Header("── 연출 (선택) ──")]
     [Tooltip("통과 시 켤 오브젝트. 예: BOSS AHEAD 텍스트")]
@@ -29,62 +24,19 @@ public class StageExit : MonoBehaviour
     [Tooltip("조건 미달일 때 켤 오브젝트")]
     [SerializeField] private GameObject blockedMessage;
 
-    [Header("── 클리어 안내 ──")]
-    [SerializeField] private string clearGuideMessage = "오른쪽으로 이동하여 다음 스테이지로 이동하시오.";
-    [SerializeField, Min(0.05f)] private float enemyCheckInterval = 0.25f;
-
     private bool triggered;
-    private bool stageCleared;
-    private float nextEnemyCheckTime;
 
-    private void Start()
+    private void Awake()
     {
-        if (enterMessage != null) enterMessage.SetActive(false);
+        // Stage01의 실제 Canvas/HP Bar를 이후 씬에도 그대로 유지합니다.
+        if (SceneManager.GetActiveScene().name != "Stage01") return;
 
-        stageCleared = !requireAllEnemiesDead;
-        if (stageCleared)
-            ShowClearGuide();
-        else
-            CheckForStageClear();
-    }
+        Canvas stageCanvas = Object.FindFirstObjectByType<Canvas>();
+        if (stageCanvas == null) return;
 
-    private void Update()
-    {
-        if (!requireAllEnemiesDead || stageCleared || triggered) return;
-        if (Time.unscaledTime < nextEnemyCheckTime) return;
-
-        nextEnemyCheckTime = Time.unscaledTime + enemyCheckInterval;
-        CheckForStageClear();
-    }
-
-    private void CheckForStageClear()
-    {
-        if (GameObject.FindGameObjectWithTag("Enemy") != null) return;
-
-        stageCleared = true;
-        ShowClearGuide();
-        Debug.Log("[StageExit] 스테이지 클리어. 출구가 열렸습니다.");
-    }
-
-    private void ShowClearGuide()
-    {
-        if (enterMessage != null)
-        {
-            enterMessage.SetActive(true);
-            return;
-        }
-
-        Canvas canvas = RuntimeUIFactory.CreateCanvas("StageClearGuideCanvas", null, 250);
-        Image panel = RuntimeUIFactory.CreateImage(canvas.transform, "GuidePanel",
-            new Color(0.02f, 0.04f, 0.08f, 0.88f));
-        RectTransform panelRect = panel.rectTransform;
-        panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 1f);
-        panelRect.anchoredPosition = new Vector2(0f, -70f);
-        panelRect.sizeDelta = new Vector2(1100f, 72f);
-
-        Text guide = RuntimeUIFactory.CreateText(panelRect, clearGuideMessage, 30,
-            Vector2.zero, panelRect.sizeDelta, Color.white);
-        RuntimeUIFactory.Stretch(guide.rectTransform);
+        PersistentPlayerHUD hud = stageCanvas.GetComponent<PersistentPlayerHUD>();
+        if (hud == null) hud = stageCanvas.gameObject.AddComponent<PersistentPlayerHUD>();
+        hud.Initialize();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -92,12 +44,11 @@ public class StageExit : MonoBehaviour
         if (triggered) return;
         if (!other.CompareTag("Player")) return;
 
-        if (requireAllEnemiesDead && !stageCleared)
-        {
-            CheckForStageClear();
-        }
-
-        if (requireAllEnemiesDead && !stageCleared)
+        // 기존 Stage01은 이 스크립트가 이미 배치된 튜토리얼 씬이므로,
+        // 별도 Inspector 작업 없이 적 처치 후 다음 스테이지로 진행하게 합니다.
+        bool needsEnemiesCleared = requireAllEnemiesDead ||
+                                  SceneManager.GetActiveScene().name == "Stage01";
+        if (needsEnemiesCleared && GameObject.FindGameObjectWithTag("Enemy") != null)
         {
             Debug.Log("[StageExit] 남은 적이 있습니다.");
             if (blockedMessage != null) blockedMessage.SetActive(true);
@@ -105,7 +56,7 @@ public class StageExit : MonoBehaviour
         }
 
         triggered = true;
-        Debug.Log($"[StageExit] {nextSceneName} 으로 이동합니다.");
+        Debug.Log($"[StageExit] {GetNextSceneName()} 으로 이동합니다.");
 
         if (blockedMessage != null) blockedMessage.SetActive(false);
         if (enterMessage != null) enterMessage.SetActive(true);
@@ -115,21 +66,44 @@ public class StageExit : MonoBehaviour
 
     private void LoadNext()
     {
-        if (string.IsNullOrEmpty(nextSceneName))
+        string sceneToLoad = GetNextSceneName();
+        if (string.IsNullOrEmpty(sceneToLoad))
         {
             Debug.LogError("[StageExit] nextSceneName이 비어 있습니다.");
             return;
         }
+        SceneManager.LoadScene(sceneToLoad);
+    }
 
-        if (GameSession.Instance != null && SaveManager.Instance != null)
-            SaveManager.Instance.UnlockStage(GameSession.Instance.CurrentStage + 1);
+    // Stage01은 기존 씬 이름을 유지하면서 신규 스테이지 흐름만 연결합니다.
+    private string GetNextSceneName()
+    {
+        return SceneManager.GetActiveScene().name == "Stage01"
+            ? "Stage_02_Combat"
+            : nextSceneName;
+    }
 
-        // 정식 실행에서는 Bootstrap의 공통 로더를 사용합니다.
-        // Stage01을 에디터에서 단독 실행할 때는 기존 직접 로딩으로 대체합니다.
-        if (SceneLoader.Instance != null)
-            SceneLoader.Instance.LoadScene(nextSceneName);
-        else
-            SceneManager.LoadScene(nextSceneName);
+    private void OnGUI()
+    {
+        if (SceneManager.GetActiveScene().name != "Stage01") return;
+
+        GUIStyle title = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = 22,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = Color.white }
+        };
+        GUIStyle body = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = 16,
+            normal = { textColor = new Color(0.82f, 0.9f, 1f, 1f) }
+        };
+
+        GUI.Label(new Rect(500f, 24f, 600f, 30f), "STAGE 01 — TUTORIAL", title);
+        GUI.Label(new Rect(500f, 57f, 900f, 26f),
+                  "← → Move   ↑ Jump   R Dash   Q Melee   W Ranged   E Parry", body);
+        GUI.Label(new Rect(500f, 83f, 900f, 26f),
+                  "Defeat the enemies, then reach the exit on the right.", body);
     }
 
     private void OnDrawGizmos()

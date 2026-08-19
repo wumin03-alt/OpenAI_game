@@ -63,6 +63,7 @@ public class BossController : MonoBehaviour
     [SerializeField] private float startDelay = 1.5f;
     [Range(0f, 1f)]
     [SerializeField] private float repositionChance = 0.45f;
+    [SerializeField] private float chargeSpeedMultiplier = 2.8f;
 
     [Header("── 예고 연출 ──")]
     [SerializeField] private GameObject telegraphMark;
@@ -100,6 +101,12 @@ public class BossController : MonoBehaviour
     [Tooltip("Descend 후 근접 기회를 주기 위한 추가 경직 시간")]
     [SerializeField] private float descendSettleTime = 0.8f;
 
+    [Header("── 확장 패턴 ──")]
+    [SerializeField] private float groundAoEWidth = 4.5f;
+    [SerializeField] private float groundAoEActiveTime = 0.2f;
+    [SerializeField] private int barrageShots = 5;
+    [SerializeField] private float barrageShotInterval = 0.18f;
+
     [Header("── 경직 (패링 성공 시) ──")]
     [SerializeField] private Color staggerColor = new Color(0.6f, 0.8f, 1f);
 
@@ -107,9 +114,12 @@ public class BossController : MonoBehaviour
     [Header("── 페이즈 전환 ──")]
     [Tooltip("씬의 AnalysisPanel에 붙인 AnalysisUI")]
     [SerializeField] private AnalysisUI analysisUI;
-    [Tooltip("이 비율 이하로 내려가면 Phase 2 (0.5 = 50%)")]
+    [Tooltip("이 비율 이하로 내려가면 첫 분석 후 Phase 2에 진입합니다 (기본 0.7 = 70%)")]
     [Range(0.1f, 0.9f)]
-    [SerializeField] private float phase2Threshold = 0.5f;
+    [SerializeField] private float phase2Threshold = 0.7f;
+    [Tooltip("이 비율 이하에서 Phase 3 재분석을 실행합니다")]
+    [Range(0.1f, 0.8f)]
+    [SerializeField] private float phase3Threshold = 0.4f;
     [Tooltip("Phase 2 진입 시 화면에 표시할 라벨 (선택)")]
     [SerializeField] private TMPro.TMP_Text phaseLabel;
 
@@ -146,6 +156,9 @@ public class BossController : MonoBehaviour
     private float visualScaleX = 1f;
     private float staggerLeft;
     private float lowHoverTime;
+    private float movementSpeedMultiplier = 1f;
+    private float strategyMovementSpeedMultiplier = 1f;
+    private Vector3 tailHitboxBaseScale = Vector3.one;
     private Coroutine aiRoutine;
     private Coroutine attackRoutine;       // ★ ExecuteAttack
     private Coroutine subRoutine;          // ★ 개별 공격 (Atk_*)
@@ -157,6 +170,7 @@ public class BossController : MonoBehaviour
 
     // ★ 10단계 ② : 페이즈 전환이 1회만 실행되게 하는 플래그
     private bool phase2Triggered;
+    private bool phase3Triggered;
     private bool phaseTransitionRunning;
 
     // ★ 11단계 : 적응 상태
@@ -190,6 +204,7 @@ public class BossController : MonoBehaviour
         if (telegraphMark != null) telegraphMark.SetActive(false);
         if (groundWarning != null) groundWarning.SetActive(false);
         if (tailHitbox != null) tailHitbox.SetActive(false);
+        if (tailHitbox != null) tailHitboxBaseScale = tailHitbox.transform.localScale;
 
         health.onDeath.AddListener(OnBossDeath);
     }
@@ -239,12 +254,15 @@ public class BossController : MonoBehaviour
 
         CheckPhaseTransition();     // ★ 10단계 ③
 
+#if UNITY_EDITOR
         if (debugHoverKeys) DebugHoverInput();
+        DebugStyleInput();
+#endif
     }
 
     private void UpdateHoverPosition()
     {
-        float hSpeed = staggerLeft > 0f ? 0f : horizontalSpeed;
+        float hSpeed = staggerLeft > 0f ? 0f : horizontalSpeed * movementSpeedMultiplier;
         float vSpeed = staggerLeft > 0f ? 0f : verticalSpeed;
 
         float x = Mathf.MoveTowards(transform.position.x, targetX, hSpeed * Time.deltaTime);
@@ -269,61 +287,68 @@ public class BossController : MonoBehaviour
     private void ApplyPhaseWeights()
     {
         weights.Clear();
-
-        // 기본값 (Phase 1 / 분석 단계)
         lowTailBonusCurrent = lowHoverTailBonus;
         repositionChanceCurrent = repositionChance;
+        strategyMovementSpeedMultiplier = 1f;
+        movementSpeedMultiplier = strategyMovementSpeedMultiplier;
 
         if (Phase <= 1)
         {
-            weights[BossAttack.PlasmaBreath] = 3;
-            weights[BossAttack.Descend] = 3;
-            weights[BossAttack.TailSweep] = 4;
-            weights[BossAttack.Ascend] = 1;
-
-            Debug.Log("[Boss] Phase 1 가중치 (균등 · 분석 중)");
+            SetWeights(18, 14, 12, 8, 14, 12, 14);
+            Debug.Log("[Boss] Phase 1 가중치 (분석 중 · 균형 패턴)");
             return;
         }
 
-        // ───────── Phase 2 이상 : 적응 ─────────
         switch (adaptedStyle)
         {
             case DominantStyle.Melee:
-                // 근접형 카운터 : 붙기 어렵게 만들되 완전히 막지는 않음
-                weights[BossAttack.PlasmaBreath] = 4;   // 원거리 견제 증가
-                weights[BossAttack.TailSweep] = 6;   // 근접 응징
-                weights[BossAttack.Ascend] = 4;   // 붙으면 상공으로 도망
-                weights[BossAttack.Descend] = 1;   // 근접 기회는 남겨둠 (0 아님)
-
-                lowTailBonusCurrent = 2f;
-                repositionChanceCurrent = 0.7f;         // 자주 자리를 옮김
-
-                Debug.Log("[Boss] Phase 2 가중치 → vs MELEE (넉백·이탈 중심)");
+                // 붙어서 때리는 플레이: 근접 휩쓸기, 장판, 이탈을 늘립니다.
+                SetWeights(14, 24, 8, 18, 24, 5, 12);
+                lowTailBonusCurrent = 2.2f;
+                repositionChanceCurrent = 0.78f;
+                Debug.Log("[Boss] Counter → MELEE (이탈·근접 장판 중심)");
                 break;
 
             case DominantStyle.Ranged:
-                // 원거리형 카운터 : 거리를 못 벌리게 계속 따라붙음
-                weights[BossAttack.Descend] = 5;   // 플레이어 위로 강하
-                weights[BossAttack.TailSweep] = 2;
-                weights[BossAttack.PlasmaBreath] = 2;   // 원거리 공방은 줄임
-                weights[BossAttack.Ascend] = 1;   // 거의 안 올라감 (0 아님)
+                // 멀리서 W를 쓰면 차지/강하로 안전 거리를 줄입니다.
+                SetWeights(8, 10, 12, 6, 16, 30, 10);
+                lowTailBonusCurrent = 1.15f;
+                repositionChanceCurrent = 0.7f;
+                strategyMovementSpeedMultiplier = 1.25f;
+                movementSpeedMultiplier = strategyMovementSpeedMultiplier;
+                Debug.Log("[Boss] Counter → RANGED (추격·Charge 중심)");
+                break;
 
-                lowTailBonusCurrent = 1.2f;
-                repositionChanceCurrent = 0.25f;        // 자리를 잘 안 뜸
+            case DominantStyle.Evasive:
+                // Dash 회피 습관: 지연 장판과 지속 탄막으로 타이밍을 섞습니다.
+                SetWeights(16, 10, 8, 10, 28, 8, 16);
+                repositionChanceCurrent = 0.58f;
+                Debug.Log("[Boss] Counter → EVASIVE (Delayed Strike·Wide Attack 중심)");
+                break;
 
-                Debug.Log("[Boss] Phase 2 가중치 → vs RANGED (추격·접근 중심)");
+            case DominantStyle.Airborne:
+                // 자주 뛰는 플레이: 상단을 넓게 덮는 브레스/탄막을 선호합니다.
+                SetWeights(24, 8, 8, 10, 12, 8, 22);
+                repositionChanceCurrent = 0.62f;
+                Debug.Log("[Boss] Counter → AIRBORNE (상공 견제·탄막 중심)");
                 break;
 
             default:
-                // 판정 실패 시 Phase 1과 동일
-                weights[BossAttack.PlasmaBreath] = 3;
-                weights[BossAttack.Descend] = 3;
-                weights[BossAttack.TailSweep] = 4;
-                weights[BossAttack.Ascend] = 1;
-
-                Debug.LogWarning("[Boss] DominantStyle이 None입니다. 기본 가중치 사용");
+                SetWeights(16, 14, 12, 10, 14, 12, 16);
+                Debug.Log("[Boss] Counter → BALANCED (혼합 전략)");
                 break;
         }
+    }
+
+    private void SetWeights(int breath, int tail, int descend, int ascend, int groundAoE, int charge, int barrage)
+    {
+        weights[BossAttack.PlasmaBreath] = breath;
+        weights[BossAttack.TailSweep] = tail;
+        weights[BossAttack.Descend] = descend;
+        weights[BossAttack.Ascend] = ascend;
+        weights[BossAttack.ClawSlam] = groundAoE;
+        weights[BossAttack.SkyDive] = charge;
+        weights[BossAttack.Barrage] = barrage;
     }
 
     /// <summary>현재 위치 상태에서 사용 가능한 공격인지</summary>
@@ -335,7 +360,10 @@ public class BossController : MonoBehaviour
             case BossAttack.Descend: return !IsLowHovering;
             case BossAttack.TailSweep: return IsLowHovering;
             case BossAttack.Ascend: return IsLowHovering;
-            default: return false;   // 확장 공격은 아직 미구현
+            case BossAttack.ClawSlam: return true;
+            case BossAttack.SkyDive: return !IsLowHovering;
+            case BossAttack.Barrage: return true;
+            default: return false;
         }
     }
 
@@ -425,6 +453,15 @@ public class BossController : MonoBehaviour
         {
             MoveToNearestSlot();        // 원거리 플레이어에게 접근
         }
+        else if (Phase >= 2 && adaptedStyle == DominantStyle.Evasive)
+        {
+            MoveToPlayerX();            // Dash 직후 위치를 다시 압박
+        }
+        else if (Phase >= 2 && adaptedStyle == DominantStyle.Airborne)
+        {
+            GoHigh();
+            MoveToNearestSlot();        // 상공에서도 플레이어의 수평 위치를 덮음
+        }
         else
         {
             int next = currentSlot;
@@ -472,6 +509,27 @@ public class BossController : MonoBehaviour
                 subRoutine = StartCoroutine(Atk_Ascend());
                 yield return subRoutine;
                 subRoutine = null;
+                break;
+
+            case BossAttack.ClawSlam:
+                subRoutine = StartCoroutine(Atk_ClawSlam());
+                yield return subRoutine;
+                subRoutine = null;
+                if (IsLowHovering) lowHoverAttackCount++;
+                break;
+
+            case BossAttack.SkyDive:
+                subRoutine = StartCoroutine(Atk_SkyDive());
+                yield return subRoutine;
+                subRoutine = null;
+                lowHoverAttackCount++;
+                break;
+
+            case BossAttack.Barrage:
+                subRoutine = StartCoroutine(Atk_Barrage());
+                yield return subRoutine;
+                subRoutine = null;
+                if (IsLowHovering) lowHoverAttackCount++;
                 break;
 
             default:
@@ -552,9 +610,100 @@ public class BossController : MonoBehaviour
 
     private void PlaceTailHitbox()
     {
+        PlaceTailHitboxAt(transform.position.x, tailWidth);
+    }
+
+    private void PlaceTailHitboxAt(float centerX, float width)
+    {
         if (tailHitbox == null) return;
-        tailHitbox.transform.position =
-            new Vector3(transform.position.x, groundSurfaceY + tailHeightAboveGround, 0f);
+        tailHitbox.transform.position = new Vector3(centerX, groundSurfaceY + tailHeightAboveGround, 0f);
+        Vector3 scale = tailHitboxBaseScale;
+        scale.x *= Mathf.Max(0.25f, width / Mathf.Max(0.1f, tailWidth));
+        tailHitbox.transform.localScale = scale;
+    }
+
+    private IEnumerator ActivateGroundHitbox(float centerX, float width, float duration)
+    {
+        if (tailHitbox == null)
+        {
+            yield return new WaitForSeconds(duration);
+            yield break;
+        }
+
+        PlaceTailHitboxAt(centerX, width);
+        tailHitbox.SetActive(true);
+        yield return new WaitForSeconds(duration);
+        tailHitbox.SetActive(false);
+        tailHitbox.transform.localScale = tailHitboxBaseScale;
+    }
+
+    // 지연된 플레이어 위치에 작은 장판을 찍는 공격입니다. Dash 습관을 견제합니다.
+    private IEnumerator Atk_ClawSlam()
+    {
+        float strikeX = player == null ? transform.position.x : Mathf.Clamp(player.position.x, arenaMinX, arenaMaxX);
+        ShowGroundWarningAt(strikeX, groundAoEWidth + warningPadding);
+
+        bool ok = true;
+        yield return StartCoroutine(Telegraph(telegraphTime + 0.2f, r => ok = r));
+        HideGroundWarning();
+        if (!ok) yield break;
+
+        State = BossState.Attack;
+        yield return StartCoroutine(ActivateGroundHitbox(strikeX, groundAoEWidth, groundAoEActiveTime));
+    }
+
+    // 원거리 플레이어를 향해 빠르게 저공으로 파고드는 Charge입니다.
+    private IEnumerator Atk_SkyDive()
+    {
+        float chargeX = player == null ? transform.position.x : Mathf.Clamp(player.position.x, arenaMinX, arenaMaxX);
+        ShowGroundWarningAt(chargeX, groundAoEWidth + warningPadding);
+
+        bool ok = true;
+        yield return StartCoroutine(Telegraph(telegraphTime, r => ok = r));
+        HideGroundWarning();
+        if (!ok) yield break;
+
+        State = BossState.Attack;
+        targetX = chargeX;
+        GoLow();
+        movementSpeedMultiplier = chargeSpeedMultiplier;
+
+        float timeout = verticalMoveTimeout;
+        while ((!ArrivedAtTargetX || !ArrivedAtTargetY) && timeout > 0f && staggerLeft <= 0f)
+        {
+            timeout -= Time.deltaTime;
+            yield return null;
+        }
+        movementSpeedMultiplier = strategyMovementSpeedMultiplier;
+        if (staggerLeft > 0f) yield break;
+        yield return StartCoroutine(ActivateGroundHitbox(chargeX, groundAoEWidth * 0.8f, groundAoEActiveTime));
+
+        lowHoverAttackCount = 0;
+        lowHoverTime = 0f;
+        lowHoverTimerActive = true;
+    }
+
+    // 넓은 브레스와 달리 같은 플레이어를 여러 번 추적하는 탄막입니다.
+    private IEnumerator Atk_Barrage()
+    {
+        ShowGroundWarningAt(player == null ? transform.position.x : player.position.x, 3.5f + warningPadding);
+        bool ok = true;
+        yield return StartCoroutine(Telegraph(telegraphTime, r => ok = r));
+        HideGroundWarning();
+        if (!ok) yield break;
+
+        State = BossState.Attack;
+        for (int i = 0; i < barrageShots; i++)
+        {
+            if (staggerLeft > 0f) break;
+            if (breathPrefab != null && firePoint != null)
+            {
+                GameObject go = Instantiate(breathPrefab, firePoint.position, Quaternion.identity);
+                Projectile projectile = go.GetComponent<Projectile>();
+                if (projectile != null) projectile.Launch(ComputeAimDirection());
+            }
+            yield return new WaitForSeconds(barrageShotInterval);
+        }
     }
 
     // ───────────────── 공격 3 : Descend (원거리 카운터 + 근접 기회) ─────────────────
@@ -758,7 +907,12 @@ public class BossController : MonoBehaviour
     private void ClearAttackVisuals()
     {
         if (telegraphMark != null) telegraphMark.SetActive(false);
-        if (tailHitbox != null) tailHitbox.SetActive(false);
+        if (tailHitbox != null)
+        {
+            tailHitbox.SetActive(false);
+            tailHitbox.transform.localScale = tailHitboxBaseScale;
+        }
+        movementSpeedMultiplier = strategyMovementSpeedMultiplier;
         HideGroundWarning();
         SetVisualColor(visualBaseColor);
     }
@@ -766,17 +920,22 @@ public class BossController : MonoBehaviour
     // ═════════════════ 10단계 ④ : 페이즈 전환 ═════════════════
     private void CheckPhaseTransition()
     {
-        if (phase2Triggered || phaseTransitionRunning) return;
+        if (phaseTransitionRunning) return;
         if (health == null || health.IsDead) return;
 
-        if (health.Normalized <= phase2Threshold)
+        if (!phase2Triggered && health.Normalized <= phase2Threshold)
         {
             phase2Triggered = true;
-            transitionRoutine = StartCoroutine(Phase2TransitionRoutine());
+            transitionRoutine = StartCoroutine(PhaseTransitionRoutine(2));
+        }
+        else if (phase2Triggered && !phase3Triggered && health.Normalized <= phase3Threshold)
+        {
+            phase3Triggered = true;
+            transitionRoutine = StartCoroutine(PhaseTransitionRoutine(3));
         }
     }
 
-    private IEnumerator Phase2TransitionRoutine()
+    private IEnumerator PhaseTransitionRoutine(int nextPhase)
     {
         phaseTransitionRunning = true;
 
@@ -789,12 +948,22 @@ public class BossController : MonoBehaviour
         State = BossState.Idle;
         staggerLeft = 0f;
 
-        Debug.Log("[Boss] ===== PHASE 2 진입 =====");
+        Debug.Log($"[Boss] ===== PHASE {nextPhase} 분석 시작 =====");
+
+        PlayerCombatTracker tracker = PlayerCombatTracker.Instance;
+        CombatAnalysis analysis = new CombatAnalysis { style = DominantStyle.Balanced };
+        DominantStyle previousStyle = adaptedStyle;
+        if (tracker != null) analysis = tracker.FinishWindow();
+
+        // 재분석은 충분히 뚜렷한 변화만 새 전략으로 인정해 작은 수치 변화로 흔들리지 않습니다.
+        if (nextPhase >= 3 && previousStyle != DominantStyle.None &&
+            (analysis.style == DominantStyle.Balanced || analysis.confidence < 0.25f))
+            analysis.style = previousStyle;
 
         // ── 3) 분석 연출 (Time.timeScale = 0) ──
-        if (analysisUI != null && PlayerCombatTracker.Instance != null)
+        if (analysisUI != null && tracker != null)
         {
-            yield return StartCoroutine(analysisUI.PlayAnalysis(PlayerCombatTracker.Instance));
+            yield return StartCoroutine(analysisUI.PlayAnalysis(tracker, analysis, previousStyle));
         }
         else
         {
@@ -809,21 +978,19 @@ public class BossController : MonoBehaviour
             Time.timeScale = 1f;
         }
 
-        // ── 5) 페이즈 갱신 ──
-        // ★ 11단계 : 확정된 스타일을 보스에 반영
-        if (PlayerCombatTracker.Instance != null)
-            adaptedStyle = PlayerCombatTracker.Instance.LockedStyle;
-
-        Phase = 2;
+        // ── 5) 현재 윈도우의 결과를 Counter Strategy로 반영 ──
+        adaptedStyle = analysis.style;
+        Phase = nextPhase;
         ApplyPhaseWeights();
         ResetStats();   // Phase 2 통계를 따로 집계
 
         if (phaseLabel != null)
         {
-            phaseLabel.text = adaptedStyle == DominantStyle.Melee
-                ? "PHASE 2 - COUNTER: CLOSE RANGE"
-                : "PHASE 2 - COUNTER: LONG RANGE";
+            phaseLabel.text = $"PHASE {Phase} - COUNTER: {adaptedStyle.ToString().ToUpperInvariant()}";
         }
+
+        // Phase 2 이후에는 새 행동을 별도 윈도우로 모아 Phase 3에서 다시 읽습니다.
+        if (nextPhase < 3 && tracker != null) tracker.BeginNewWindow();
 
         phaseTransitionRunning = false;
         transitionRoutine = null;
@@ -831,7 +998,7 @@ public class BossController : MonoBehaviour
         // ── 6) AI 루프 재시작 ──
         aiRoutine = StartCoroutine(AIRoutine());
 
-        Debug.Log("[Boss] Phase 2 AI 재시작");
+        Debug.Log($"[Boss] Phase {Phase} AI 재시작 → {adaptedStyle}");
     }
 
     // ───────────────────── 이동 헬퍼 ─────────────────────
@@ -942,6 +1109,32 @@ public class BossController : MonoBehaviour
         // P : 패턴 사용 통계 출력 (적응 검증용)
         if (Input.GetKeyDown(KeyCode.P)) DebugPrintStats();
     }
+
+#if UNITY_EDITOR
+    // 1~5는 현재 Phase와 무관하게 Counter Strategy를 즉시 바꿔 회의 중 체감 확인에 사용합니다.
+    private void DebugStyleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) ApplyDebugStyle(DominantStyle.Ranged);
+        if (Input.GetKeyDown(KeyCode.Alpha2)) ApplyDebugStyle(DominantStyle.Melee);
+        if (Input.GetKeyDown(KeyCode.Alpha3)) ApplyDebugStyle(DominantStyle.Evasive);
+        if (Input.GetKeyDown(KeyCode.Alpha4)) ApplyDebugStyle(DominantStyle.Balanced);
+        if (Input.GetKeyDown(KeyCode.Alpha5)) ApplyDebugStyle(DominantStyle.Airborne);
+    }
+
+    private void ApplyDebugStyle(DominantStyle style)
+    {
+        if (State == BossState.Dead) return;
+
+        adaptedStyle = style;
+        Phase = Mathf.Max(2, Phase);
+        phase2Triggered = true;
+        ApplyPhaseWeights();
+        if (phaseLabel != null)
+            phaseLabel.text = $"DEBUG COUNTER: {style.ToString().ToUpperInvariant()}";
+
+        Debug.Log($"[Boss DEBUG] Style forced → {style}");
+    }
+#endif
 
     // ── 패턴 사용 통계 (적응 검증용) ──
     private readonly Dictionary<BossAttack, int> useCount = new Dictionary<BossAttack, int>();

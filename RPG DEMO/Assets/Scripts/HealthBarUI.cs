@@ -33,6 +33,14 @@ public class HealthBarUI : MonoBehaviour
         Apply();
     }
 
+    /// <summary>런타임 스테이지가 기존 HP 바 로직을 재사용해 연결할 때 사용합니다.</summary>
+    public void Configure(Health newTarget, Image newFillImage, TMP_Text newLabel = null)
+    {
+        fillImage = newFillImage;
+        label = newLabel;
+        SetTarget(newTarget);
+    }
+
     private void Start()
     {
         displayed = target != null ? target.Normalized : 0f;

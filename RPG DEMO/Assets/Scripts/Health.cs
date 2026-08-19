@@ -3,44 +3,49 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// í”Œë ˆì´ì–´ / ì¡ëª¹ / ë³´ìŠ¤ê°€ ê³µìš©ìœ¼ë¡œ ì‚¬ìš©í•˜ëŠ” ì²´ë ¥ ì»´í¬ë„ŒíŠ¸.
+/// ÇÃ·¹ÀÌ¾î / Àâ¸÷ / º¸½º°¡ °ø¿ëÀ¸·Î »ç¿ëÇÏ´Â Ã¼·Â ÄÄÆ÷³ÍÆ®.
 /// </summary>
 public class Health : MonoBehaviour
 {
-    [Header("â”€â”€ HP â”€â”€")]
+    [Header("¦¡¦¡ HP ¦¡¦¡")]
     [SerializeField] private float maxHP = 100f;
-    [Tooltip("í”¼ê²© í›„ ë¬´ì  ì‹œê°„. ë³´ìŠ¤/ì¡ëª¹ì€ 0ìœ¼ë¡œ ë‘ì„¸ìš”")]
+    [Tooltip("ÇÇ°İ ÈÄ ¹«Àû ½Ã°£. º¸½º/Àâ¸÷Àº 0À¸·Î µÎ¼¼¿ä")]
     [SerializeField] private float invincibleTime = 0.6f;
 
-    [Header("â”€â”€ í”¼ê²© ì—°ì¶œ â”€â”€")]
+    [Header("¦¡¦¡ ÇÇ°İ ¿¬Ãâ ¦¡¦¡")]
     [SerializeField] private bool flashOnDamage = true;
     [SerializeField] private Color flashColor = new Color(1f, 0.3f, 0.3f, 1f);
     [SerializeField] private float flashInterval = 0.08f;
 
-    [Header("â”€â”€ ì‚¬ë§ ì²˜ë¦¬ â”€â”€")]
-    [Tooltip("í”Œë ˆì´ì–´ëŠ” ì²´í¬ í•´ì œ, ì¡ëª¹ì€ ì²´í¬")]
+    [Header("¦¡¦¡ »ç¸Á Ã³¸® ¦¡¦¡")]
+    [Tooltip("ÇÃ·¹ÀÌ¾î´Â Ã¼Å© ÇØÁ¦, Àâ¸÷Àº Ã¼Å©")]
     [SerializeField] private bool destroyOnDeath = true;
     [SerializeField] private float destroyDelay = 0f;
-    [Tooltip("ì‚¬ë§ ì‹œ êº¼ë²„ë¦´ ì»´í¬ë„ŒíŠ¸ (ì˜ˆ: PlayerController, EnemyController)")]
+    [Tooltip("»ç¸Á ½Ã ²¨¹ö¸± ÄÄÆ÷³ÍÆ® (¿¹: PlayerController, EnemyController)")]
     [SerializeField] private Behaviour[] disableOnDeath;
-    [Tooltip("ì‚¬ë§ ì‹œ Rigidbody2D ì†ë„ë¥¼ 0ìœ¼ë¡œ ë§Œë“¤ì–´ ë¯¸ë„ëŸ¬ì§ì„ ë§‰ìŠµë‹ˆë‹¤")]
+    [Tooltip("»ç¸Á ½Ã Rigidbody2D ¼Óµµ¸¦ 0À¸·Î ¸¸µé¾î ¹Ì²ô·¯ÁüÀ» ¸·½À´Ï´Ù")]
     [SerializeField] private bool stopMovementOnDeath = true;
-    [Tooltip("ì‚¬ë§ í›„ ì´ í”„ë ˆì„ ìˆ˜ë§Œí¼ ì†ë„ë¥¼ ê³„ì† 0ìœ¼ë¡œ ìœ ì§€í•©ë‹ˆë‹¤ (ì”ì—¬ FixedUpdate ë°©ì–´)")]
+    [Tooltip("»ç¸Á ÈÄ ÀÌ ÇÁ·¹ÀÓ ¼ö¸¸Å­ ¼Óµµ¸¦ °è¼Ó 0À¸·Î À¯ÁöÇÕ´Ï´Ù (ÀÜ¿© FixedUpdate ¹æ¾î)")]
     [SerializeField] private int stopMovementFrames = 6;
-    [Tooltip("ì‚¬ë§ ì‹œ Rigidbody2D Constraintsë¡œ X ì´ë™ì„ ì™„ì „íˆ ì ê¸‰ë‹ˆë‹¤")]
+    [Tooltip("»ç¸Á ½Ã Rigidbody2D Constraints·Î X ÀÌµ¿À» ¿ÏÀüÈ÷ Àá±Ş´Ï´Ù")]
     [SerializeField] private bool freezePositionOnDeath = true;
 
-    [Header("â”€â”€ íŒ¨ë§ ì—°ë™ (í”Œë ˆì´ì–´ë§Œ ì²´í¬) â”€â”€")]
+    [Header("¦¡¦¡ ÆĞ¸µ ¿¬µ¿ (ÇÃ·¹ÀÌ¾î¸¸ Ã¼Å©) ¦¡¦¡")]
     [SerializeField] private bool usePlayerParry = false;
 
-    // â”€â”€ ì™¸ë¶€ì—ì„œ ì½ëŠ” ê°’ â”€â”€
+    [Header("¦¡¦¡ µğ¹ö±× (Å×½ºÆ®¿ë, ³ªÁß¿¡ ÇØÁ¦) ¦¡¦¡")]
+    [Tooltip("Ã¼Å©ÇÏ¸é H Å°·Î ÀÚ±â ÀÚ½Å¿¡°Ô µ¥¹ÌÁö")]
+    [SerializeField] private bool debugDamageKey = false;
+    [SerializeField] private float debugDamageAmount = 10f;
+
+    // ¦¡¦¡ ¿ÜºÎ¿¡¼­ ÀĞ´Â °ª ¦¡¦¡
     public float MaxHP => maxHP;
     public float CurrentHP { get; private set; }
     public float Normalized => maxHP <= 0f ? 0f : Mathf.Clamp01(CurrentHP / maxHP);
     public bool IsDead { get; private set; }
     public bool IsInvincible => invincibleLeft > 0f;
 
-    // â”€â”€ Inspectorì—ì„œ ì—°ê²° ê°€ëŠ¥í•œ ì´ë²¤íŠ¸ â”€â”€
+    // ¦¡¦¡ Inspector¿¡¼­ ¿¬°á °¡´ÉÇÑ ÀÌº¥Æ® ¦¡¦¡
     public UnityEvent onDamaged;
     public UnityEvent onParrySuccess;
     public UnityEvent onDeath;
@@ -50,7 +55,7 @@ public class Health : MonoBehaviour
     private bool flashOn;
     private SpriteRenderer[] renderers;
     private Color[] baseColors;
-    private PlayerController player;   // íŒ¨ë§ íŒì •ìš© (ì—†ìœ¼ë©´ null)
+    private PlayerController player;   // ÆĞ¸µ ÆÇÁ¤¿ë (¾øÀ¸¸é null)
     private Rigidbody2D rb;
 
     private void Awake()
@@ -68,6 +73,9 @@ public class Health : MonoBehaviour
 
     private void Update()
     {
+        if (debugDamageKey && Input.GetKeyDown(KeyCode.H))
+            TakeDamage(debugDamageAmount, true);   // µğ¹ö±×´Â ¹«Àû ¹«½Ã
+
         if (invincibleLeft > 0f)
         {
             invincibleLeft -= Time.deltaTime;
@@ -76,25 +84,25 @@ public class Health : MonoBehaviour
         }
     }
 
-    /// <summary>ë°ë¯¸ì§€ë¥¼ ì…í™ë‹ˆë‹¤. íŒ¨ë§/ë¬´ì  ì¤‘ì´ë©´ ë¬´ì‹œë©ë‹ˆë‹¤.</summary>
+    /// <summary>µ¥¹ÌÁö¸¦ ÀÔÈü´Ï´Ù. ÆĞ¸µ/¹«Àû ÁßÀÌ¸é ¹«½ÃµË´Ï´Ù.</summary>
     public void TakeDamage(float amount, bool ignoreInvincible = false)
     {
         if (IsDead || amount <= 0f) return;
 
-        // 1) íŒ¨ë§ ì„±ê³µ íŒì • (í”Œë ˆì´ì–´ ì „ìš©)
+        // 1) ÆĞ¸µ ¼º°ø ÆÇÁ¤ (ÇÃ·¹ÀÌ¾î Àü¿ë)
         if (player != null && player.IsParrying)
         {
-            Debug.Log($"[{name}] PARRY SUCCESS! ë°ë¯¸ì§€ {amount} ë¬´íš¨í™”");
+            Debug.Log($"[{name}] PARRY SUCCESS! µ¥¹ÌÁö {amount} ¹«È¿È­");
             onParrySuccess?.Invoke();
             return;
         }
 
-        // 2) ë¬´ì  íŒì •
+        // 2) ¹«Àû ÆÇÁ¤
         if (!ignoreInvincible && invincibleLeft > 0f) return;
 
-        // 3) ì‹¤ì œ ê°ì†Œ
+        // 3) ½ÇÁ¦ °¨¼Ò
         CurrentHP = Mathf.Max(0f, CurrentHP - amount);
-        Debug.Log($"[{name}] -{amount}  â†’  HP {CurrentHP}/{maxHP}");
+        Debug.Log($"[{name}] -{amount}  ¡æ  HP {CurrentHP}/{maxHP}");
         onDamaged?.Invoke();
 
         if (CurrentHP <= 0f) { Die(); return; }
@@ -112,26 +120,26 @@ public class Health : MonoBehaviour
         CurrentHP = Mathf.Min(maxHP, CurrentHP + amount);
     }
 
-    /// <summary>ë³´ìŠ¤ í˜ì´ì¦ˆ ì „í™˜ ë“±ì—ì„œ ê°•ì œë¡œ HPë¥¼ ì„¸íŒ…í•  ë•Œ ì‚¬ìš©</summary>
+    /// <summary>º¸½º ÆäÀÌÁî ÀüÈ¯ µî¿¡¼­ °­Á¦·Î HP¸¦ ¼¼ÆÃÇÒ ¶§ »ç¿ë</summary>
     public void SetHP(float value)
     {
         CurrentHP = Mathf.Clamp(value, 0f, maxHP);
     }
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì‚¬ë§ ì²˜ë¦¬ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ »ç¸Á Ã³¸® ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     private void Die()
     {
         IsDead = true;
         ResetColor();
         Debug.Log($"[{name}] DEAD");
 
-        // â˜… ìˆœì„œ ì¤‘ìš” : ì´ë™ ìŠ¤í¬ë¦½íŠ¸ë¥¼ ë¨¼ì € êº¼ì•¼ ì†ë„ë¥¼ ë˜ì‚´ë¦¬ì§€ ëª»í•©ë‹ˆë‹¤
+        // ¡Ú ¼ø¼­ Áß¿ä : ÀÌµ¿ ½ºÅ©¸³Æ®¸¦ ¸ÕÀú ²¨¾ß ¼Óµµ¸¦ µÇ»ì¸®Áö ¸øÇÕ´Ï´Ù
         if (disableOnDeath != null)
             foreach (var b in disableOnDeath) if (b != null) b.enabled = false;
 
         StopMovementNow();
 
-        // ì´ë²ˆ í”„ë ˆì„ì— ì´ë¯¸ íì‰ëœ FixedUpdateê°€ ì†ë„ë¥¼ ë˜ì‚´ë¦¬ëŠ” ê²ƒì„ ë§‰ìŠµë‹ˆë‹¤
+        // ÀÌ¹ø ÇÁ·¹ÀÓ¿¡ ÀÌ¹Ì Å¥À×µÈ FixedUpdate°¡ ¼Óµµ¸¦ µÇ»ì¸®´Â °ÍÀ» ¸·½À´Ï´Ù
         if (stopMovementOnDeath && isActiveAndEnabled)
             StartCoroutine(HoldStopRoutine());
 
@@ -140,7 +148,7 @@ public class Health : MonoBehaviour
         if (destroyOnDeath) Destroy(gameObject, destroyDelay);
     }
 
-    /// <summary>ì¦‰ì‹œ ì†ë„ë¥¼ 0ìœ¼ë¡œ ë§Œë“¤ê³ , ì˜µì…˜ì— ë”°ë¼ ìœ„ì¹˜ë¥¼ ì ê¸‰ë‹ˆë‹¤.</summary>
+    /// <summary>Áï½Ã ¼Óµµ¸¦ 0À¸·Î ¸¸µé°í, ¿É¼Ç¿¡ µû¶ó À§Ä¡¸¦ Àá±Ş´Ï´Ù.</summary>
     private void StopMovementNow()
     {
         if (!stopMovementOnDeath || rb == null) return;
@@ -151,13 +159,13 @@ public class Health : MonoBehaviour
 
         if (freezePositionOnDeath && rb.bodyType == RigidbodyType2D.Dynamic)
         {
-            // XëŠ” ì ê·¸ê³  Y(ì¤‘ë ¥ ë‚™í•˜)ëŠ” ë‚¨ê²¨ ê³µì¤‘ì—ì„œ ì£½ì–´ë„ ì°©ì§€í•˜ë„ë¡
+            // X´Â Àá±×°í Y(Áß·Â ³«ÇÏ)´Â ³²°Ü °øÁß¿¡¼­ Á×¾îµµ ÂøÁöÇÏµµ·Ï
             rb.constraints = RigidbodyConstraints2D.FreezeRotation
                            | RigidbodyConstraints2D.FreezePositionX;
         }
     }
 
-    /// <summary>ì‚¬ë§ ì§í›„ ëª‡ í”„ë ˆì„ ë™ì•ˆ ì†ë„ë¥¼ ê³„ì† 0ìœ¼ë¡œ ìœ ì§€</summary>
+    /// <summary>»ç¸Á Á÷ÈÄ ¸î ÇÁ·¹ÀÓ µ¿¾È ¼Óµµ¸¦ °è¼Ó 0À¸·Î À¯Áö</summary>
     private IEnumerator HoldStopRoutine()
     {
         int frames = Mathf.Max(1, stopMovementFrames);
@@ -168,13 +176,13 @@ public class Health : MonoBehaviour
             if (rb == null) yield break;
             if (rb.bodyType == RigidbodyType2D.Static) yield break;
 
-            // YëŠ” ë‚¨ê²¨ ì¤‘ë ¥ ë‚™í•˜ëŠ” ìœ ì§€, Xë§Œ í™•ì‹¤íˆ ì œê±°
+            // Y´Â ³²°Ü Áß·Â ³«ÇÏ´Â À¯Áö, X¸¸ È®½ÇÈ÷ Á¦°Å
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             rb.angularVelocity = 0f;
         }
     }
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ê¹œë¹¡ì„ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ±ôºıÀÓ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     private void HandleFlash()
     {
         if (!flashOnDamage || renderers.Length == 0) return;

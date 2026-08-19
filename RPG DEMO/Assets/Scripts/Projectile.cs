@@ -111,6 +111,10 @@ public class Projectile : MonoBehaviour
 
         hp.TakeDamage(damage);
 
+        // Boss에 적중한 Player 투사체만 W 적중 데이터로 기록됩니다.
+        if (hp.CompareTag("Boss") && PlayerCombatTracker.Instance != null)
+            PlayerCombatTracker.Instance.RecordBossHit(ActionType.Ranged);
+
         // 3) 넉백 — 수직 성분은 쓰지 않고 수평 + 위로만
         if (knockbackForce > 0f || knockbackUp > 0f)
         {

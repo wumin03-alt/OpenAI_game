@@ -284,9 +284,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 85244624}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ace9690464e14ba2b77784dfaf283e45, type: 3}
+  m_Script: {fileID: 11500000, guid: a5d9fb327c915854aa4660ee12696808, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Game.SceneManagement.FallRestartZone
+  m_EditorClassIdentifier: Assembly-CSharp::DamageZone
+  damage: 999
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 384
+  mode: 1
+  repeatInterval: 0.5
+  knockbackForce: 0
+  knockbackUp: 2
+  onHit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!61 &85244626
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1913,11 +1924,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageExit
   nextSceneName: BossArena
   delay: 0.4
-  requireAllEnemiesDead: 1
+  requireAllEnemiesDead: 0
   enterMessage: {fileID: 0}
   blockedMessage: {fileID: 0}
-  clearGuideMessage: "\uC624\uB978\uCABD\uC73C\uB85C \uC774\uB3D9\uD558\uC5EC \uB2E4\uC74C \uC2A4\uD14C\uC774\uC9C0\uB85C \uC774\uB3D9\uD558\uC2DC\uC624."
-  enemyCheckInterval: 0.25
 --- !u!61 &1997453011
 BoxCollider2D:
   m_ObjectHideFlags: 0

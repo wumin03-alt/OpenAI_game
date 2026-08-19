@@ -91,7 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5d9fb327c915854aa4660ee12696808, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageZone
-  damage: 10
+  damage: 16
   targetLayers:
     serializedVersion: 2
     m_Bits: 256
@@ -116,7 +116,6 @@ GameObject:
   - component: {fileID: 3714572559608300473}
   - component: {fileID: 2261863406042718281}
   - component: {fileID: 1550754604106996124}
-  - component: {fileID: 8124491738491027311}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -274,6 +273,8 @@ MonoBehaviour:
   stopMovementFrames: 6
   freezePositionOnDeath: 1
   usePlayerParry: 1
+  debugDamageKey: 1
+  debugDamageAmount: 10
   onDamaged:
     m_PersistentCalls:
       m_Calls: []
@@ -311,24 +312,6 @@ MonoBehaviour:
   minSampleCount: 4
   debugReportKey: 1
   logEveryAction: 0
---- !u!114 &8124491738491027311
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3058643352853835719}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0be2059c019461cbb1128d8231cc399, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::Game.Core.PlayerRespawn
-  respawnDelay: 1.4
-  debrisCount: 12
-  debrisLifetime: 1.2
-  explosionForce: 7
-  upwardForce: 4
-  debrisGravity: 2.5
 --- !u!1 &3993095235277698760
 GameObject:
   m_ObjectHideFlags: 0
@@ -340,7 +323,7 @@ GameObject:
   - component: {fileID: 4188887094865168853}
   - component: {fileID: 1742894634528590551}
   m_Layer: 7
-  m_Name: Visual
+  m_Name: VIsual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
