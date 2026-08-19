@@ -8,8 +8,9 @@ namespace Game.Save
     {
         public int highestUnlockedStage = 1;
         public float masterVolume = 1f;
-        public float musicVolume = 1f;
-        public float sfxVolume = 1f;
+        public float musicVolume = 0.2f;
+        public float sfxVolume = 0.15f;
+        public int audioSettingsVersion = 2;
     }
 
     /// <summary>초기 버전의 진행도와 오디오 설정 저장소입니다.</summary>
@@ -40,6 +41,25 @@ namespace Game.Save
 
             string json = PlayerPrefs.GetString(SaveKey);
             Data = JsonUtility.FromJson<SaveData>(json) ?? new SaveData();
+            bool migrated = false;
+
+            // 기존 저장 데이터에는 버전 필드가 없으므로 UI/SFX 100% 값을 새 기본값으로 한 번만 변경합니다.
+            if (Data.audioSettingsVersion < 1)
+            {
+                Data.sfxVolume = 0.15f;
+                Data.audioSettingsVersion = 1;
+                migrated = true;
+            }
+
+            // 기존 BGM 100% 저장값을 새 기본값인 20%로 한 번만 낮춥니다.
+            if (Data.audioSettingsVersion < 2)
+            {
+                Data.musicVolume = 0.2f;
+                Data.audioSettingsVersion = 2;
+                migrated = true;
+            }
+
+            if (migrated) Save();
         }
 
         public void Save()

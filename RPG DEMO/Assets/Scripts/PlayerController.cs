@@ -1,78 +1,79 @@
 using System.Collections;
+using Game.Audio;
 using UnityEngine;
 
 /// <summary>
-/// ÇÃ·¹ÀÌ¾î ÀÌµ¿ / Á¡ÇÁ / ¾şµå¸®±â / ´ë½Ã / ÆĞ¸µ / ±Ù°Å¸®(Q) / ¿ø°Å¸®(W).
-/// Á¶ÀÛ: ¡ç ¡æ ÀÌµ¿, ¡è Á¡ÇÁ, ¡é ¾şµå¸®±â, Q ±Ù°Å¸®, W ¿ø°Å¸®, E ÆĞ¸µ, R ´ë½Ã
+/// í”Œë ˆì´ì–´ ì´ë™ / ì í”„ / ì—ë“œë¦¬ê¸° / ëŒ€ì‹œ / íŒ¨ë§ / ê·¼ê±°ë¦¬(Q) / ì›ê±°ë¦¬(W).
+/// ì¡°ì‘: â† â†’ ì´ë™, â†‘ ì í”„, â†“ ì—ë“œë¦¬ê¸°, Q ê·¼ê±°ë¦¬, W ì›ê±°ë¦¬, E íŒ¨ë§, R ëŒ€ì‹œ
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CapsuleCollider2D))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("¦¡¦¡ ÀÌµ¿ ¦¡¦¡")]
+    [Header("â”€â”€ ì´ë™ â”€â”€")]
     [SerializeField] private float moveSpeed = 7f;
 
-    [Header("¦¡¦¡ Á¡ÇÁ ¦¡¦¡")]
+    [Header("â”€â”€ ì í”„ â”€â”€")]
     [SerializeField] private float jumpForce = 15f;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.18f;
     [SerializeField] private LayerMask groundLayer;
-    [Tooltip("¹ßÆÇ¿¡¼­ ¶³¾îÁø Á÷ÈÄ¿¡µµ Àá±ñ Á¡ÇÁ¸¦ Çã¿ëÇÏ´Â ½Ã°£")]
+    [Tooltip("ë°œíŒì—ì„œ ë–¨ì–´ì§„ ì§í›„ì—ë„ ì ê¹ ì í”„ë¥¼ í—ˆìš©í•˜ëŠ” ì‹œê°„")]
     [SerializeField] private float coyoteTime = 0.1f;
-    [Tooltip("ÂøÁö Á÷Àü¿¡ ´©¸¥ Á¡ÇÁ ÀÔ·ÂÀ» ±â¾ïÇÏ´Â ½Ã°£")]
+    [Tooltip("ì°©ì§€ ì§ì „ì— ëˆ„ë¥¸ ì í”„ ì…ë ¥ì„ ê¸°ì–µí•˜ëŠ” ì‹œê°„")]
     [SerializeField] private float jumpBufferTime = 0.1f;
 
-    [Header("¦¡¦¡ ¾şµå¸®±â (¡é) ¦¡¦¡")]
-    [Tooltip("¾şµå¸° »óÅÂÀÇ ÀÌµ¿ ¼Óµµ ¹èÀ². 0À¸·Î µÎ¸é ÀÌµ¿ ºÒ°¡")]
+    [Header("â”€â”€ ì—ë“œë¦¬ê¸° (â†“) â”€â”€")]
+    [Tooltip("ì—ë“œë¦° ìƒíƒœì˜ ì´ë™ ì†ë„ ë°°ìœ¨. 0ìœ¼ë¡œ ë‘ë©´ ì´ë™ ë¶ˆê°€")]
     [SerializeField] private float crouchSpeedMultiplier = 0.35f;
-    [Tooltip("¾şµå¸± ¶§ Äİ¶óÀÌ´õ/ºñÁÖ¾ó ³ôÀÌ ¹èÀ²")]
+    [Tooltip("ì—ë“œë¦´ ë•Œ ì½œë¼ì´ë”/ë¹„ì£¼ì–¼ ë†’ì´ ë°°ìœ¨")]
     [SerializeField] private float crouchHeightRatio = 0.5f;
 
-    [Header("¦¡¦¡ ´ë½Ã (R) ¦¡¦¡")]
+    [Header("â”€â”€ ëŒ€ì‹œ (R) â”€â”€")]
     [SerializeField] private float dashSpeed = 22f;
     [SerializeField] private float dashDuration = 0.18f;
     [SerializeField] private float dashCooldown = 0.6f;
 
-    [Header("¦¡¦¡ ÆĞ¸µ (E) ¦¡¦¡")]
-    [Tooltip("ÀÌ ½Ã°£ µ¿¾È ÇÇ°İµÇ¸é µ¥¹ÌÁö ¹«È¿ + º¸½º °æÁ÷")]
+    [Header("â”€â”€ íŒ¨ë§ (E) â”€â”€")]
+    [Tooltip("ì´ ì‹œê°„ ë™ì•ˆ í”¼ê²©ë˜ë©´ ë°ë¯¸ì§€ ë¬´íš¨ + ë³´ìŠ¤ ê²½ì§")]
     [SerializeField] private float parryWindow = 0.25f;
     [SerializeField] private float parryCooldown = 0.8f;
 
-    [Header("¦¡¦¡ ÇÇ°İ ¹İÀÀ (³Ë¹é) ¦¡¦¡")]
-    [Tooltip("ÇÇ°İ ÈÄ ÀÌ ½Ã°£ µ¿¾È ÀÌµ¿ ÀÔ·ÂÀÌ ¼Óµµ¸¦ µ¤¾î¾²Áö ¾Ê½À´Ï´Ù")]
+    [Header("â”€â”€ í”¼ê²© ë°˜ì‘ (ë„‰ë°±) â”€â”€")]
+    [Tooltip("í”¼ê²© í›„ ì´ ì‹œê°„ ë™ì•ˆ ì´ë™ ì…ë ¥ì´ ì†ë„ë¥¼ ë®ì–´ì“°ì§€ ì•ŠìŠµë‹ˆë‹¤")]
     [SerializeField] private float knockbackTime = 0.25f;
-    [Tooltip("³Ë¹é Áß¿¡ ´ë½Ã(R)·Î Å»ÃâÇÒ ¼ö ÀÖ°Ô ÇÒÁö")]
+    [Tooltip("ë„‰ë°± ì¤‘ì— ëŒ€ì‹œ(R)ë¡œ íƒˆì¶œí•  ìˆ˜ ìˆê²Œ í• ì§€")]
     [SerializeField] private bool allowDashDuringKnockback = true;
 
-    [Header("¦¡¦¡ ±Ù°Å¸® °ø°İ (Q) ¦¡¦¡")]
-    [Tooltip("Player ÀÚ½ÄÀ¸·Î ¸¸µç MeleeHitbox ¿ÀºêÁ§Æ®")]
+    [Header("â”€â”€ ê·¼ê±°ë¦¬ ê³µê²© (Q) â”€â”€")]
+    [Tooltip("Player ìì‹ìœ¼ë¡œ ë§Œë“  MeleeHitbox ì˜¤ë¸Œì íŠ¸")]
     [SerializeField] private GameObject meleeHitbox;
-    [Tooltip("Q¸¦ ´©¸£°í ÆÇÁ¤ÀÌ ³ª°¡±â±îÁöÀÇ ¼±µô·¹ÀÌ")]
+    [Tooltip("Që¥¼ ëˆ„ë¥´ê³  íŒì •ì´ ë‚˜ê°€ê¸°ê¹Œì§€ì˜ ì„ ë”œë ˆì´")]
     [SerializeField] private float meleeStartDelay = 0.05f;
-    [Tooltip("È÷Æ®¹Ú½º°¡ ÄÑÁ® ÀÖ´Â ½Ã°£")]
+    [Tooltip("íˆíŠ¸ë°•ìŠ¤ê°€ ì¼œì ¸ ìˆëŠ” ì‹œê°„")]
     [SerializeField] private float meleeActiveTime = 0.12f;
     [SerializeField] private float meleeCooldown = 0.35f;
 
-    [Header("¦¡¦¡ ¿ø°Å¸® °ø°İ (W) ¦¡¦¡")]
-    [Tooltip("Assets/Prefabs ÀÇ Bullet_Player ÇÁ¸®ÆÕ")]
+    [Header("â”€â”€ ì›ê±°ë¦¬ ê³µê²© (W) â”€â”€")]
+    [Tooltip("Assets/Prefabs ì˜ Bullet_Player í”„ë¦¬íŒ¹")]
     [SerializeField] private GameObject projectilePrefab;
-    [Tooltip("Player ÀÚ½ÄÀ¸·Î ¸¸µç FirePoint ¿ÀºêÁ§Æ®")]
+    [Tooltip("Player ìì‹ìœ¼ë¡œ ë§Œë“  FirePoint ì˜¤ë¸Œì íŠ¸")]
     [SerializeField] private Transform firePoint;
     [SerializeField] private float rangedStartDelay = 0.05f;
     [SerializeField] private float rangedCooldown = 0.4f;
 
-    // ¡Ú ½Å±Ô ¨ç : °øÁß º¸½º ÀÚµ¿ Á¶ÁØ
-    [Tooltip("ÀÌ ÅÂ±×ÀÇ ¿ÀºêÁ§Æ®°¡ ¾À¿¡ ÀÖÀ¸¸é W°¡ ±×ÂÊÀ¸·Î ÀÚµ¿ Á¶ÁØµË´Ï´Ù (Stage01¿¡´Â ¾øÀ¸¹Ç·Î ¼öÆò ¹ß»ç)")]
+    // â˜… ì‹ ê·œ â‘  : ê³µì¤‘ ë³´ìŠ¤ ìë™ ì¡°ì¤€
+    [Tooltip("ì´ íƒœê·¸ì˜ ì˜¤ë¸Œì íŠ¸ê°€ ì”¬ì— ìˆìœ¼ë©´ Wê°€ ê·¸ìª½ìœ¼ë¡œ ìë™ ì¡°ì¤€ë©ë‹ˆë‹¤ (Stage01ì—ëŠ” ì—†ìœ¼ë¯€ë¡œ ìˆ˜í‰ ë°œì‚¬)")]
     [SerializeField] private bool autoAimEnabled = true;
     [SerializeField] private string autoAimTargetTag = "Boss";
-    [Tooltip("Á¶ÁØÁ¡À» ´ë»ó pivotº¸´Ù À§·Î ¿Ã¸®´Â °ª. º¸½º ¸öÅë Áß½ÉÀ» ³ë¸®°Ô ÇÔ")]
+    [Tooltip("ì¡°ì¤€ì ì„ ëŒ€ìƒ pivotë³´ë‹¤ ìœ„ë¡œ ì˜¬ë¦¬ëŠ” ê°’. ë³´ìŠ¤ ëª¸í†µ ì¤‘ì‹¬ì„ ë…¸ë¦¬ê²Œ í•¨")]
     [SerializeField] private float autoAimVerticalOffset = 1.2f;
 
-    [Header("¦¡¦¡ ºñÁÖ¾ó ¦¡¦¡")]
+    [Header("â”€â”€ ë¹„ì£¼ì–¼ â”€â”€")]
     [SerializeField] private Transform visual;
 
-    // ¦¡¦¡ ´Ù¸¥ ½ºÅ©¸³Æ®°¡ ÀĞ¾î°¥ »óÅÂ°ª ¦¡¦¡
-    public int Facing { get; private set; } = 1;   // 1 = ¿À¸¥ÂÊ, -1 = ¿ŞÂÊ
+    // â”€â”€ ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸ê°€ ì½ì–´ê°ˆ ìƒíƒœê°’ â”€â”€
+    public int Facing { get; private set; } = 1;   // 1 = ì˜¤ë¥¸ìª½, -1 = ì™¼ìª½
     public bool IsGrounded { get; private set; }
     public bool IsDashing { get; private set; }
     public bool IsCrouching { get; private set; }
@@ -83,7 +84,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private CapsuleCollider2D col;
     private Health health;
-    private Transform autoAimTarget;               // ¡Ú ½Å±Ô ¨è
+    private Transform autoAimTarget;               // â˜… ì‹ ê·œ â‘¡
 
     private float moveInput;
     private float coyoteLeft;
@@ -140,7 +141,7 @@ public class PlayerController : MonoBehaviour
             health.onDamaged.AddListener(OnDamaged);
     }
 
-    // ¡Ú ½Å±Ô ¨è : ÀÚµ¿ Á¶ÁØ ´ë»ó Ä³½Ì (¾øÀ¸¸é null ¡æ ¼öÆò ¹ß»ç)
+    // â˜… ì‹ ê·œ â‘¡ : ìë™ ì¡°ì¤€ ëŒ€ìƒ ìºì‹± (ì—†ìœ¼ë©´ null â†’ ìˆ˜í‰ ë°œì‚¬)
     private void Start()
     {
         if (autoAimEnabled && !string.IsNullOrEmpty(autoAimTargetTag))
@@ -167,7 +168,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
 
-        // »ç¸Á ÈÄ ÀÌµ¿ ÄÚµå°¡ ¼Óµµ¸¦ µÇ»ì¸®´Â °ÍÀ» Â÷´Ü
+        // ì‚¬ë§ í›„ ì´ë™ ì½”ë“œê°€ ì†ë„ë¥¼ ë˜ì‚´ë¦¬ëŠ” ê²ƒì„ ì°¨ë‹¨
         if (health != null && health.IsDead) return;
 
         if (IsDashing)
@@ -176,7 +177,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // ³Ë¹é Áß¿¡´Â velocity¸¦ °Çµå¸®Áö ¾Ê¾Æ AddForce°¡ »ì¾Æ³²°Ô ÇÔ
+        // ë„‰ë°± ì¤‘ì—ëŠ” velocityë¥¼ ê±´ë“œë¦¬ì§€ ì•Šì•„ AddForceê°€ ì‚´ì•„ë‚¨ê²Œ í•¨
         if (knockbackLeft > 0f) return;
 
         float speed = IsCrouching ? moveSpeed * crouchSpeedMultiplier : moveSpeed;
@@ -189,13 +190,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ÇÇ°İ ¹İÀÀ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ í”¼ê²© ë°˜ì‘ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void OnDamaged()
     {
         BeginKnockback(knockbackTime);
     }
 
-    /// <summary>¿ÜºÎ¿¡¼­ °­ÇÑ ³Ë¹éÀ» ÁÙ ¶§ »ç¿ë (8´Ü°è TailSweep µî)</summary>
+    /// <summary>ì™¸ë¶€ì—ì„œ ê°•í•œ ë„‰ë°±ì„ ì¤„ ë•Œ ì‚¬ìš© (8ë‹¨ê³„ TailSweep ë“±)</summary>
     public void BeginKnockback(float duration)
     {
         if (duration <= 0f) return;
@@ -211,7 +212,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ÀÌµ¿ (¡ç ¡æ) ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì´ë™ (â† â†’) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void ReadMoveInput()
     {
         moveInput = 0f;
@@ -230,7 +231,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ Á¢Áö ÆÇÁ¤ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì ‘ì§€ íŒì • â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void CheckGround()
     {
         IsGrounded = groundCheck != null &&
@@ -239,7 +240,7 @@ public class PlayerController : MonoBehaviour
         coyoteLeft = IsGrounded ? coyoteTime : coyoteLeft - Time.deltaTime;
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ¾şµå¸®±â (¡é) ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì—ë“œë¦¬ê¸° (â†“) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void HandleCrouch()
     {
         bool wantCrouch = Input.GetKey(KeyCode.DownArrow) && IsGrounded && !IsDashing && knockbackLeft <= 0f;
@@ -266,7 +267,7 @@ public class PlayerController : MonoBehaviour
         visual.localPosition = p;
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ Á¡ÇÁ (¡è) ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì í”„ (â†‘) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void HandleJumpInput()
     {
         if (Input.GetKeyDown(KeyCode.UpArrow)) jumpBufferLeft = jumpBufferTime;
@@ -283,7 +284,7 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.45f);
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ´ë½Ã (R) ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ëŒ€ì‹œ (R) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void HandleDash()
     {
         if (dashCooldownLeft > 0f) dashCooldownLeft -= Time.deltaTime;
@@ -316,6 +317,7 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = 0f;
 
         Debug.Log("DASH");
+        AudioManager.Instance?.PlayPlayerDash();
         
         if (PlayerCombatTracker.Instance != null)
             PlayerCombatTracker.Instance.RecordAction(ActionType.Dash);
@@ -327,7 +329,7 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = defaultGravity;
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ÆĞ¸µ (E) ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ íŒ¨ë§ (E) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void HandleParry()
     {
         if (parryCooldownLeft > 0f) parryCooldownLeft -= Time.deltaTime;
@@ -351,7 +353,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ±Ù°Å¸® °ø°İ (Q) ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ê·¼ê±°ë¦¬ ê³µê²© (Q) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void HandleMelee()
     {
         if (meleeCooldownLeft > 0f) meleeCooldownLeft -= Time.deltaTime;
@@ -366,6 +368,7 @@ public class PlayerController : MonoBehaviour
         meleeCooldownLeft = meleeCooldown;
 
         Debug.Log("MELEE");
+        AudioManager.Instance?.PlayPlayerMeleeSwing();
 
         if (PlayerCombatTracker.Instance != null)
             PlayerCombatTracker.Instance.RecordAction(ActionType.Melee);
@@ -388,7 +391,7 @@ public class PlayerController : MonoBehaviour
         IsAttacking = false;
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ¿ø°Å¸® °ø°İ (W) ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì›ê±°ë¦¬ ê³µê²© (W) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void HandleRanged()
     {
         if (rangedCooldownLeft > 0f) rangedCooldownLeft -= Time.deltaTime;
@@ -411,7 +414,7 @@ public class PlayerController : MonoBehaviour
 
         if (projectilePrefab != null && firePoint != null)
         {
-            // ¡Ú ½Å±Ô ¨é : ¹ß»ç ¹æÇâ °áÁ¤
+            // â˜… ì‹ ê·œ â‘¢ : ë°œì‚¬ ë°©í–¥ ê²°ì •
             Vector2 shootDir = new Vector2(Facing, 0f);
             int spawnSide = Facing;
 
@@ -423,7 +426,7 @@ public class PlayerController : MonoBehaviour
                 if (toTarget.sqrMagnitude > 0.01f)
                 {
                     shootDir = toTarget.normalized;
-                    // º¸½º°¡ ÀÖ´Â ÂÊ¿¡¼­ ÃÑ¾ËÀÌ ³ª°¡µµ·Ï ¹ß»ç À§Ä¡µµ ÀÌµ¿
+                    // ë³´ìŠ¤ê°€ ìˆëŠ” ìª½ì—ì„œ ì´ì•Œì´ ë‚˜ê°€ë„ë¡ ë°œì‚¬ ìœ„ì¹˜ë„ ì´ë™
                     if (Mathf.Abs(toTarget.x) > 0.2f)
                         spawnSide = toTarget.x > 0f ? 1 : -1;
                 }
@@ -437,12 +440,13 @@ public class PlayerController : MonoBehaviour
             GameObject go = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
             Projectile p = go.GetComponent<Projectile>();
             if (p != null) p.Launch(shootDir);
+            AudioManager.Instance?.PlayPlayerRangedShot();
         }
 
         IsAttacking = false;
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ¿¡µğÅÍ µğ¹ö±× (°ÔÀÓ µ¿ÀÛ¿¡´Â ¿µÇâ ¾øÀ½) ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì—ë””í„° ë””ë²„ê·¸ (ê²Œì„ ë™ì‘ì—ëŠ” ì˜í–¥ ì—†ìŒ) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void OnDrawGizmosSelected()
     {
         if (groundCheck == null) return;

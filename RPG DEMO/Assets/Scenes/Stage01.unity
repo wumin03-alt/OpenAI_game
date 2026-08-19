@@ -1911,8 +1911,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca0f54da0948ab946a624cf98e9f910b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageExit
-  nextSceneName: BossArena
-  delay: 0.4
+  nextSceneName: Stage05
+  delay: 0.1
   requireAllEnemiesDead: 1
   enterMessage: {fileID: 0}
   blockedMessage: {fileID: 0}
@@ -1973,7 +1973,7 @@ Transform:
   m_GameObject: {fileID: 1997453009}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 32, y: -1, z: 0}
+  m_LocalPosition: {x: 31, y: -1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

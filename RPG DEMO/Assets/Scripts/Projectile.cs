@@ -1,3 +1,4 @@
+using Game.Audio;
 using UnityEngine;
 
 /// <summary>
@@ -110,6 +111,10 @@ public class Projectile : MonoBehaviour
         if (hp == null || hp.IsDead) return;
 
         hp.TakeDamage(damage);
+
+        // 원거리 명중음은 요청대로 근접 명중/몬스터 피격음과 같은 클립을 사용합니다.
+        if (hp.GetComponent<PlayerController>() == null)
+            AudioManager.Instance?.PlayCombatHit();
 
         // 3) 넉백 — 수직 성분은 쓰지 않고 수평 + 위로만
         if (knockbackForce > 0f || knockbackUp > 0f)

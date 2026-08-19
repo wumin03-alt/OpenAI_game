@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Game.Audio;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -69,6 +70,10 @@ public class DamageZone : MonoBehaviour
 
         // 4) 데미지
         hp.TakeDamage(damage);
+
+        // 플레이어가 아닌 대상(잡몹/보스)에 타격이 발생했을 때 공통 명중음을 냅니다.
+        if (hp.GetComponent<PlayerController>() == null)
+            AudioManager.Instance?.PlayCombatHit();
 
         // 5) 넉백
         if (knockbackForce > 0f)

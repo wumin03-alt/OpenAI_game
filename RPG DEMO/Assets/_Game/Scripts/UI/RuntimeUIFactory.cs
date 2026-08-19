@@ -60,6 +60,11 @@ namespace Game.UI
             text.fontSize = fontSize;
             text.color = color;
             text.alignment = TextAnchor.MiddleCenter;
+
+            Shadow shadow = go.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0.02f, 0.05f, 0.8f);
+            shadow.effectDistance = new Vector2(1.5f, -2f);
+            shadow.useGraphicAlpha = true;
             return text;
         }
 
@@ -79,6 +84,9 @@ namespace Game.UI
             colors.highlightedColor = new Color(0.75f, 0.88f, 1f);
             colors.pressedColor = new Color(0.48f, 0.68f, 0.9f);
             button.colors = colors;
+
+            UIAudioFeedback audioFeedback = image.gameObject.AddComponent<UIAudioFeedback>();
+            audioFeedback.Initialize(button);
             button.onClick.AddListener(onClick);
 
             Text text = CreateText(rect, label, 28, Vector2.zero, size, Color.white);

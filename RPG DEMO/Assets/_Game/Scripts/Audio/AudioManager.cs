@@ -1,5 +1,6 @@
 using Game.Save;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Game.Audio
 {
@@ -11,6 +12,26 @@ namespace Game.Audio
         [SerializeField] private AudioSource musicSource;
         [SerializeField] private AudioSource sfxSource;
 
+        [Header("공통 UI 효과음")]
+        [SerializeField] private AudioClip uiHoverClip;
+        [SerializeField] private AudioClip uiClickClip;
+
+        [Header("플레이어 전투 효과음")]
+        [SerializeField] private AudioClip playerMeleeSwingClip;
+        [SerializeField] private AudioClip combatHitClip;
+        [SerializeField] private AudioClip playerRangedShotClip;
+        [SerializeField] private AudioClip playerDashClip;
+        [SerializeField] private AudioClip playerDeathExplosionClip;
+
+        [Header("씬 배경음")]
+        [SerializeField] private AudioClip mainMenuMusicClip;
+        [SerializeField] private AudioClip normalStageMusicClip;
+        [SerializeField] private AudioClip midBossMusicClip;
+        [SerializeField] private AudioClip finalBossMusicClip;
+
+        [Header("씬 전환 효과음")]
+        [SerializeField] private AudioClip stageTransitionClip;
+
         private void Awake()
         {
             if (Instance != null && Instance != this) return;
@@ -20,6 +41,41 @@ namespace Game.Audio
                 musicSource = CreateSource("MusicSource", true);
             if (sfxSource == null)
                 sfxSource = CreateSource("SfxSource", false);
+
+            musicSource.playOnAwake = false;
+            musicSource.loop = true;
+            sfxSource.playOnAwake = false;
+            sfxSource.loop = false;
+
+            // Bootstrap 씬에서 별도 연결을 하지 않아도 공통 UI 음원을 사용할 수 있게 합니다.
+            if (uiHoverClip == null)
+                uiHoverClip = Resources.Load<AudioClip>("Audio/UI/rollover2");
+            if (uiClickClip == null)
+                uiClickClip = Resources.Load<AudioClip>("Audio/UI/click1");
+
+            if (playerMeleeSwingClip == null)
+                playerMeleeSwingClip = Resources.Load<AudioClip>("Audio/SFX/Player/Player_Melee_Swing_01");
+            if (combatHitClip == null)
+                combatHitClip = Resources.Load<AudioClip>("Audio/SFX/Player/Combat_Hit_01");
+            if (playerRangedShotClip == null)
+                playerRangedShotClip = Resources.Load<AudioClip>("Audio/SFX/Player/Player_Ranged_Shot_01");
+            if (playerDashClip == null)
+                playerDashClip = Resources.Load<AudioClip>("Audio/SFX/Player/Player_Dash_01");
+            if (playerDeathExplosionClip == null)
+                playerDeathExplosionClip = Resources.Load<AudioClip>("Audio/SFX/Player/Player_Death_Explosion_01");
+
+            if (mainMenuMusicClip == null)
+                mainMenuMusicClip = Resources.Load<AudioClip>("Audio/Music/BGM_MainMenu_Loop");
+            if (normalStageMusicClip == null)
+                normalStageMusicClip = Resources.Load<AudioClip>("Audio/Music/BGM_Stage01_Loop");
+            if (midBossMusicClip == null)
+                midBossMusicClip = Resources.Load<AudioClip>("Audio/Music/BGM_MidBoss_Loop");
+            if (finalBossMusicClip == null)
+                finalBossMusicClip = Resources.Load<AudioClip>("Audio/Music/BGM_FinalBoss_Loop");
+            if (stageTransitionClip == null)
+                stageTransitionClip = Resources.Load<AudioClip>("Audio/SFX/System/Stage_Transition_01");
+
+            SceneManager.sceneLoaded += HandleSceneLoaded;
         }
 
         public void ApplySavedVolumes()
@@ -67,6 +123,93 @@ namespace Game.Audio
                 sfxSource.PlayOneShot(clip, Mathf.Clamp01(volumeScale));
         }
 
+        public void PlayUiHover() => PlaySfx(uiHoverClip);
+
+        public void PlayUiClick() => PlaySfx(uiClickClip);
+
+        public void PlayPlayerMeleeSwing() => PlaySfx(playerMeleeSwingClip);
+
+        public void PlayCombatHit() => PlaySfx(combatHitClip);
+
+        public void PlayPlayerRangedShot() => PlaySfx(playerRangedShotClip);
+
+        public void PlayPlayerDash() => PlaySfx(playerDashClip);
+
+        public void PlayPlayerDeathExplosion() => PlaySfx(playerDeathExplosionClip);
+
+        public void PlayStageTransition() => PlaySfx(stageTransitionClip);
+
+        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name == "MainMenu")
+            {
+                PlayMusic(mainMenuMusicClip);
+                return;
+            }
+
+            if (IsNormalStage(scene.name))
+            {
+                PlayMusic(normalStageMusicClip);
+                return;
+            }
+
+            if (IsMidBossStage(scene.name))
+            {
+                if (midBossMusicClip != null)
+                    PlayMusic(midBossMusicClip);
+                else
+                    StopMusic();
+                return;
+            }
+
+            if (IsFinalBossStage(scene.name))
+            {
+                if (finalBossMusicClip != null)
+                    PlayMusic(finalBossMusicClip);
+                else
+                    StopMusic();
+                return;
+            }
+
+            // 보스전 등 별도 BGM이 아직 없는 씬에서는 이전 씬 음악이 잘못 이어지지 않게 합니다.
+            if (scene.name != "Bootstrap")
+                StopMusic();
+        }
+
+        private static bool IsNormalStage(string sceneName)
+        {
+            if (!TryGetStageNumber(sceneName, out int stageNumber)) return false;
+            return stageNumber >= 1 && stageNumber <= 9 && stageNumber != 5;
+        }
+
+        private static bool IsMidBossStage(string sceneName)
+        {
+            return TryGetStageNumber(sceneName, out int stageNumber)
+                   && stageNumber == 5;
+        }
+
+        private static bool IsFinalBossStage(string sceneName)
+        {
+            if (sceneName == "BossArena") return true;
+            return TryGetStageNumber(sceneName, out int stageNumber)
+                   && stageNumber == 10;
+        }
+
+        private static bool TryGetStageNumber(string sceneName, out int stageNumber)
+        {
+            stageNumber = 0;
+            if (!sceneName.StartsWith("Stage", System.StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            string suffix = sceneName.Substring("Stage".Length);
+            int digitCount = 0;
+            while (digitCount < suffix.Length && char.IsDigit(suffix[digitCount]))
+                digitCount++;
+
+            return digitCount > 0
+                   && int.TryParse(suffix.Substring(0, digitCount), out stageNumber);
+        }
+
         private AudioSource CreateSource(string objectName, bool loop)
         {
             GameObject child = new GameObject(objectName);
@@ -79,7 +222,10 @@ namespace Game.Audio
 
         private void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (Instance != this) return;
+
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            Instance = null;
         }
     }
 }

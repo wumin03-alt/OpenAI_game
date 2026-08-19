@@ -1,4 +1,5 @@
 using System.Collections;
+using Game.Audio;
 using Game.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -40,6 +41,8 @@ namespace Game.Core
 
         private void HandleDeath()
         {
+            AudioManager.Instance?.PlayPlayerDeathExplosion();
+
             if (!respawning)
                 StartCoroutine(RespawnRoutine());
         }

@@ -8,6 +8,16 @@ using TMPro;
 /// </summary>
 public class HealthBarUI : MonoBehaviour
 {
+    private static readonly Color PanelColor = new Color(0.025f, 0.045f, 0.075f, 0.94f);
+    private static readonly Color PlayerHighColor = new Color(0.12f, 0.86f, 0.76f, 1f);
+    private static readonly Color PlayerLowColor = new Color(1f, 0.25f, 0.4f, 1f);
+    private static readonly Color BossHighColor = new Color(1f, 0.48f, 0.16f, 1f);
+    private static readonly Color BossLowColor = new Color(0.88f, 0.07f, 0.25f, 1f);
+    private static readonly Color PrimaryTextColor = new Color(0.91f, 0.96f, 1f, 1f);
+    private static readonly Color BossTitleColor = new Color(1f, 0.72f, 0.32f, 1f);
+    private static readonly Color PlayerAccentColor = new Color(0.2f, 0.82f, 0.95f, 0.9f);
+    private static readonly Color BossAccentColor = new Color(1f, 0.32f, 0.2f, 0.9f);
+
     [Header("── 연결 ──")]
     [Tooltip("표시할 대상의 Health 컴포넌트")]
     [SerializeField] private Health target;
@@ -29,14 +39,69 @@ public class HealthBarUI : MonoBehaviour
     public void SetTarget(Health newTarget)
     {
         target = newTarget;
+        ApplyVisualStyle();
         displayed = target != null ? target.Normalized : 0f;
         Apply();
     }
 
     private void Start()
     {
+        ApplyVisualStyle();
         displayed = target != null ? target.Normalized : 0f;
         Apply();
+    }
+
+    private void ApplyVisualStyle()
+    {
+        bool isBoss = target != null && target.CompareTag("Boss");
+        highColor = isBoss ? BossHighColor : PlayerHighColor;
+        lowColor = isBoss ? BossLowColor : PlayerLowColor;
+
+        Image background = GetComponent<Image>();
+        if (background != null)
+        {
+            background.color = PanelColor;
+            background.raycastTarget = false;
+        }
+
+        if (fillImage != null)
+            fillImage.raycastTarget = false;
+
+        Outline border = GetComponent<Outline>();
+        if (border == null)
+            border = gameObject.AddComponent<Outline>();
+        border.effectColor = isBoss ? BossAccentColor : PlayerAccentColor;
+        border.effectDistance = new Vector2(2f, -2f);
+        border.useGraphicAlpha = true;
+
+        RectTransform barRect = transform as RectTransform;
+        if (barRect != null)
+        {
+            Vector2 size = barRect.sizeDelta;
+            size.y = isBoss ? Mathf.Max(size.y, 34f) : Mathf.Max(size.y, 28f);
+            if (!isBoss)
+                size.x = Mathf.Max(size.x, 260f);
+            barRect.sizeDelta = size;
+        }
+
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+        foreach (TMP_Text text in texts)
+        {
+            bool isValueLabel = text == label;
+            text.color = !isValueLabel && isBoss ? BossTitleColor : PrimaryTextColor;
+            text.fontStyle |= FontStyles.Bold;
+            text.outlineColor = new Color32(4, 10, 20, 235);
+            text.outlineWidth = isValueLabel ? 0.14f : 0.2f;
+            text.raycastTarget = false;
+
+            if (isValueLabel)
+                text.fontSize = Mathf.Max(text.fontSize, isBoss ? 20f : 18f);
+            else if (isBoss)
+            {
+                text.fontSize = Mathf.Max(text.fontSize, 26f);
+                text.characterSpacing = 2f;
+            }
+        }
     }
 
     private void Update()

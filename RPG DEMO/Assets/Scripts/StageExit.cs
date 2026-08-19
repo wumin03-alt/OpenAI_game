@@ -4,6 +4,7 @@ using Game.SceneManagement;
 using Game.Core;
 using Game.Save;
 using Game.UI;
+using Game.Audio;
 using UnityEngine.UI;
 
 /// <summary>
@@ -83,7 +84,8 @@ public class StageExit : MonoBehaviour
         panelRect.sizeDelta = new Vector2(1100f, 72f);
 
         Text guide = RuntimeUIFactory.CreateText(panelRect, clearGuideMessage, 30,
-            Vector2.zero, panelRect.sizeDelta, Color.white);
+            Vector2.zero, panelRect.sizeDelta, new Color(0.76f, 0.9f, 1f));
+        guide.fontStyle = FontStyle.Bold;
         RuntimeUIFactory.Stretch(guide.rectTransform);
     }
 
@@ -107,10 +109,31 @@ public class StageExit : MonoBehaviour
         triggered = true;
         Debug.Log($"[StageExit] {nextSceneName} 으로 이동합니다.");
 
+        FreezePlayerForTransition(other);
+
         if (blockedMessage != null) blockedMessage.SetActive(false);
         if (enterMessage != null) enterMessage.SetActive(true);
 
+        // 공통 AudioManager는 씬이 바뀌어도 유지되므로 징글의 끝부분도 자연스럽게 이어집니다.
+        AudioManager.Instance?.PlayStageTransition();
+
         Invoke(nameof(LoadNext), delay);
+    }
+
+    private static void FreezePlayerForTransition(Collider2D playerCollider)
+    {
+        PlayerController controller = playerCollider.GetComponentInParent<PlayerController>();
+        if (controller != null)
+            controller.enabled = false;
+
+        Rigidbody2D body = playerCollider.attachedRigidbody;
+        if (body == null)
+            body = playerCollider.GetComponentInParent<Rigidbody2D>();
+        if (body == null) return;
+
+        body.linearVelocity = Vector2.zero;
+        body.angularVelocity = 0f;
+        body.constraints = RigidbodyConstraints2D.FreezeAll;
     }
 
     private void LoadNext()

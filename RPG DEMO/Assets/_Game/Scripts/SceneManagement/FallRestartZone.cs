@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.SceneManagement
 {
-    /// <summary>플레이어가 낙사하면 사망 연출 없이 현재 스테이지를 바로 재시작합니다.</summary>
+    /// <summary>플레이어 낙사는 씬을 재시작하고, 잡몹 낙사는 즉시 사망 처리합니다.</summary>
     [RequireComponent(typeof(Collider2D))]
     public sealed class FallRestartZone : MonoBehaviour
     {
@@ -18,7 +18,23 @@ namespace Game.SceneManagement
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (restarting || !other.CompareTag("Player")) return;
+            // 자식 공격/발판 콜라이더가 먼저 닿더라도 루트의 Health로 판정합니다.
+            Health actorHealth = other.GetComponentInParent<Health>();
+
+            if (actorHealth != null && actorHealth.CompareTag("Enemy"))
+            {
+                if (!actorHealth.IsDead)
+                {
+                    Debug.Log($"[FallRestartZone] {actorHealth.name} 낙사 처리");
+                    actorHealth.TakeDamage(Mathf.Max(1f, actorHealth.CurrentHP), true);
+                }
+                return;
+            }
+
+            bool isPlayer = actorHealth != null
+                ? actorHealth.CompareTag("Player")
+                : other.CompareTag("Player");
+            if (restarting || !isPlayer) return;
 
             restarting = true;
             Time.timeScale = 1f;
