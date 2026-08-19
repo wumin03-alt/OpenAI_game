@@ -12,8 +12,8 @@
 
 | 영역 | 담당 | 소유 파일/폴더 | 책임 |
 |---|---|---|---|
-| 공통 시스템 | 주민 | `Assets/_Game/Scripts/Core`, `Save`, `Audio`, `SceneManagement` | 플레이어 공통 동작, 전투 기반, 세션, 저장, 오디오, 씬 전환 |
-| 공통 플레이어 | 주민 | `Assets/Prefabs/Player.prefab`, `PlayerController.cs`, `Health.cs`, 공통 투사체·피해 코드 | 모든 스테이지가 사용하는 플레이어 계약 유지 |
+| 공통 시스템 | 준희 | `Assets/_Game/Scripts/Core`, `Save`, `Audio`, `SceneManagement` | 플레이어 공통 동작, 전투 기반, 세션, 저장, 오디오, 씬 전환 |
+| 공통 플레이어 | 준희 | `Assets/Prefabs/Player.prefab`, `PlayerController.cs`, `Health.cs`, 공통 투사체·피해 코드 | 모든 스테이지가 사용하는 플레이어 계약 유지 |
 | 보스 스테이지 | 도현 | `BossArena.unity`, `BossController.cs`, `AnalysisUI.cs`, `AdaptiveBossVisual.cs`, `PlayerCombatTracker.cs` | 보스 패턴, 학습, 교란, 페이즈 전환 |
 | 보스 임시 UI | 도현, UI 이관 전까지 | `BossLearningHUD.cs` | 보스 프로토타입 HUD·결과 화면 유지, 최종 UI 계약 제공 |
 | 일반 스테이지 | 담당자 지정 필요 | `Stage01.unity`, 일반 적·웨이브·스테이지 전용 코드 | 웨이브, 배치, 클리어 조건, 보스 진입 |
