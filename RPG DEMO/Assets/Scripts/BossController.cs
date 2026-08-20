@@ -146,7 +146,7 @@ public class BossController : MonoBehaviour
     public float AdaptationDisruption => adaptationDisruption;
     public float AdaptationStrength => 1f - adaptationDisruption;
     public string CounterProtocol => PlayerCombatTracker.Instance == null
-        ? "SCANNING"
+        ? "행동 분석 중"
         : PlayerCombatTracker.Instance.GetCounterProtocolLabel();
     public bool IsLowHovering => baseY < (hoverHighY + hoverLowY) * 0.5f;
     public float HorizontalDistanceToPlayer =>
@@ -214,8 +214,11 @@ public class BossController : MonoBehaviour
         }
 
         adaptiveVisual = GetComponent<AdaptiveBossVisual>();
-        if (adaptiveVisual == null) adaptiveVisual = gameObject.AddComponent<AdaptiveBossVisual>();
-        adaptiveVisual.Initialize(visualSr);
+        bool usesPrototypeSprite = visualSr == null || visualSr.sprite == null || visualSr.sprite.rect.width <= 16f;
+        if (adaptiveVisual == null && usesPrototypeSprite)
+            adaptiveVisual = gameObject.AddComponent<AdaptiveBossVisual>();
+        if (adaptiveVisual != null)
+            adaptiveVisual.Initialize(visualSr);
         if (visualSr != null) visualBaseColor = visualSr.color;
 
         if (telegraphMark != null) telegraphMark.SetActive(false);
@@ -1008,7 +1011,7 @@ public class BossController : MonoBehaviour
 
         if (phaseLabel != null)
         {
-            phaseLabel.text = "PHASE 2 - " + CounterProtocol;
+            phaseLabel.text = "2단계 · " + CounterProtocol;
         }
 
         phaseTransitionRunning = false;

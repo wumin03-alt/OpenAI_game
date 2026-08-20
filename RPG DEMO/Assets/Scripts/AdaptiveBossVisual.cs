@@ -27,6 +27,12 @@ public class AdaptiveBossVisual : MonoBehaviour
         initialized = true;
         mainRenderer = bossRenderer;
 
+        // 최종 사이버 드래곤 아트에는 코어와 데이터 노드가 이미 포함되어 있습니다.
+        // 프로토타입 사각형이 완성 스프라이트를 가리지 않도록 생성 단계를 생략합니다.
+        if (mainRenderer != null && mainRenderer.sprite != null &&
+            (mainRenderer.sprite.name.StartsWith("SPR_CyberDragon") || mainRenderer.sprite.rect.width > 16f))
+            return;
+
         Texture2D pixel = new Texture2D(1, 1, TextureFormat.RGBA32, false);
         pixel.name = "RuntimeBossPixel";
         pixel.SetPixel(0, 0, Color.white);

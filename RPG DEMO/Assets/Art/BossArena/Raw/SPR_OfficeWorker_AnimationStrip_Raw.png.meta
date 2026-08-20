@@ -1,0 +1,962 @@
+fileFormatVersion: 2
+guid: fd86ea92319ba68409704e0ce579faca
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1753243490353038300
+    second: SPR_OfficeWorker_AnimationStrip_Raw_0
+  - first:
+      213: -1046280979602552759
+    second: SPR_OfficeWorker_AnimationStrip_Raw_1
+  - first:
+      213: 8023908355971838582
+    second: SPR_OfficeWorker_AnimationStrip_Raw_2
+  - first:
+      213: -4173603756366571311
+    second: SPR_OfficeWorker_AnimationStrip_Raw_3
+  - first:
+      213: -8610249799824809670
+    second: SPR_OfficeWorker_AnimationStrip_Raw_4
+  - first:
+      213: 7930291137538520219
+    second: SPR_OfficeWorker_AnimationStrip_Raw_5
+  - first:
+      213: -8423913519861607839
+    second: SPR_OfficeWorker_AnimationStrip_Raw_6
+  - first:
+      213: -6139765857147621700
+    second: SPR_OfficeWorker_AnimationStrip_Raw_7
+  - first:
+      213: -4256440518142537200
+    second: SPR_OfficeWorker_AnimationStrip_Raw_8
+  - first:
+      213: 8944499383123329936
+    second: SPR_OfficeWorker_AnimationStrip_Raw_9
+  - first:
+      213: -1851676270123564943
+    second: SPR_OfficeWorker_AnimationStrip_Raw_10
+  - first:
+      213: -7617301013199478982
+    second: SPR_OfficeWorker_AnimationStrip_Raw_11
+  - first:
+      213: -7069914498256813037
+    second: SPR_OfficeWorker_AnimationStrip_Raw_12
+  - first:
+      213: 427366777331383199
+    second: SPR_OfficeWorker_AnimationStrip_Raw_13
+  - first:
+      213: -4449516726398524202
+    second: SPR_OfficeWorker_AnimationStrip_Raw_14
+  - first:
+      213: -6603368386744647225
+    second: SPR_OfficeWorker_AnimationStrip_Raw_15
+  - first:
+      213: 4548720959839629185
+    second: SPR_OfficeWorker_AnimationStrip_Raw_16
+  - first:
+      213: 8621449298107450867
+    second: SPR_OfficeWorker_AnimationStrip_Raw_17
+  - first:
+      213: 8721800403361789225
+    second: SPR_OfficeWorker_AnimationStrip_Raw_18
+  - first:
+      213: 6408611870785336094
+    second: SPR_OfficeWorker_AnimationStrip_Raw_19
+  - first:
+      213: 1829827766740104540
+    second: SPR_OfficeWorker_AnimationStrip_Raw_20
+  - first:
+      213: -283485904578323648
+    second: SPR_OfficeWorker_AnimationStrip_Raw_21
+  - first:
+      213: 8961870950820625637
+    second: SPR_OfficeWorker_AnimationStrip_Raw_22
+  - first:
+      213: 4472654659751540107
+    second: SPR_OfficeWorker_AnimationStrip_Raw_23
+  - first:
+      213: -3927483251361540651
+    second: SPR_OfficeWorker_AnimationStrip_Raw_24
+  - first:
+      213: -3672185210164499535
+    second: SPR_OfficeWorker_AnimationStrip_Raw_25
+  - first:
+      213: -3948073823856897443
+    second: SPR_OfficeWorker_AnimationStrip_Raw_26
+  - first:
+      213: 4013810987122065519
+    second: SPR_OfficeWorker_AnimationStrip_Raw_27
+  - first:
+      213: -2674904229785425902
+    second: SPR_OfficeWorker_AnimationStrip_Raw_28
+  - first:
+      213: 4628164329458988944
+    second: SPR_OfficeWorker_AnimationStrip_Raw_29
+  - first:
+      213: -3356143394043450351
+    second: SPR_OfficeWorker_AnimationStrip_Raw_30
+  - first:
+      213: -5855542223814987634
+    second: SPR_OfficeWorker_AnimationStrip_Raw_31
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_0
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 23
+        width: 540
+        height: 669
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd342475aa5c45810800000000000000
+      internalID: 1753243490353038300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_1
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 624
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 948ca831efcda71f0800000000000000
+      internalID: -1046280979602552759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_2
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 626
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6727df32326aa5f60800000000000000
+      internalID: 8023908355971838582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_3
+      rect:
+        serializedVersion: 2
+        x: 505
+        y: 128
+        width: 365
+        height: 513
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d8d88c0f716416c0800000000000000
+      internalID: -4173603756366571311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_4
+      rect:
+        serializedVersion: 2
+        x: 555
+        y: 588
+        width: 76
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3160161d6f328880800000000000000
+      internalID: -8610249799824809670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_5
+      rect:
+        serializedVersion: 2
+        x: 985
+        y: 610
+        width: 26
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b94796ae5cd0e0e60800000000000000
+      internalID: 7930291137538520219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_6
+      rect:
+        serializedVersion: 2
+        x: 1199
+        y: 39
+        width: 973
+        height: 629
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 162d906194f381b80800000000000000
+      internalID: -8423913519861607839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_7
+      rect:
+        serializedVersion: 2
+        x: 251
+        y: 612
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbee4a89b7b2bcaa0800000000000000
+      internalID: -6139765857147621700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_8
+      rect:
+        serializedVersion: 2
+        x: 1052
+        y: 123
+        width: 272
+        height: 486
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 012d88c76e51ee4c0800000000000000
+      internalID: -4256440518142537200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_9
+      rect:
+        serializedVersion: 2
+        x: 1343
+        y: 594
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09344c88cce312c70800000000000000
+      internalID: 8944499383123329936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_10
+      rect:
+        serializedVersion: 2
+        x: 1891
+        y: 548
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 170c3403e368d46e0800000000000000
+      internalID: -1851676270123564943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_11
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 73
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3f95013619e94690800000000000000
+      internalID: -7617301013199478982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_12
+      rect:
+        serializedVersion: 2
+        x: 702
+        y: 67
+        width: 43
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 314c40bc83e92ed90800000000000000
+      internalID: -7069914498256813037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_13
+      rect:
+        serializedVersion: 2
+        x: 748
+        y: 31
+        width: 395
+        height: 508
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9bf3a7d1df4ee500800000000000000
+      internalID: 427366777331383199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_14
+      rect:
+        serializedVersion: 2
+        x: 764
+        y: 79
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d46bd4ac142042c0800000000000000
+      internalID: -4449516726398524202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_15
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 81
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c18a0b307f1c54a0800000000000000
+      internalID: -6603368386744647225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_16
+      rect:
+        serializedVersion: 2
+        x: 794
+        y: 85
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18f6d91ec9d402f30800000000000000
+      internalID: 4548720959839629185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_17
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 93
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f54cbe457a85a770800000000000000
+      internalID: 8621449298107450867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_18
+      rect:
+        serializedVersion: 2
+        x: 818
+        y: 87
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 925fc3cb14f0a0970800000000000000
+      internalID: 8721800403361789225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_19
+      rect:
+        serializedVersion: 2
+        x: 1339
+        y: 91
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e13f28dca86ffe850800000000000000
+      internalID: 6408611870785336094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_20
+      rect:
+        serializedVersion: 2
+        x: 1345
+        y: 81
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c55b0b4b8aad46910800000000000000
+      internalID: 1829827766740104540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_21
+      rect:
+        serializedVersion: 2
+        x: 1351
+        y: 81
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04b57ce521bd01cf0800000000000000
+      internalID: -283485904578323648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_22
+      rect:
+        serializedVersion: 2
+        x: 1351
+        y: 71
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ec3e82d526fe5c70800000000000000
+      internalID: 8961870950820625637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_23
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 71
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b857c7547bf021e30800000000000000
+      internalID: 4472654659751540107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_24
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 59
+        width: 9
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d59c45aac6ce79c0800000000000000
+      internalID: -3927483251361540651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_25
+      rect:
+        serializedVersion: 2
+        x: 1412
+        y: 49
+        width: 19
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bba3b6e107c90dc0800000000000000
+      internalID: -3672185210164499535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_26
+      rect:
+        serializedVersion: 2
+        x: 1518
+        y: 85
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d52ddf566cf9539c0800000000000000
+      internalID: -3948073823856897443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_27
+      rect:
+        serializedVersion: 2
+        x: 1522
+        y: 87
+        width: 12
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6088f2a3dbe3b730800000000000000
+      internalID: 4013810987122065519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_28
+      rect:
+        serializedVersion: 2
+        x: 1808
+        y: 63
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 218237776c4d0ead0800000000000000
+      internalID: -2674904229785425902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_29
+      rect:
+        serializedVersion: 2
+        x: 1914
+        y: 49
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0977983cfea8a3040800000000000000
+      internalID: 4628164329458988944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_30
+      rect:
+        serializedVersion: 2
+        x: 2033
+        y: 47
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11c24ce5d559c61d0800000000000000
+      internalID: -3356143394043450351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_AnimationStrip_Raw_31
+      rect:
+        serializedVersion: 2
+        x: 2083
+        y: 81
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e80f4361f5fecbea0800000000000000
+      internalID: -5855542223814987634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SPR_OfficeWorker_AnimationStrip_Raw_0: 1753243490353038300
+      SPR_OfficeWorker_AnimationStrip_Raw_1: -1046280979602552759
+      SPR_OfficeWorker_AnimationStrip_Raw_10: -1851676270123564943
+      SPR_OfficeWorker_AnimationStrip_Raw_11: -7617301013199478982
+      SPR_OfficeWorker_AnimationStrip_Raw_12: -7069914498256813037
+      SPR_OfficeWorker_AnimationStrip_Raw_13: 427366777331383199
+      SPR_OfficeWorker_AnimationStrip_Raw_14: -4449516726398524202
+      SPR_OfficeWorker_AnimationStrip_Raw_15: -6603368386744647225
+      SPR_OfficeWorker_AnimationStrip_Raw_16: 4548720959839629185
+      SPR_OfficeWorker_AnimationStrip_Raw_17: 8621449298107450867
+      SPR_OfficeWorker_AnimationStrip_Raw_18: 8721800403361789225
+      SPR_OfficeWorker_AnimationStrip_Raw_19: 6408611870785336094
+      SPR_OfficeWorker_AnimationStrip_Raw_2: 8023908355971838582
+      SPR_OfficeWorker_AnimationStrip_Raw_20: 1829827766740104540
+      SPR_OfficeWorker_AnimationStrip_Raw_21: -283485904578323648
+      SPR_OfficeWorker_AnimationStrip_Raw_22: 8961870950820625637
+      SPR_OfficeWorker_AnimationStrip_Raw_23: 4472654659751540107
+      SPR_OfficeWorker_AnimationStrip_Raw_24: -3927483251361540651
+      SPR_OfficeWorker_AnimationStrip_Raw_25: -3672185210164499535
+      SPR_OfficeWorker_AnimationStrip_Raw_26: -3948073823856897443
+      SPR_OfficeWorker_AnimationStrip_Raw_27: 4013810987122065519
+      SPR_OfficeWorker_AnimationStrip_Raw_28: -2674904229785425902
+      SPR_OfficeWorker_AnimationStrip_Raw_29: 4628164329458988944
+      SPR_OfficeWorker_AnimationStrip_Raw_3: -4173603756366571311
+      SPR_OfficeWorker_AnimationStrip_Raw_30: -3356143394043450351
+      SPR_OfficeWorker_AnimationStrip_Raw_31: -5855542223814987634
+      SPR_OfficeWorker_AnimationStrip_Raw_4: -8610249799824809670
+      SPR_OfficeWorker_AnimationStrip_Raw_5: 7930291137538520219
+      SPR_OfficeWorker_AnimationStrip_Raw_6: -8423913519861607839
+      SPR_OfficeWorker_AnimationStrip_Raw_7: -6139765857147621700
+      SPR_OfficeWorker_AnimationStrip_Raw_8: -4256440518142537200
+      SPR_OfficeWorker_AnimationStrip_Raw_9: 8944499383123329936
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -210,30 +210,30 @@ public class PlayerCombatTracker : MonoBehaviour
         DominantStyle style = isRecording ? GetDominantStyle() : LockedStyle;
         switch (style)
         {
-            case DominantStyle.Melee: return "CLOSE RANGE";
-            case DominantStyle.Ranged: return "LONG RANGE";
-            default: return "UNKNOWN";
+            case DominantStyle.Melee: return "근접 전투";
+            case DominantStyle.Ranged: return "원거리 전투";
+            default: return "분석 중";
         }
     }
 
     public string GetMobilityLabel()
     {
         MobilityStyle style = isRecording ? GetMobilityStyle() : LockedMobility;
-        return style == MobilityStyle.Airborne ? "AIRBORNE" : style == MobilityStyle.Grounded ? "GROUNDED" : "UNKNOWN";
+        return style == MobilityStyle.Airborne ? "공중 기동" : style == MobilityStyle.Grounded ? "지상 기동" : "분석 중";
     }
 
     public string GetEvasionLabel()
     {
         EvasionBias bias = isRecording ? GetEvasionBias() : LockedEvasion;
-        return bias == EvasionBias.Left ? "LEFT BIAS" : bias == EvasionBias.Right ? "RIGHT BIAS" : "BALANCED";
+        return bias == EvasionBias.Left ? "좌측 편향" : bias == EvasionBias.Right ? "우측 편향" : "균형 회피";
     }
 
     public string GetCounterProtocolLabel()
     {
-        string attackCounter = LockedStyle == DominantStyle.Melee ? "REPULSION" :
-            LockedStyle == DominantStyle.Ranged ? "PURSUIT" : "STANDARD";
-        string mobilityCounter = LockedMobility == MobilityStyle.Airborne ? "ANTI-AIR" : "GROUND PREDICTION";
-        return $"{attackCounter} + {mobilityCounter}";
+        string attackCounter = LockedStyle == DominantStyle.Melee ? "접근 거부" :
+            LockedStyle == DominantStyle.Ranged ? "고속 추격" : "표준 대응";
+        string mobilityCounter = LockedMobility == MobilityStyle.Airborne ? "대공 예측" : "지면 예측";
+        return $"{attackCounter} · {mobilityCounter}";
     }
 
     public float GetDominantRatio()

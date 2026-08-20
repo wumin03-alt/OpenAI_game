@@ -1,0 +1,546 @@
+fileFormatVersion: 2
+guid: 4a59b8ad4441fa645b071b3cfcc373f5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1674197606987254662
+    second: SPR_CombatVFX_Atlas_Raw_0
+  - first:
+      213: -4223927428776402231
+    second: SPR_CombatVFX_Atlas_Raw_1
+  - first:
+      213: -1615226364474471280
+    second: SPR_CombatVFX_Atlas_Raw_2
+  - first:
+      213: -7203862598093008731
+    second: SPR_CombatVFX_Atlas_Raw_3
+  - first:
+      213: 2925504636342295106
+    second: SPR_CombatVFX_Atlas_Raw_4
+  - first:
+      213: -8632483620059146148
+    second: SPR_CombatVFX_Atlas_Raw_5
+  - first:
+      213: 274508807266650744
+    second: SPR_CombatVFX_Atlas_Raw_6
+  - first:
+      213: -2904239418545919766
+    second: SPR_CombatVFX_Atlas_Raw_7
+  - first:
+      213: 617250836097044632
+    second: SPR_CombatVFX_Atlas_Raw_8
+  - first:
+      213: -2658728904285494241
+    second: SPR_CombatVFX_Atlas_Raw_9
+  - first:
+      213: 4994527142368078692
+    second: SPR_CombatVFX_Atlas_Raw_10
+  - first:
+      213: -5203872437659287100
+    second: SPR_CombatVFX_Atlas_Raw_11
+  - first:
+      213: 6087176535655759889
+    second: SPR_CombatVFX_Atlas_Raw_12
+  - first:
+      213: -5476870375023529068
+    second: SPR_CombatVFX_Atlas_Raw_13
+  - first:
+      213: 1456099147485099386
+    second: SPR_CombatVFX_Atlas_Raw_14
+  - first:
+      213: -1931757731467557
+    second: SPR_CombatVFX_Atlas_Raw_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_0
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 0
+        width: 682
+        height: 704
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 68bc8407ad1fb3710800000000000000
+      internalID: 1674197606987254662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_1
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 691
+        width: 90
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c2e0c202689165c0800000000000000
+      internalID: -4223927428776402231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_2
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 680
+        width: 22
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09c47a9ed209599e0800000000000000
+      internalID: -1615226364474471280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_3
+      rect:
+        serializedVersion: 2
+        x: 708
+        y: 0
+        width: 785
+        height: 724
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a091fd722db60c90800000000000000
+      internalID: -7203862598093008731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_4
+      rect:
+        serializedVersion: 2
+        x: 1494
+        y: 25
+        width: 678
+        height: 675
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24ad0fd77fa799820800000000000000
+      internalID: 2925504636342295106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_5
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 665
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c581ff862e1433880800000000000000
+      internalID: -8632483620059146148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_6
+      rect:
+        serializedVersion: 2
+        x: 608
+        y: 634
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87a48d84e404fc300800000000000000
+      internalID: 274508807266650744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_7
+      rect:
+        serializedVersion: 2
+        x: 627
+        y: 640
+        width: 12
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae822ead2a112b7d0800000000000000
+      internalID: -2904239418545919766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_8
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 95
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89090e67d5ae09800800000000000000
+      internalID: 617250836097044632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_9
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 38
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f14eff9e52c4a1bd0800000000000000
+      internalID: -2658728904285494241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_10
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 47
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46b65ed49ff105540800000000000000
+      internalID: 4994527142368078692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_11
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 31
+        width: 14
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c14fd8d69128c7b0800000000000000
+      internalID: -5203872437659287100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_12
+      rect:
+        serializedVersion: 2
+        x: 1569
+        y: 0
+        width: 23
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 110cad4decef97450800000000000000
+      internalID: 6087176535655759889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_13
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 15
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 493bcdf596f3ef3b0800000000000000
+      internalID: -5476870375023529068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_14
+      rect:
+        serializedVersion: 2
+        x: 1520
+        y: 0
+        width: 38
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a75399bb57a153410800000000000000
+      internalID: 1456099147485099386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_15
+      rect:
+        serializedVersion: 2
+        x: 1541
+        y: 21
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdeaf9a931329fff0800000000000000
+      internalID: -1931757731467557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SPR_CombatVFX_Atlas_Raw_0: 1674197606987254662
+      SPR_CombatVFX_Atlas_Raw_1: -4223927428776402231
+      SPR_CombatVFX_Atlas_Raw_10: 4994527142368078692
+      SPR_CombatVFX_Atlas_Raw_11: -5203872437659287100
+      SPR_CombatVFX_Atlas_Raw_12: 6087176535655759889
+      SPR_CombatVFX_Atlas_Raw_13: -5476870375023529068
+      SPR_CombatVFX_Atlas_Raw_14: 1456099147485099386
+      SPR_CombatVFX_Atlas_Raw_15: -1931757731467557
+      SPR_CombatVFX_Atlas_Raw_2: -1615226364474471280
+      SPR_CombatVFX_Atlas_Raw_3: -7203862598093008731
+      SPR_CombatVFX_Atlas_Raw_4: 2925504636342295106
+      SPR_CombatVFX_Atlas_Raw_5: -8632483620059146148
+      SPR_CombatVFX_Atlas_Raw_6: 274508807266650744
+      SPR_CombatVFX_Atlas_Raw_7: -2904239418545919766
+      SPR_CombatVFX_Atlas_Raw_8: 617250836097044632
+      SPR_CombatVFX_Atlas_Raw_9: -2658728904285494241
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
