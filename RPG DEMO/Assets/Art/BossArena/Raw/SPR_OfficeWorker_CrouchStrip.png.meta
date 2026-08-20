@@ -1,0 +1,442 @@
+fileFormatVersion: 2
+guid: cdeb6c2347730fa4cb562ea692b440aa
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5577437258299445969
+    second: SPR_OfficeWorker_CrouchStrip_0
+  - first:
+      213: -7238573781028059449
+    second: SPR_OfficeWorker_CrouchStrip_1
+  - first:
+      213: -9104080365622405222
+    second: SPR_OfficeWorker_CrouchStrip_2
+  - first:
+      213: -6197452239981941434
+    second: SPR_OfficeWorker_CrouchStrip_3
+  - first:
+      213: 5020919967904982265
+    second: SPR_OfficeWorker_CrouchStrip_4
+  - first:
+      213: -993421128217032152
+    second: SPR_OfficeWorker_CrouchStrip_5
+  - first:
+      213: -1621822446925710724
+    second: SPR_OfficeWorker_CrouchStrip_6
+  - first:
+      213: 2298723521537727353
+    second: SPR_OfficeWorker_CrouchStrip_7
+  - first:
+      213: -2512543143150638868
+    second: SPR_OfficeWorker_CrouchStrip_8
+  - first:
+      213: 4455884055923363677
+    second: SPR_OfficeWorker_CrouchStrip_9
+  - first:
+      213: 7982104393288492657
+    second: SPR_OfficeWorker_CrouchStrip_10
+  - first:
+      213: -3941293692121037920
+    second: SPR_OfficeWorker_CrouchStrip_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_0
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 31
+        width: 872
+        height: 836
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d297f9c2a9076d40800000000000000
+      internalID: 5577437258299445969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_1
+      rect:
+        serializedVersion: 2
+        x: 1332
+        y: 838
+        width: 40
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c6cd5d6f7b6b8b90800000000000000
+      internalID: -7238573781028059449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_2
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 656
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a97d778942fc7a180800000000000000
+      internalID: -9104080365622405222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_3
+      rect:
+        serializedVersion: 2
+        x: 1028
+        y: 18
+        width: 727
+        height: 815
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64d6d63f50a3ef9a0800000000000000
+      internalID: -6197452239981941434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_4
+      rect:
+        serializedVersion: 2
+        x: 1636
+        y: 564
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f464acdb14eda540800000000000000
+      internalID: 5020919967904982265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_5
+      rect:
+        serializedVersion: 2
+        x: 919
+        y: 459
+        width: 66
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82a814c4fb8a632f0800000000000000
+      internalID: -993421128217032152
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_6
+      rect:
+        serializedVersion: 2
+        x: 935
+        y: 307
+        width: 28
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7afc3ac3112e79e0800000000000000
+      internalID: -1621822446925710724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_7
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 203
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97b571a1dd4b6ef10800000000000000
+      internalID: 2298723521537727353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_8
+      rect:
+        serializedVersion: 2
+        x: 199
+        y: 199
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce8a9a5c257a12dd0800000000000000
+      internalID: -2512543143150638868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_9
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 196
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5f83a9c0fa76dd30800000000000000
+      internalID: 4455884055923363677
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_10
+      rect:
+        serializedVersion: 2
+        x: 435
+        y: 0
+        width: 34
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 176ab0a97a126ce60800000000000000
+      internalID: 7982104393288492657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_OfficeWorker_CrouchStrip_11
+      rect:
+        serializedVersion: 2
+        x: 758
+        y: 23
+        width: 11
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a343a5d446bd49c0800000000000000
+      internalID: -3941293692121037920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SPR_OfficeWorker_CrouchStrip_0: 5577437258299445969
+      SPR_OfficeWorker_CrouchStrip_1: -7238573781028059449
+      SPR_OfficeWorker_CrouchStrip_10: 7982104393288492657
+      SPR_OfficeWorker_CrouchStrip_11: -3941293692121037920
+      SPR_OfficeWorker_CrouchStrip_2: -9104080365622405222
+      SPR_OfficeWorker_CrouchStrip_3: -6197452239981941434
+      SPR_OfficeWorker_CrouchStrip_4: 5020919967904982265
+      SPR_OfficeWorker_CrouchStrip_5: -993421128217032152
+      SPR_OfficeWorker_CrouchStrip_6: -1621822446925710724
+      SPR_OfficeWorker_CrouchStrip_7: 2298723521537727353
+      SPR_OfficeWorker_CrouchStrip_8: -2512543143150638868
+      SPR_OfficeWorker_CrouchStrip_9: 4455884055923363677
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

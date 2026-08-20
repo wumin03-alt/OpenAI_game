@@ -1,6 +1,0 @@
-# Whisper models are installed separately on each developer PC.
-# Unity menu: Powerful Spell > Whisper 모델 설치 및 확인
-Assets/StreamingAssets/OfflineSpeech/ggml-*.bin
-Assets/StreamingAssets/OfflineSpeech/ggml-*.bin.meta
-Assets/StreamingAssets/OfflineSpeech/*.download
-

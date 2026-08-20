@@ -1911,7 +1911,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca0f54da0948ab946a624cf98e9f910b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageExit
-  nextSceneName: Stage05
+  nextSceneName: BossArena
   delay: 0.1
   requireAllEnemiesDead: 1
   enterMessage: {fileID: 0}

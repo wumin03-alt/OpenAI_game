@@ -41,9 +41,9 @@ public class AnalysisUI : MonoBehaviour
     [SerializeField] private Color completeColor = new Color(0.4f, 1f, 0.55f);
 
     [Header("── 문구 ──")]
-    [SerializeField] private string titleLine = "COMBAT DATA ANALYSIS";
-    [SerializeField] private string loadingLine = "COUNTER PROTOCOL LOADING";
-    [SerializeField] private string completeLine = "ADAPTATION COMPLETE";
+    [SerializeField] private string titleLine = "root@ai-core:~/combat $ analyze --live";
+    [SerializeField] private string loadingLine = "$ countermeasure --build";
+    [SerializeField] private string completeLine = "[OK] 대응 프로토콜 배포 완료";
 
     public bool IsPlaying { get; private set; }
 
@@ -83,10 +83,12 @@ public class AnalysisUI : MonoBehaviour
         // ── 3) 스탯 한 줄씩 ──
         string[] lines =
         {
-            $"MELEE   : {tracker.MeleeCount}",
-            $"RANGED  : {tracker.RangedCount}",
-            $"PARRY   : {tracker.ParryCount}",
-            $"DASH    : {tracker.DashCount}"
+            $"[01] melee.sample      {tracker.MeleeCount:D2}",
+            $"[02] ranged.sample     {tracker.RangedCount:D2}",
+            $"[03] mobility.profile  {tracker.GetMobilityLabel()}",
+            $"[04] evade.vector      {tracker.GetEvasionLabel()}",
+            $"[05] parry.inject      {tracker.ParrySuccessCount}/{tracker.ParryCount}",
+            $"[06] data.integrity    {tracker.DataIntegrity * 100f:F0}%"
         };
 
         string acc = "";
@@ -98,7 +100,7 @@ public class AnalysisUI : MonoBehaviour
         }
 
         // ── 4) 뜸들이기 ──
-        if (styleLabel != null) styleLabel.text = "DOMINANT STYLE";
+        if (styleLabel != null) styleLabel.text = "> dominant_profile";
         yield return new WaitForSecondsRealtime(suspenseDelay);
 
         // ── 5) 스타일 공개 ──
@@ -109,7 +111,7 @@ public class AnalysisUI : MonoBehaviour
         }
         yield return new WaitForSecondsRealtime(suspenseDelay);
 
-        // ── 6) 로딩 점 애니메이션 ──
+        // ── 6) 보스가 실제로 장착할 카운터를 공개 ──
         float t = 0f;
         int dots = 0;
         while (t < loadingTime)
@@ -126,7 +128,7 @@ public class AnalysisUI : MonoBehaviour
         if (protocolText != null)
         {
             protocolText.color = completeColor;
-            protocolText.text = completeLine;
+            protocolText.text = completeLine + "\n" + tracker.GetCounterProtocolLabel();
         }
         yield return new WaitForSecondsRealtime(completeHold);
 

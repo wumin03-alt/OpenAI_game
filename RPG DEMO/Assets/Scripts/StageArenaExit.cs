@@ -26,22 +26,16 @@ public sealed class StageArenaExit : MonoBehaviour
         SetGateVisual(false);
     }
 
-    private void OnEnable()
-    {
-        if (waveController != null)
-            waveController.StageCleared += Unlock;
-    }
-
     private void Start()
     {
         if (waveController != null && waveController.IsCleared)
             Unlock();
     }
 
-    private void OnDisable()
+    private void Update()
     {
-        if (waveController != null)
-            waveController.StageCleared -= Unlock;
+        if (!IsUnlocked && waveController != null && waveController.IsCleared)
+            Unlock();
     }
 
     public void Unlock()

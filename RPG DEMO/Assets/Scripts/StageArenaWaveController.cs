@@ -21,9 +21,6 @@ public sealed class StageArenaWaveController : MonoBehaviour
     [SerializeField, Min(0f)] private float nextWaveDelay = 1.25f;
     [SerializeField] private WaveDefinition[] waves = CreateDefaultWaves();
 
-    public event Action<int> WaveStarted;
-    public event Action StageCleared;
-
     public int CurrentWave { get; private set; }
     public bool IsCleared { get; private set; }
 
@@ -73,7 +70,6 @@ public sealed class StageArenaWaveController : MonoBehaviour
         if (CurrentWave >= waves.Length)
         {
             IsCleared = true;
-            StageCleared?.Invoke();
             Debug.Log("[StageArenaWaveController] Stage clear. Exit unlocked.");
             return;
         }
@@ -128,7 +124,6 @@ public sealed class StageArenaWaveController : MonoBehaviour
         }
 
         waitingForWaveClear = true;
-        WaveStarted?.Invoke(CurrentWave);
         Debug.Log($"[StageArenaWaveController] Wave {CurrentWave}/{waves.Length} started.");
     }
 

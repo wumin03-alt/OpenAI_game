@@ -1,0 +1,312 @@
+fileFormatVersion: 2
+guid: 79a842498dcc49e41b90c37b988172d4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6015430452181834720
+    second: SPR_CyberDragon_AnimationStrip_Raw_0
+  - first:
+      213: 6027660134138090029
+    second: SPR_CyberDragon_AnimationStrip_Raw_1
+  - first:
+      213: 3913851581097917900
+    second: SPR_CyberDragon_AnimationStrip_Raw_2
+  - first:
+      213: 7192746990618021048
+    second: SPR_CyberDragon_AnimationStrip_Raw_3
+  - first:
+      213: 851008467757591153
+    second: SPR_CyberDragon_AnimationStrip_Raw_4
+  - first:
+      213: -8601257535977887927
+    second: SPR_CyberDragon_AnimationStrip_Raw_5
+  - first:
+      213: 111251806209916403
+    second: SPR_CyberDragon_AnimationStrip_Raw_6
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SPR_CyberDragon_AnimationStrip_Raw_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 37
+        width: 373
+        height: 653
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02462a6ffd5e48ca0800000000000000
+      internalID: -6015430452181834720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CyberDragon_AnimationStrip_Raw_1
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 19
+        width: 313
+        height: 580
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d229512c4fc86a350800000000000000
+      internalID: 6027660134138090029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CyberDragon_AnimationStrip_Raw_2
+      rect:
+        serializedVersion: 2
+        x: 706
+        y: 21
+        width: 366
+        height: 649
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccd31fac64bc05630800000000000000
+      internalID: 3913851581097917900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CyberDragon_AnimationStrip_Raw_3
+      rect:
+        serializedVersion: 2
+        x: 1043
+        y: 75
+        width: 406
+        height: 424
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bc0c077745c1d360800000000000000
+      internalID: 7192746990618021048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CyberDragon_AnimationStrip_Raw_4
+      rect:
+        serializedVersion: 2
+        x: 1376
+        y: 57
+        width: 411
+        height: 581
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17a6a8d41b36fcb00800000000000000
+      internalID: 851008467757591153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CyberDragon_AnimationStrip_Raw_5
+      rect:
+        serializedVersion: 2
+        x: 1512
+        y: 87
+        width: 16
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 947e26aa7d132a880800000000000000
+      internalID: -8601257535977887927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CyberDragon_AnimationStrip_Raw_6
+      rect:
+        serializedVersion: 2
+        x: 1810
+        y: 15
+        width: 362
+        height: 671
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fd33c5adee3b8100800000000000000
+      internalID: 111251806209916403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SPR_CyberDragon_AnimationStrip_Raw_0: -6015430452181834720
+      SPR_CyberDragon_AnimationStrip_Raw_1: 6027660134138090029
+      SPR_CyberDragon_AnimationStrip_Raw_2: 3913851581097917900
+      SPR_CyberDragon_AnimationStrip_Raw_3: 7192746990618021048
+      SPR_CyberDragon_AnimationStrip_Raw_4: 851008467757591153
+      SPR_CyberDragon_AnimationStrip_Raw_5: -8601257535977887927
+      SPR_CyberDragon_AnimationStrip_Raw_6: 111251806209916403
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
