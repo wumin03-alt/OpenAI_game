@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 74b31734607ee8948bbcd3f8f8607f06
+guid: 7b849e67f52243f4180eb694e68de503
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6705223757034052023
-    second: SPR_OfficeWorker_Frame_02_0
+      213: 5522628487549477544
+    second: SPR_OfficeWorker_Frame_01_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +72,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 512
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -109,16 +109,29 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 512
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SPR_OfficeWorker_Frame_02_0
+      name: SPR_OfficeWorker_Frame_01_0
       rect:
         serializedVersion: 2
-        x: 48
+        x: 54
         y: 0
-        width: 131
+        width: 130
         height: 256
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -128,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7b956813b7dbd0d50800000000000000
-      internalID: 6705223757034052023
+      spriteID: 8a2e6da695154ac40800000000000000
+      internalID: 5522628487549477544
       vertices: []
       indices: 
       edges: []
@@ -148,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SPR_OfficeWorker_Frame_02_0: 6705223757034052023
+      SPR_OfficeWorker_Frame_01_0: 5522628487549477544
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
