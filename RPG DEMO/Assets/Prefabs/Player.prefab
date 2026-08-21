@@ -117,6 +117,7 @@ GameObject:
   - component: {fileID: 2261863406042718281}
   - component: {fileID: 1550754604106996124}
   - component: {fileID: 8124491738491027311}
+  - component: {fileID: 1838588047256329091}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -309,6 +310,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatTracker
   isRecording: 1
   minSampleCount: 4
+  movementSampleInterval: 0.1
+  corruptionPerParry: 0.18
   debugReportKey: 1
   logEveryAction: 0
 --- !u!114 &8124491738491027311
@@ -321,7 +324,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f0be2059c019461cbb1128d8231cc399, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Core.PlayerRespawn
   respawnDelay: 1.4
   debrisCount: 12
@@ -329,6 +332,26 @@ MonoBehaviour:
   explosionForce: 7
   upwardForce: 4
   debrisGravity: 2.5
+--- !u!114 &1838588047256329091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3058643352853835719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf7a658390c2bd242bb6b2915fdf6e53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatVFX
+  player: {fileID: 3714572559608300473}
+  tracker: {fileID: 1550754604106996124}
+  attackBurst: {fileID: 21300000, guid: 69be155d13b578245a9d1127e88978ec, type: 3}
+  parryRing: {fileID: 21300000, guid: 7c77e769b0e50924c81103b13e62dc76, type: 3}
+  sortingOrder: 14
+  rangedScale: 0.32
+  meleeScale: 0.38
+  parryScale: 0.48
 --- !u!1 &3993095235277698760
 GameObject:
   m_ObjectHideFlags: 0
@@ -339,6 +362,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4188887094865168853}
   - component: {fileID: 1742894634528590551}
+  - component: {fileID: 1754182889270837161}
   m_Layer: 7
   m_Name: Visual
   m_TagString: Untagged
@@ -355,8 +379,8 @@ Transform:
   m_GameObject: {fileID: 3993095235277698760}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 1.4, z: 1}
+  m_LocalPosition: {x: 0, y: -0.72, z: 0}
+  m_LocalScale: {x: 0.78, y: 0.78, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1669877307630776854}
@@ -408,9 +432,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -9095717837082945937, guid: 207ee8102dd4143d288186ef0be518ee, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7b849e67f52243f4180eb694e68de503, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -420,6 +444,38 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1754182889270837161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3993095235277698760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 190811c715ee5124a8817abcf1d349ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpriteAnimator
+  targetRenderer: {fileID: 1742894634528590551}
+  player: {fileID: 3714572559608300473}
+  playerBody: {fileID: 7081294255287934019}
+  idleFrames:
+  - {fileID: 21300000, guid: 7b849e67f52243f4180eb694e68de503, type: 3}
+  - {fileID: 21300000, guid: 74b31734607ee8948bbcd3f8f8607f06, type: 3}
+  moveFrames:
+  - {fileID: 21300000, guid: 9e807fe12c9bbff418b80dd06db5cd44, type: 3}
+  - {fileID: 21300000, guid: 7db68a0a66e67c546b738184341960f0, type: 3}
+  - {fileID: 21300000, guid: ce9f1a6f6df4caf4ab61e6f216aa5537, type: 3}
+  - {fileID: 21300000, guid: 9980adc3f1539774fa1b87cbd3b61b67, type: 3}
+  attackFrames:
+  - {fileID: 21300000, guid: 6ee5ee6d802460c44841c79f054c298e, type: 3}
+  - {fileID: 21300000, guid: 648fb99287c477141a1d819f9221c7d5, type: 3}
+  crouchFrames:
+  - {fileID: 21300000, guid: f37401da433647e40ad8a65bf2a1e0b4, type: 3}
+  - {fileID: 21300000, guid: 4ed82ea8c0de12e47947bcd01b734cd3, type: 3}
+  idleFps: 2.4
+  moveFps: 10
+  attackFps: 12
 --- !u!1 &8860851074096285175
 GameObject:
   m_ObjectHideFlags: 0

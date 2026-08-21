@@ -12,8 +12,8 @@ public static class BossArenaPresentationSetup
 {
     private const string ScenePath = "Assets/Scenes/BossArena.unity";
     private const string ArtRoot = "Assets/Art/BossArena";
-    private const string FontSourcePath = ArtRoot + "/Fonts/NotoSansKR-Variable.ttf";
-    private const string FontAssetPath = ArtRoot + "/Fonts/NotoSansKR-BossArena SDF.asset";
+    private const string FontSourcePath = "Assets/Art/Common/Fonts/NotoSansKR-Variable.ttf";
+    private const string FontAssetPath = "Assets/Art/Common/Fonts/NotoSansKR-BossArena SDF.asset";
 
     [MenuItem("Tools/Boss Arena/Apply Korean AI Core Presentation")]
     public static void Apply()
@@ -39,18 +39,12 @@ public static class BossArenaPresentationSetup
     {
         ConfigureSprite(ArtRoot + "/Environment/SPR_AICoreChamber_Background.png", 67.2f, new Vector2(0.5f, 0.5f), 2048);
 
-        for (int i = 1; i <= 8; i++)
-            ConfigureSprite($"{ArtRoot}/Player/SPR_OfficeWorker_Frame_{i:00}.png", 100f, new Vector2(0.5f, 0f), 512);
-        for (int i = 1; i <= 2; i++)
-            ConfigureSprite($"{ArtRoot}/Player/SPR_OfficeWorker_Crouch_{i:00}.png", 100f, new Vector2(0.5f, 0f), 512);
         for (int i = 1; i <= 6; i++)
             ConfigureSprite($"{ArtRoot}/Boss/SPR_CyberDragon_Frame_{i:00}.png", 100f, new Vector2(0.5f, 0f), 1024);
         for (int i = 1; i <= 3; i++)
             ConfigureSprite($"{ArtRoot}/Platforms/SPR_AICorePlatform_{i:00}.png", 100f, new Vector2(0.5f, 0f), 1024);
 
-        ConfigureSprite(ArtRoot + "/VFX/SPR_Player_RangedBurst.png", 100f, new Vector2(0.5f, 0.5f), 1024);
         ConfigureSprite(ArtRoot + "/VFX/SPR_Boss_CoreCharge.png", 100f, new Vector2(0.5f, 0.5f), 1024);
-        ConfigureSprite(ArtRoot + "/VFX/SPR_Parry_SuccessRing.png", 100f, new Vector2(0.5f, 0.5f), 1024);
     }
 
     private static void ConfigureSprite(string path, float pixelsPerUnit, Vector2 pivot, int maxSize)
@@ -159,28 +153,6 @@ public static class BossArenaPresentationSetup
 
     private static void ConfigureActors(Scene scene)
     {
-        PlayerController player = scene.GetRootGameObjects()
-            .SelectMany(root => root.GetComponentsInChildren<PlayerController>(true)).FirstOrDefault();
-        if (player != null)
-        {
-            SpriteRenderer renderer = player.GetComponentInChildren<SpriteRenderer>(true);
-            if (renderer != null)
-            {
-                Sprite[] frames = LoadFrames("Player/SPR_OfficeWorker_Frame_", 8);
-                Sprite[] crouchFrames = LoadFrames("Player/SPR_OfficeWorker_Crouch_", 2);
-                renderer.sprite = frames[0];
-                renderer.sortingOrder = 5;
-                renderer.transform.localPosition = new Vector3(0f, -0.72f, 0f);
-                renderer.transform.localScale = new Vector3(0.78f, 0.78f, 1f);
-
-                BossArenaSpriteAnimator animator = renderer.GetComponent<BossArenaSpriteAnimator>();
-                if (animator == null) animator = renderer.gameObject.AddComponent<BossArenaSpriteAnimator>();
-                animator.ConfigurePlayer(renderer, player, player.GetComponent<Rigidbody2D>(),
-                    frames.Take(2).ToArray(), frames.Skip(2).Take(4).ToArray(),
-                    frames.Skip(6).Take(2).ToArray(), crouchFrames);
-            }
-        }
-
         BossController boss = scene.GetRootGameObjects()
             .SelectMany(root => root.GetComponentsInChildren<BossController>(true)).FirstOrDefault();
         if (boss != null)
@@ -209,13 +181,9 @@ public static class BossArenaPresentationSetup
         GameObject presentation = FindSceneObject(scene, "BossArenaPresentation");
         if (presentation != null)
         {
-            PlayerCombatTracker tracker = scene.GetRootGameObjects()
-                .SelectMany(root => root.GetComponentsInChildren<PlayerCombatTracker>(true)).FirstOrDefault();
             BossArenaCombatVFX vfx = presentation.AddComponent<BossArenaCombatVFX>();
-            vfx.Configure(player, boss, tracker,
-                AssetDatabase.LoadAssetAtPath<Sprite>(ArtRoot + "/VFX/SPR_Player_RangedBurst.png"),
-                AssetDatabase.LoadAssetAtPath<Sprite>(ArtRoot + "/VFX/SPR_Boss_CoreCharge.png"),
-                AssetDatabase.LoadAssetAtPath<Sprite>(ArtRoot + "/VFX/SPR_Parry_SuccessRing.png"));
+            vfx.Configure(boss,
+                AssetDatabase.LoadAssetAtPath<Sprite>(ArtRoot + "/VFX/SPR_Boss_CoreCharge.png"));
         }
     }
 
@@ -269,11 +237,8 @@ public static class BossArenaPresentationSetup
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        StyleHealthBar(scene, "PlayerHPBar", new Vector2(48f, -56f), new Vector2(360f, 30f),
-            "해고된 직장인 · 생존력", font, new Color(0.22f, 0.95f, 0.68f), new Color(1f, 0.28f, 0.36f));
         StyleHealthBar(scene, "BossHPBar", new Vector2(0f, -42f), new Vector2(940f, 34f),
             null, font, new Color(1f, 0.22f, 0.45f), new Color(0.52f, 0.08f, 0.18f));
-        BuildControlsBadge(canvas.transform, font);
         StyleAnalysisPanel(scene);
     }
 
