@@ -10,13 +10,27 @@ using UnityEngine;
 /// </summary>
 public sealed class StageArenaWaveController : MonoBehaviour
 {
+    private enum EnemyType
+    {
+        Grunt,
+        Ranged
+    }
+
+    [Serializable]
+    private sealed class SpawnDefinition
+    {
+        public EnemyType enemyType;
+        public Vector2 spawnPoint;
+    }
+
     [Serializable]
     private sealed class WaveDefinition
     {
-        public Vector2[] spawnPoints;
+        public SpawnDefinition[] spawns;
     }
 
     [SerializeField] private GameObject gruntPrefab;
+    [SerializeField] private GameObject rangedPrefab;
     [SerializeField] private Transform enemyContainer;
     [SerializeField, Min(0f)] private float nextWaveDelay = 1.25f;
     [SerializeField] private WaveDefinition[] waves = CreateDefaultWaves();
@@ -94,7 +108,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
             return;
         }
 
-        if (waves[waveIndex].spawnPoints == null || waves[waveIndex].spawnPoints.Length == 0)
+        if (waves[waveIndex].spawns == null || waves[waveIndex].spawns.Length == 0)
         {
             Debug.LogError($"[Stage01] Wave {waveIndex + 1} has no spawn points.", this);
             enabled = false;
@@ -102,15 +116,23 @@ public sealed class StageArenaWaveController : MonoBehaviour
         }
 
         CurrentWave = waveIndex + 1;
-        Debug.Log($"[Stage01] Spawn count = {waves[waveIndex].spawnPoints.Length}", this);
-        foreach (Vector2 spawnPoint in waves[waveIndex].spawnPoints)
+        Debug.Log($"[Stage01] Spawn count = {waves[waveIndex].spawns.Length}", this);
+        foreach (SpawnDefinition spawn in waves[waveIndex].spawns)
         {
-            Debug.Log($"[Stage01] Instantiate Grunt at ({spawnPoint.x}, {spawnPoint.y})", this);
+            GameObject prefab = GetPrefab(spawn.enemyType);
+            if (prefab == null)
+            {
+                Debug.LogError($"[Stage01] Wave {CurrentWave} cannot spawn {spawn.enemyType}: prefab is missing.", this);
+                enabled = false;
+                return;
+            }
+
+            Debug.Log($"[Stage01] Instantiate {spawn.enemyType} at ({spawn.spawnPoint.x}, {spawn.spawnPoint.y})", this);
 
             GameObject enemy;
             try
             {
-                enemy = Instantiate(gruntPrefab, spawnPoint, Quaternion.identity, enemyContainer);
+                enemy = Instantiate(prefab, spawn.spawnPoint, Quaternion.identity, enemyContainer);
             }
             catch (Exception exception)
             {
@@ -119,7 +141,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
                 return;
             }
 
-            enemy.name = $"Wave_{CurrentWave}_Grunt";
+            enemy.name = $"Wave_{CurrentWave}_{spawn.enemyType}";
             livingEnemies.Add(enemy);
         }
 
@@ -141,8 +163,14 @@ public sealed class StageArenaWaveController : MonoBehaviour
         if (waves == null || waves.Length == 0) return false;
         for (int i = 0; i < waves.Length; i++)
         {
-            if (waves[i] == null || waves[i].spawnPoints == null || waves[i].spawnPoints.Length == 0)
+            if (waves[i] == null || waves[i].spawns == null || waves[i].spawns.Length == 0)
                 return false;
+
+            for (int j = 0; j < waves[i].spawns.Length; j++)
+            {
+                if (waves[i].spawns[j] == null)
+                    return false;
+            }
         }
 
         return true;
@@ -152,16 +180,47 @@ public sealed class StageArenaWaveController : MonoBehaviour
     {
         return new[]
         {
-            new WaveDefinition { spawnPoints = new[] { new Vector2(-8.5f, -2.0f), new Vector2(8.5f, -2.0f) } },
-            new WaveDefinition { spawnPoints = new[] { new Vector2(-7.5f, 2.85f), new Vector2(0f, 0.6f), new Vector2(9.5f, -2.0f) } },
             new WaveDefinition
             {
-                spawnPoints = new[]
+                spawns = new[]
                 {
-                    new Vector2(-10.5f, -2.0f), new Vector2(10.5f, -2.0f),
-                    new Vector2(-7.2f, 2.85f), new Vector2(7.2f, 2.85f)
+                    Spawn(EnemyType.Grunt, -8.5f, -2.0f),
+                    Spawn(EnemyType.Grunt, 8.5f, -2.0f)
+                }
+            },
+            new WaveDefinition
+            {
+                spawns = new[]
+                {
+                    Spawn(EnemyType.Grunt, -7.5f, 2.85f),
+                    Spawn(EnemyType.Grunt, 0f, 0.6f),
+                    Spawn(EnemyType.Ranged, 9.5f, -2.0f)
+                }
+            },
+            new WaveDefinition
+            {
+                spawns = new[]
+                {
+                    Spawn(EnemyType.Grunt, -10.5f, -2.0f),
+                    Spawn(EnemyType.Grunt, 10.5f, -2.0f),
+                    Spawn(EnemyType.Ranged, -7.2f, 2.85f),
+                    Spawn(EnemyType.Ranged, 7.2f, 2.85f)
                 }
             }
+        };
+    }
+
+    private GameObject GetPrefab(EnemyType enemyType)
+    {
+        return enemyType == EnemyType.Ranged ? rangedPrefab : gruntPrefab;
+    }
+
+    private static SpawnDefinition Spawn(EnemyType enemyType, float x, float y)
+    {
+        return new SpawnDefinition
+        {
+            enemyType = enemyType,
+            spawnPoint = new Vector2(x, y)
         };
     }
 }

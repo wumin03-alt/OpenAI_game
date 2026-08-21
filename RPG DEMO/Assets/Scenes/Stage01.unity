@@ -2158,6 +2158,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2110000011}
   - component: {fileID: 2110000012}
+  - component: {fileID: 2110000013}
   m_Layer: 0
   m_Name: Stage01_Waves
   m_TagString: Untagged
@@ -2193,21 +2194,49 @@ MonoBehaviour:
   m_Name: ''
   m_EditorClassIdentifier: Assembly-CSharp::StageArenaWaveController
   gruntPrefab: {fileID: 582121387903121166, guid: 9e5736c203bde2f4cbd0878574016ded, type: 3}
+  rangedPrefab: {fileID: 100000000000000001, guid: 3b4c5d6e7f8091a2b3c4d5e6f708192a, type: 3}
   enemyContainer: {fileID: 1530536846}
   nextWaveDelay: 1.25
   waves:
-  - spawnPoints:
-    - {x: -8.5, y: -2}
-    - {x: 8.5, y: -2}
-  - spawnPoints:
-    - {x: -7.5, y: 2.85}
-    - {x: 0, y: 0.6}
-    - {x: 9.5, y: -2}
-  - spawnPoints:
-    - {x: -10.5, y: -2}
-    - {x: 10.5, y: -2}
-    - {x: -7.2, y: 2.85}
-    - {x: 7.2, y: 2.85}
+  - spawns:
+    - enemyType: 0
+      spawnPoint: {x: -8.5, y: -2}
+    - enemyType: 0
+      spawnPoint: {x: 8.5, y: -2}
+  - spawns:
+    - enemyType: 0
+      spawnPoint: {x: -7.5, y: 2.85}
+    - enemyType: 0
+      spawnPoint: {x: 0, y: 0.6}
+    - enemyType: 1
+      spawnPoint: {x: 9.5, y: -2}
+  - spawns:
+    - enemyType: 0
+      spawnPoint: {x: -10.5, y: -2}
+    - enemyType: 0
+      spawnPoint: {x: 10.5, y: -2}
+    - enemyType: 1
+      spawnPoint: {x: -7.2, y: 2.85}
+    - enemyType: 1
+      spawnPoint: {x: 7.2, y: 2.85}
+--- !u!114 &2110000013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2110000010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d9a2c8f4b1e4375a3c6d8e0f2a4b691, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::StageWaveAnnouncement
+  stageCanvas: {fileID: 423002318}
+  fadeInDuration: 0.12
+  holdDuration: 0.72
+  fadeOutDuration: 0.26
+  startScale: 0.9
+  overshootScale: 1.05
 --- !u!1 &2110000020
 GameObject:
   m_ObjectHideFlags: 0
