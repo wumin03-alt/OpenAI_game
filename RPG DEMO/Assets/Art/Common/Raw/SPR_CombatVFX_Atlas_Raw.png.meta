@@ -1,43 +1,55 @@
 fileFormatVersion: 2
-guid: cdeb6c2347730fa4cb562ea692b440aa
+guid: 4a59b8ad4441fa645b071b3cfcc373f5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5577437258299445969
-    second: SPR_OfficeWorker_CrouchStrip_0
+      213: 1674197606987254662
+    second: SPR_CombatVFX_Atlas_Raw_0
   - first:
-      213: -7238573781028059449
-    second: SPR_OfficeWorker_CrouchStrip_1
+      213: -4223927428776402231
+    second: SPR_CombatVFX_Atlas_Raw_1
   - first:
-      213: -9104080365622405222
-    second: SPR_OfficeWorker_CrouchStrip_2
+      213: -1615226364474471280
+    second: SPR_CombatVFX_Atlas_Raw_2
   - first:
-      213: -6197452239981941434
-    second: SPR_OfficeWorker_CrouchStrip_3
+      213: -7203862598093008731
+    second: SPR_CombatVFX_Atlas_Raw_3
   - first:
-      213: 5020919967904982265
-    second: SPR_OfficeWorker_CrouchStrip_4
+      213: 2925504636342295106
+    second: SPR_CombatVFX_Atlas_Raw_4
   - first:
-      213: -993421128217032152
-    second: SPR_OfficeWorker_CrouchStrip_5
+      213: -8632483620059146148
+    second: SPR_CombatVFX_Atlas_Raw_5
   - first:
-      213: -1621822446925710724
-    second: SPR_OfficeWorker_CrouchStrip_6
+      213: 274508807266650744
+    second: SPR_CombatVFX_Atlas_Raw_6
   - first:
-      213: 2298723521537727353
-    second: SPR_OfficeWorker_CrouchStrip_7
+      213: -2904239418545919766
+    second: SPR_CombatVFX_Atlas_Raw_7
   - first:
-      213: -2512543143150638868
-    second: SPR_OfficeWorker_CrouchStrip_8
+      213: 617250836097044632
+    second: SPR_CombatVFX_Atlas_Raw_8
   - first:
-      213: 4455884055923363677
-    second: SPR_OfficeWorker_CrouchStrip_9
+      213: -2658728904285494241
+    second: SPR_CombatVFX_Atlas_Raw_9
   - first:
-      213: 7982104393288492657
-    second: SPR_OfficeWorker_CrouchStrip_10
+      213: 4994527142368078692
+    second: SPR_CombatVFX_Atlas_Raw_10
   - first:
-      213: -3941293692121037920
-    second: SPR_OfficeWorker_CrouchStrip_11
+      213: -5203872437659287100
+    second: SPR_CombatVFX_Atlas_Raw_11
+  - first:
+      213: 6087176535655759889
+    second: SPR_CombatVFX_Atlas_Raw_12
+  - first:
+      213: -5476870375023529068
+    second: SPR_CombatVFX_Atlas_Raw_13
+  - first:
+      213: 1456099147485099386
+    second: SPR_CombatVFX_Atlas_Raw_14
+  - first:
+      213: -1931757731467557
+    second: SPR_CombatVFX_Atlas_Raw_15
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -142,17 +154,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_0
+      name: SPR_CombatVFX_Atlas_Raw_0
       rect:
         serializedVersion: 2
-        x: 99
-        y: 31
-        width: 872
-        height: 836
+        x: 14
+        y: 0
+        width: 682
+        height: 704
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -161,20 +186,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1d297f9c2a9076d40800000000000000
-      internalID: 5577437258299445969
+      spriteID: 68bc8407ad1fb3710800000000000000
+      internalID: 1674197606987254662
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_1
+      name: SPR_CombatVFX_Atlas_Raw_1
       rect:
         serializedVersion: 2
-        x: 1332
-        y: 838
-        width: 40
-        height: 31
+        x: 352
+        y: 691
+        width: 90
+        height: 17
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -183,64 +208,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7c6cd5d6f7b6b8b90800000000000000
-      internalID: -7238573781028059449
+      spriteID: 9c2e0c202689165c0800000000000000
+      internalID: -4223927428776402231
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_2
+      name: SPR_CombatVFX_Atlas_Raw_2
       rect:
         serializedVersion: 2
-        x: 855
-        y: 656
-        width: 13
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a97d778942fc7a180800000000000000
-      internalID: -9104080365622405222
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_3
-      rect:
-        serializedVersion: 2
-        x: 1028
-        y: 18
-        width: 727
-        height: 815
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 64d6d63f50a3ef9a0800000000000000
-      internalID: -6197452239981941434
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_4
-      rect:
-        serializedVersion: 2
-        x: 1636
-        y: 564
+        x: 641
+        y: 680
         width: 22
-        height: 27
+        height: 24
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -249,20 +230,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9f464acdb14eda540800000000000000
-      internalID: 5020919967904982265
+      spriteID: 09c47a9ed209599e0800000000000000
+      internalID: -1615226364474471280
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_5
+      name: SPR_CombatVFX_Atlas_Raw_3
       rect:
         serializedVersion: 2
-        x: 919
-        y: 459
-        width: 66
-        height: 27
+        x: 708
+        y: 0
+        width: 785
+        height: 724
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -271,20 +252,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 82a814c4fb8a632f0800000000000000
-      internalID: -993421128217032152
+      spriteID: 5a091fd722db60c90800000000000000
+      internalID: -7203862598093008731
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_6
+      name: SPR_CombatVFX_Atlas_Raw_4
       rect:
         serializedVersion: 2
-        x: 935
-        y: 307
-        width: 28
-        height: 48
+        x: 1494
+        y: 25
+        width: 678
+        height: 675
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -293,20 +274,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c7afc3ac3112e79e0800000000000000
-      internalID: -1621822446925710724
+      spriteID: 24ad0fd77fa799820800000000000000
+      internalID: 2925504636342295106
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_7
+      name: SPR_CombatVFX_Atlas_Raw_5
       rect:
         serializedVersion: 2
-        x: 193
-        y: 203
-        width: 8
-        height: 7
+        x: 617
+        y: 665
+        width: 10
+        height: 9
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -315,40 +296,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 97b571a1dd4b6ef10800000000000000
-      internalID: 2298723521537727353
+      spriteID: c581ff862e1433880800000000000000
+      internalID: -8632483620059146148
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_8
+      name: SPR_CombatVFX_Atlas_Raw_6
       rect:
         serializedVersion: 2
-        x: 199
-        y: 199
-        width: 6
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ce8a9a5c257a12dd0800000000000000
-      internalID: -2512543143150638868
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_9
-      rect:
-        serializedVersion: 2
-        x: 197
-        y: 196
+        x: 608
+        y: 634
         width: 6
         height: 6
       alignment: 0
@@ -359,20 +318,130 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d5f83a9c0fa76dd30800000000000000
-      internalID: 4455884055923363677
+      spriteID: 87a48d84e404fc300800000000000000
+      internalID: 274508807266650744
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_10
+      name: SPR_CombatVFX_Atlas_Raw_7
       rect:
         serializedVersion: 2
-        x: 435
+        x: 627
+        y: 640
+        width: 12
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae822ead2a112b7d0800000000000000
+      internalID: -2904239418545919766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_8
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 95
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89090e67d5ae09800800000000000000
+      internalID: 617250836097044632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_9
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 38
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f14eff9e52c4a1bd0800000000000000
+      internalID: -2658728904285494241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_10
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 47
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46b65ed49ff105540800000000000000
+      internalID: 4994527142368078692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_11
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 31
+        width: 14
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c14fd8d69128c7b0800000000000000
+      internalID: -5203872437659287100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_12
+      rect:
+        serializedVersion: 2
+        x: 1569
         y: 0
-        width: 34
-        height: 38
+        width: 23
+        height: 33
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -381,20 +450,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 176ab0a97a126ce60800000000000000
-      internalID: 7982104393288492657
+      spriteID: 110cad4decef97450800000000000000
+      internalID: 6087176535655759889
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SPR_OfficeWorker_CrouchStrip_11
+      name: SPR_CombatVFX_Atlas_Raw_13
       rect:
         serializedVersion: 2
-        x: 758
-        y: 23
-        width: 11
-        height: 21
+        x: 635
+        y: 15
+        width: 6
+        height: 7
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -403,8 +472,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0a343a5d446bd49c0800000000000000
-      internalID: -3941293692121037920
+      spriteID: 493bcdf596f3ef3b0800000000000000
+      internalID: -5476870375023529068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_14
+      rect:
+        serializedVersion: 2
+        x: 1520
+        y: 0
+        width: 38
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a75399bb57a153410800000000000000
+      internalID: 1456099147485099386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_CombatVFX_Atlas_Raw_15
+      rect:
+        serializedVersion: 2
+        x: 1541
+        y: 21
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdeaf9a931329fff0800000000000000
+      internalID: -1931757731467557
       vertices: []
       indices: 
       edges: []
@@ -423,18 +536,22 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SPR_OfficeWorker_CrouchStrip_0: 5577437258299445969
-      SPR_OfficeWorker_CrouchStrip_1: -7238573781028059449
-      SPR_OfficeWorker_CrouchStrip_10: 7982104393288492657
-      SPR_OfficeWorker_CrouchStrip_11: -3941293692121037920
-      SPR_OfficeWorker_CrouchStrip_2: -9104080365622405222
-      SPR_OfficeWorker_CrouchStrip_3: -6197452239981941434
-      SPR_OfficeWorker_CrouchStrip_4: 5020919967904982265
-      SPR_OfficeWorker_CrouchStrip_5: -993421128217032152
-      SPR_OfficeWorker_CrouchStrip_6: -1621822446925710724
-      SPR_OfficeWorker_CrouchStrip_7: 2298723521537727353
-      SPR_OfficeWorker_CrouchStrip_8: -2512543143150638868
-      SPR_OfficeWorker_CrouchStrip_9: 4455884055923363677
+      SPR_CombatVFX_Atlas_Raw_0: 1674197606987254662
+      SPR_CombatVFX_Atlas_Raw_1: -4223927428776402231
+      SPR_CombatVFX_Atlas_Raw_10: 4994527142368078692
+      SPR_CombatVFX_Atlas_Raw_11: -5203872437659287100
+      SPR_CombatVFX_Atlas_Raw_12: 6087176535655759889
+      SPR_CombatVFX_Atlas_Raw_13: -5476870375023529068
+      SPR_CombatVFX_Atlas_Raw_14: 1456099147485099386
+      SPR_CombatVFX_Atlas_Raw_15: -1931757731467557
+      SPR_CombatVFX_Atlas_Raw_2: -1615226364474471280
+      SPR_CombatVFX_Atlas_Raw_3: -7203862598093008731
+      SPR_CombatVFX_Atlas_Raw_4: 2925504636342295106
+      SPR_CombatVFX_Atlas_Raw_5: -8632483620059146148
+      SPR_CombatVFX_Atlas_Raw_6: 274508807266650744
+      SPR_CombatVFX_Atlas_Raw_7: -2904239418545919766
+      SPR_CombatVFX_Atlas_Raw_8: 617250836097044632
+      SPR_CombatVFX_Atlas_Raw_9: -2658728904285494241
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,19 +1,10 @@
 fileFormatVersion: 2
-guid: 7c77e769b0e50924c81103b13e62dc76
+guid: f37401da433647e40ad8a65bf2a1e0b4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1333213061793201317
-    second: SPR_Parry_SuccessRing_0
-  - first:
-      213: 1554854934103400073
-    second: SPR_Parry_SuccessRing_1
-  - first:
-      213: 4821590270239732136
-    second: SPR_Parry_SuccessRing_2
-  - first:
-      213: 5065395935432439906
-    second: SPR_Parry_SuccessRing_3
+      213: -2039802125139318991
+    second: SPR_OfficeWorker_Crouch_01_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -59,7 +50,7 @@ TextureImporter:
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.5}
+  spritePivot: {x: 0.5, y: 0}
   spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
@@ -118,39 +109,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 512
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SPR_Parry_SuccessRing_0
+      name: SPR_OfficeWorker_Crouch_01_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 25
-        width: 724
-        height: 674
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b53c7e1b8c97f7de0800000000000000
-      internalID: -1333213061793201317
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SPR_Parry_SuccessRing_1
-      rect:
-        serializedVersion: 2
-        x: 72
+        x: 35
         y: 0
-        width: 38
-        height: 26
+        width: 185
+        height: 256
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,52 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 98e1f781354f39510800000000000000
-      internalID: 1554854934103400073
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SPR_Parry_SuccessRing_2
-      rect:
-        serializedVersion: 2
-        x: 93
-        y: 21
-        width: 9
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8a17e1e0ecab9e240800000000000000
-      internalID: 4821590270239732136
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SPR_Parry_SuccessRing_3
-      rect:
-        serializedVersion: 2
-        x: 121
-        y: 0
-        width: 23
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 268782204c6eb4640800000000000000
-      internalID: 5065395935432439906
+      spriteID: 137ebf646ca21b3e0800000000000000
+      internalID: -2039802125139318991
       vertices: []
       indices: 
       edges: []
@@ -223,10 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SPR_Parry_SuccessRing_0: -1333213061793201317
-      SPR_Parry_SuccessRing_1: 1554854934103400073
-      SPR_Parry_SuccessRing_2: 4821590270239732136
-      SPR_Parry_SuccessRing_3: 5065395935432439906
+      SPR_OfficeWorker_Crouch_01_0: -2039802125139318991
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
