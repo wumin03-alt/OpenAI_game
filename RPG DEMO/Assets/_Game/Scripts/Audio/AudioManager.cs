@@ -32,6 +32,8 @@ namespace Game.Audio
         [Header("씬 전환 효과음")]
         [SerializeField] private AudioClip stageTransitionClip;
 
+        private float lastStageTransitionTime = float.NegativeInfinity;
+
         private void Awake()
         {
             if (Instance != null && Instance != this) return;
@@ -137,7 +139,18 @@ namespace Game.Audio
 
         public void PlayPlayerDeathExplosion() => PlaySfx(playerDeathExplosionClip);
 
-        public void PlayStageTransition() => PlaySfx(stageTransitionClip);
+        public void PlayStageTransition()
+        {
+            // 기존 스테이지 출구와 공통 SceneLoader가 같은 전환을 연속 요청해도
+            // 징글이 겹쳐 재생되지 않게 짧은 재생 방지 구간을 둡니다.
+            float guardTime = stageTransitionClip != null
+                ? Mathf.Max(0.5f, stageTransitionClip.length * 0.5f)
+                : 0.5f;
+            if (Time.unscaledTime - lastStageTransitionTime < guardTime) return;
+
+            lastStageTransitionTime = Time.unscaledTime;
+            PlaySfx(stageTransitionClip);
+        }
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {

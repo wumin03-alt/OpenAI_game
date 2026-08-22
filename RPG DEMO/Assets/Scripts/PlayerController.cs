@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Game.Audio;
 using UnityEngine;
 
@@ -22,6 +23,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float coyoteTime = 0.1f;
     [Tooltip("착지 직전에 누른 점프 입력을 기억하는 시간")]
     [SerializeField] private float jumpBufferTime = 0.1f;
+
+    [Header("── 단방향 발판 ──")]
+    [Tooltip("발판 위에서 ↓를 두 번 누를 때 두 입력을 하나로 인식하는 시간")]
+    [SerializeField, Min(0.05f)] private float dropTapWindow = 0.32f;
+    [Tooltip("발판 아래로 내려갈 때 주는 초기 하강 속도")]
+    [SerializeField, Min(0.1f)] private float dropThroughSpeed = 3f;
+    [Tooltip("일반 BoxCollider를 단방향 발판으로 인식할 오브젝트 이름 토큰")]
+    [SerializeField] private string platformNameToken = "Platform";
 
     [Header("── 엎드리기 (↓) ──")]
     [Tooltip("엎드린 상태의 이동 속도 배율. 0으로 두면 이동 불가")]
@@ -96,6 +105,12 @@ public class PlayerController : MonoBehaviour
     private float knockbackLeft;
     private float defaultGravity;
     private bool jumpRequested;
+    private float dropTapTimeLeft;
+    private float upwardVelocityBeforePhysics;
+
+    private readonly Dictionary<Collider2D, IgnoredPlatform> ignoredPlatforms =
+        new Dictionary<Collider2D, IgnoredPlatform>();
+    private readonly List<Collider2D> ignoredPlatformCleanup = new List<Collider2D>();
 
     private float meleeCooldownLeft;
     private float meleeHitboxBaseX;
@@ -157,6 +172,7 @@ public class PlayerController : MonoBehaviour
 
         ReadMoveInput();
         CheckGround();
+        HandleDropThroughInput();
         HandleCrouch();
         HandleJumpInput();
         HandleDash();
@@ -167,6 +183,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        UpdateIgnoredPlatforms();
 
         // 사망 후 이동 코드가 속도를 되살리는 것을 차단
         if (health != null && health.IsDead) return;
@@ -188,6 +205,8 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             jumpRequested = false;
         }
+
+        upwardVelocityBeforePhysics = rb.linearVelocity.y;
     }
 
     // ───────────────────────── 피격 반응 ─────────────────────────
@@ -234,10 +253,169 @@ public class PlayerController : MonoBehaviour
     // ───────────────────────── 접지 판정 ─────────────────────────
     private void CheckGround()
     {
-        IsGrounded = groundCheck != null &&
-                     Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer) != null;
+        Collider2D ground = groundCheck != null
+            ? Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer)
+            : null;
+        IsGrounded = ground != null && !ignoredPlatforms.ContainsKey(ground);
 
         coyoteLeft = IsGrounded ? coyoteTime : coyoteLeft - Time.deltaTime;
+    }
+
+    // ───────────────────── 단방향 발판 ───────────────────────
+    private void HandleDropThroughInput()
+    {
+        if (dropTapTimeLeft > 0f)
+            dropTapTimeLeft -= Time.deltaTime;
+
+        if (!Input.GetKeyDown(KeyCode.DownArrow)) return;
+
+        if (dropTapTimeLeft > 0f && IsGrounded && TryGetSupportingPlatform(out Collider2D platform))
+        {
+            IgnorePlatform(platform, true);
+            dropTapTimeLeft = 0f;
+            coyoteLeft = 0f;
+            jumpBufferLeft = 0f;
+            IsGrounded = false;
+
+            if (IsCrouching)
+            {
+                IsCrouching = false;
+                SetCrouchVisual(false);
+            }
+
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, -dropThroughSpeed);
+            return;
+        }
+
+        dropTapTimeLeft = dropTapWindow;
+    }
+
+    private bool TryGetSupportingPlatform(out Collider2D platform)
+    {
+        platform = null;
+        if (groundCheck == null) return false;
+
+        Collider2D[] contacts = Physics2D.OverlapCircleAll(
+            groundCheck.position, groundCheckRadius, groundLayer);
+        float highestSurface = float.NegativeInfinity;
+
+        foreach (Collider2D candidate in contacts)
+        {
+            if (!IsPassThroughPlatform(candidate) || ignoredPlatforms.ContainsKey(candidate))
+                continue;
+
+            float surface = candidate.bounds.max.y;
+            if (surface <= highestSurface) continue;
+
+            highestSurface = surface;
+            platform = candidate;
+        }
+
+        return platform != null;
+    }
+
+    private bool IsPassThroughPlatform(Collider2D candidate)
+    {
+        if (candidate == null || candidate.isTrigger) return false;
+        if ((groundLayer.value & (1 << candidate.gameObject.layer)) == 0) return false;
+        if (candidate.GetComponent<PlatformEffector2D>() != null) return true;
+
+        return !string.IsNullOrWhiteSpace(platformNameToken)
+               && candidate.name.IndexOf(platformNameToken,
+                   System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        PassThroughPlatformWhileRising(collision);
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        PassThroughPlatformWhileRising(collision);
+    }
+
+    private void PassThroughPlatformWhileRising(Collision2D collision)
+    {
+        if (upwardVelocityBeforePhysics <= 0.05f) return;
+
+        Collider2D platform = collision.collider == col
+            ? collision.otherCollider
+            : collision.collider;
+        if (!IsPassThroughPlatform(platform) || ignoredPlatforms.ContainsKey(platform)) return;
+
+        // 발판이 플레이어 위쪽에 있을 때만 아래에서 위로 통과시킵니다.
+        if (platform.bounds.center.y <= col.bounds.center.y) return;
+
+        IgnorePlatform(platform, false);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, upwardVelocityBeforePhysics);
+    }
+
+    private void IgnorePlatform(Collider2D platform, bool droppingDown)
+    {
+        Physics2D.IgnoreCollision(col, platform, true);
+        ignoredPlatforms[platform] = new IgnoredPlatform(droppingDown, Time.time + 1.5f);
+    }
+
+    private void UpdateIgnoredPlatforms()
+    {
+        if (ignoredPlatforms.Count == 0) return;
+
+        ignoredPlatformCleanup.Clear();
+        foreach (KeyValuePair<Collider2D, IgnoredPlatform> pair in ignoredPlatforms)
+        {
+            Collider2D platform = pair.Key;
+            if (platform == null)
+            {
+                ignoredPlatformCleanup.Add(platform);
+                continue;
+            }
+
+            Bounds playerBounds = col.bounds;
+            Bounds platformBounds = platform.bounds;
+            bool cleared = pair.Value.DroppingDown
+                ? playerBounds.max.y < platformBounds.min.y - 0.03f
+                : playerBounds.min.y > platformBounds.max.y + 0.03f;
+            bool safetyExpired = Time.time >= pair.Value.SafetyEndTime
+                                 && !playerBounds.Intersects(platformBounds);
+
+            if (cleared || safetyExpired)
+                ignoredPlatformCleanup.Add(platform);
+        }
+
+        foreach (Collider2D platform in ignoredPlatformCleanup)
+        {
+            if (platform != null)
+                Physics2D.IgnoreCollision(col, platform, false);
+            ignoredPlatforms.Remove(platform);
+        }
+    }
+
+    private void RestoreIgnoredPlatformCollisions()
+    {
+        foreach (Collider2D platform in ignoredPlatforms.Keys)
+        {
+            if (col != null && platform != null)
+                Physics2D.IgnoreCollision(col, platform, false);
+        }
+        ignoredPlatforms.Clear();
+    }
+
+    private void OnDisable()
+    {
+        RestoreIgnoredPlatformCollisions();
+    }
+
+    private readonly struct IgnoredPlatform
+    {
+        public readonly bool DroppingDown;
+        public readonly float SafetyEndTime;
+
+        public IgnoredPlatform(bool droppingDown, float safetyEndTime)
+        {
+            DroppingDown = droppingDown;
+            SafetyEndTime = safetyEndTime;
+        }
     }
 
     // ───────────────────────── 엎드리기 (↓) ─────────────────────────

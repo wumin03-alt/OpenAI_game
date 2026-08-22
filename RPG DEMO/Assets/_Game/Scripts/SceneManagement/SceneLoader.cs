@@ -1,4 +1,5 @@
 using System.Collections;
+using Game.Audio;
 using Game.Core;
 using Game.Save;
 using Game.UI;
@@ -42,6 +43,11 @@ namespace Game.SceneManagement
             IsLoading = true;
             Time.timeScale = 1f;
             GameManager.Instance?.SetState(GameState.Loading);
+
+            // Bootstrap 직후의 초기 로딩을 제외한 모든 정식 전환에서
+            // 오디오와 페이드가 같은 시점에 시작되도록 공통 로더가 책임집니다.
+            if (SceneManager.GetActiveScene().name != "Bootstrap")
+                AudioManager.Instance?.PlayStageTransition();
 
             if (screenFader != null)
                 yield return screenFader.FadeOut(fadeDuration);
