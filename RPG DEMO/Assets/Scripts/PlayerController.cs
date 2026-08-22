@@ -116,6 +116,7 @@ public class PlayerController : MonoBehaviour
     private float meleeHitboxBaseX;
     private float rangedCooldownLeft;
     private float firePointBaseX;
+    private GameObject activeBullet;
 
     private Vector2 standSize, standOffset, crouchSize, crouchOffset;
     private Vector3 visualStandScale, visualStandPos;
@@ -592,6 +593,13 @@ public class PlayerController : MonoBehaviour
 
         if (projectilePrefab != null && firePoint != null)
         {
+            // 이전 총알이 아직 남아있으면 제거해서 화면/히어라키에 항상 총알이 1개만 존재하도록 합니다
+            if (activeBullet != null)
+            {
+                Destroy(activeBullet);
+                activeBullet = null;
+            }
+
             // ★ 신규 ③ : 발사 방향 결정
             Vector2 shootDir = new Vector2(Facing, 0f);
             int spawnSide = Facing;
@@ -616,6 +624,7 @@ public class PlayerController : MonoBehaviour
             firePoint.localPosition = fp;
 
             GameObject go = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+            activeBullet = go;
             Projectile p = go.GetComponent<Projectile>();
             if (p != null) p.Launch(shootDir);
             AudioManager.Instance?.PlayPlayerRangedShot();
