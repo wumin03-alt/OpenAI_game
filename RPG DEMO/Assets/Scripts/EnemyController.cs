@@ -36,6 +36,11 @@ public class EnemyController : MonoBehaviour
     [Tooltip("맞았을 때 넉백이 먹히도록 잠시 이동 정지")]
     [SerializeField] private float hitStunTime = 0.25f;
 
+    [Header("── 접촉 피해 범위 ──")]
+    [Tooltip("플레이어가 근접 공격을 시도하기 전에 먼저 맞지 않도록 몸체 주변로 제한할 피해 트리거")]
+    [SerializeField] private BoxCollider2D contactDamageCollider;
+    [SerializeField] private Vector2 contactDamageSize = new Vector2(0.9f, 1.15f);
+
     [Header("── 비주얼 ──")]
     [SerializeField] private Transform visual;
 
@@ -55,6 +60,8 @@ public class EnemyController : MonoBehaviour
         health = GetComponent<Health>();
         startPos = transform.position;
 
+        NormalizeContactDamageRange();
+
         if (visual == null)
         {
             SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
@@ -64,6 +71,26 @@ public class EnemyController : MonoBehaviour
 
         // 맞았을 때 잠시 멈추도록 Health 이벤트에 자동 등록 (Inspector 연결 불필요)
         if (health != null) health.onDamaged.AddListener(OnDamaged);
+    }
+
+    private void NormalizeContactDamageRange()
+    {
+        if (contactDamageCollider == null)
+        {
+            Transform contactDamage = transform.Find("ContactDamage");
+            if (contactDamage != null)
+                contactDamageCollider = contactDamage.GetComponent<BoxCollider2D>();
+        }
+
+        // 기존 Stage01 인스턴스에 이전 1.4 값이 오버라이드되어 있어도
+        // 실행 시에는 공통 Grunt 프리팡의 안전 범위를 적용합니다.
+        if (contactDamageCollider != null)
+        {
+            Vector2 safeSize = contactDamageSize.sqrMagnitude > 0.01f
+                ? contactDamageSize
+                : new Vector2(0.9f, 1.15f);
+            contactDamageCollider.size = safeSize;
+        }
     }
 
     private void Start()
