@@ -53,7 +53,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
     [SerializeField, Min(1)] private int speedrunMaxConcurrentEnemies = 6;
     [SerializeField, Min(1f)] private float speedrunEnemyMaxHP = 20f;
     [SerializeField] private Vector2[] speedrunSpawnPoints;
-    [SerializeField] private TMP_Text speedrunHudText;
+    [SerializeField] private TMP_FontAsset speedrunHudFont;
     [SerializeField, Min(0f)] private float speedrunFailureReloadDelay = 1.5f;
 
     public int CurrentWave { get; private set; }
@@ -73,7 +73,10 @@ public sealed class StageArenaWaveController : MonoBehaviour
     private float nextSpeedrunSpawnTime;
     private int speedrunKills;
     private int speedrunSpawnIndex;
+    private int lastSpeedrunSpawnPointIndex = -1;
     private bool speedrunFailed;
+    private TextMeshProUGUI speedrunKillText;
+    private TextMeshProUGUI speedrunTimeText;
 
     private void Awake()
     {
@@ -172,6 +175,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
         CurrentWave = 1;
         speedrunTimeRemaining = speedrunTimeLimit;
         nextSpeedrunSpawnTime = Time.time;
+        CreateSpeedrunHud();
         UpdateSpeedrunHud();
     }
 
@@ -198,7 +202,8 @@ public sealed class StageArenaWaveController : MonoBehaviour
 
     private void SpawnSpeedrunEnemy()
     {
-        Vector2 spawnPoint = speedrunSpawnPoints[speedrunSpawnIndex % speedrunSpawnPoints.Length];
+        int spawnPointIndex = ChooseSpeedrunSpawnPoint();
+        Vector2 spawnPoint = speedrunSpawnPoints[spawnPointIndex];
         speedrunSpawnIndex++;
 
         GameObject enemy = Instantiate(gruntPrefab, spawnPoint, Quaternion.identity, enemyContainer);
@@ -215,11 +220,27 @@ public sealed class StageArenaWaveController : MonoBehaviour
         livingEnemies.Add(enemy);
     }
 
+    private int ChooseSpeedrunSpawnPoint()
+    {
+        if (speedrunSpawnPoints.Length == 1) return 0;
+
+        if (lastSpeedrunSpawnPointIndex < 0)
+        {
+            lastSpeedrunSpawnPointIndex = UnityEngine.Random.Range(0, speedrunSpawnPoints.Length);
+            return lastSpeedrunSpawnPointIndex;
+        }
+
+        int pointIndex = UnityEngine.Random.Range(0, speedrunSpawnPoints.Length - 1);
+        if (pointIndex >= lastSpeedrunSpawnPointIndex) pointIndex++;
+        lastSpeedrunSpawnPointIndex = pointIndex;
+        return pointIndex;
+    }
+
     private void HandleSpeedrunEnemyDefeated()
     {
-        if (IsCleared || speedrunFailed) return;
+        if (IsCleared || speedrunFailed || speedrunKills >= speedrunKillGoal) return;
 
-        speedrunKills++;
+        speedrunKills = Mathf.Min(speedrunKills + 1, speedrunKillGoal);
         if (speedrunKills < speedrunKillGoal)
         {
             UpdateSpeedrunHud();
@@ -239,8 +260,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
 
         speedrunFailed = true;
         FreezeSpeedrunEnemies();
-        if (speedrunHudText != null)
-            speedrunHudText.text = "실패! 재도전...";
+        UpdateSpeedrunHud();
         StartCoroutine(ReloadSpeedrunAfterDelay());
     }
 
@@ -266,12 +286,74 @@ public sealed class StageArenaWaveController : MonoBehaviour
 
     private void UpdateSpeedrunHud()
     {
-        if (speedrunHudText == null) return;
+        if (speedrunKillText == null || speedrunTimeText == null) return;
 
         if (IsCleared)
-            speedrunHudText.text = "목표 달성! 출구로 이동";
-        else if (!speedrunFailed)
-            speedrunHudText.text = $"처치 {speedrunKills}/{speedrunKillGoal}  |  {Mathf.CeilToInt(speedrunTimeRemaining)}초";
+        {
+            speedrunKillText.text = $"처치수 {speedrunKillGoal}/{speedrunKillGoal}";
+            speedrunTimeText.text = "목표 달성! 출구로 이동";
+        }
+        else if (speedrunFailed)
+        {
+            speedrunKillText.text = "실패! 재도전...";
+            speedrunTimeText.text = string.Empty;
+        }
+        else
+        {
+            speedrunKillText.text = $"처치수 {speedrunKills}/{speedrunKillGoal}";
+            speedrunTimeText.text = $"남은 시간 {Mathf.CeilToInt(speedrunTimeRemaining)}초";
+        }
+    }
+
+    private void CreateSpeedrunHud()
+    {
+        if (speedrunKillText != null) return;
+
+        Canvas canvas = stageCanvas != null ? stageCanvas : FindFirstObjectByType<Canvas>();
+        if (canvas == null || speedrunHudFont == null)
+        {
+            Debug.LogError("[StageArenaWaveController] Speedrun HUD cannot initialize: Canvas or Korean TMP font is missing.", this);
+            return;
+        }
+
+        GameObject panelObject = new GameObject("Stage04SpeedrunHUD", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        panelObject.transform.SetParent(canvas.transform, false);
+
+        RectTransform panelRect = panelObject.GetComponent<RectTransform>();
+        panelRect.anchorMin = panelRect.anchorMax = new Vector2(1f, 1f);
+        panelRect.pivot = new Vector2(1f, 1f);
+        panelRect.anchoredPosition = new Vector2(-40f, -40f);
+        panelRect.sizeDelta = new Vector2(360f, 104f);
+
+        Image panelImage = panelObject.GetComponent<Image>();
+        panelImage.color = new Color(0.051f, 0.09f, 0.188f, 0.9f);
+        panelImage.raycastTarget = false;
+
+        speedrunKillText = CreateSpeedrunHudText(panelObject.transform, "KillText", new Vector2(18f, -14f),
+            new Color(0.22f, 0.95f, 0.68f, 1f));
+        speedrunTimeText = CreateSpeedrunHudText(panelObject.transform, "TimeText", new Vector2(18f, -59f),
+            new Color(0.91f, 0.95f, 1f, 1f));
+    }
+
+    private TextMeshProUGUI CreateSpeedrunHudText(Transform parent, string objectName, Vector2 anchoredPosition, Color color)
+    {
+        GameObject textObject = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        textObject.transform.SetParent(parent, false);
+
+        TextMeshProUGUI text = textObject.GetComponent<TextMeshProUGUI>();
+        text.font = speedrunHudFont;
+        text.fontSize = 25f;
+        text.fontStyle = FontStyles.Bold;
+        text.alignment = TextAlignmentOptions.Left;
+        text.color = color;
+        text.raycastTarget = false;
+
+        RectTransform textRect = text.rectTransform;
+        textRect.anchorMin = textRect.anchorMax = new Vector2(0f, 1f);
+        textRect.pivot = new Vector2(0f, 1f);
+        textRect.anchoredPosition = anchoredPosition;
+        textRect.sizeDelta = new Vector2(324f, 34f);
+        return text;
     }
 
     private void StartWave(int waveIndex)

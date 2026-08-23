@@ -2220,6 +2220,14 @@ MonoBehaviour:
       spawnPoint: {x: 7.2, y: 2.85}
       healthMultiplier: 0.65
       movementSpeedMultiplier: 1
+    - enemyType: 1
+      spawnPoint: {x: -5.5, y: 2.85}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
+    - enemyType: 1
+      spawnPoint: {x: 7.5, y: -2}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
 --- !u!114 &2110000013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2390,7 +2398,7 @@ MonoBehaviour:
   m_Name: ''
   m_EditorClassIdentifier: Assembly-CSharp::StageArenaExit
   waveController: {fileID: 2110000012}
-  nextSceneName: BossArena
+  nextSceneName: Stage04
   delay: 0.35
   gateRenderer: {fileID: 2110000023}
   lockedColor: {r: 0.35, g: 0.08, b: 0.12, a: 1}
@@ -2505,7 +2513,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de6625bcf1372a548a9d5d87f71336b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHP: 300
+  maxHP: 200
   invincibleTime: 0
   flashOnDamage: 1
   flashColor: {r: 1, g: 0.25, b: 0.35, a: 1}

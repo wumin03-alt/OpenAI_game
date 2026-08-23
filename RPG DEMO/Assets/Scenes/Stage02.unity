@@ -2423,7 +2423,7 @@ MonoBehaviour:
   m_Name: ''
   m_EditorClassIdentifier: Assembly-CSharp::StageArenaExit
   waveController: {fileID: 2110000012}
-  nextSceneName: BossArena
+  nextSceneName: Stage03
   delay: 0.35
   gateRenderer: {fileID: 2110000023}
   lockedColor: {r: 0.35, g: 0.08, b: 0.12, a: 1}

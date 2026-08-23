@@ -633,7 +633,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 390750783}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68f3d16cb9b92264da7e9805d6fd7b59, type: 3}
   m_Name:
@@ -2200,7 +2200,11 @@ MonoBehaviour:
   - {x: 8.5, y: -2}
   - {x: -7.5, y: 2.85}
   - {x: 9.5, y: -2}
-  speedrunHudText: {fileID: 1420863902}
+  - {x: -11.5, y: -2}
+  - {x: 11.5, y: -2}
+  - {x: -3.5, y: -2}
+  - {x: 3.5, y: -2}
+  speedrunHudFont: {fileID: 11400000, guid: 70695baa547641548907010ea1096365, type: 2}
   speedrunFailureReloadDelay: 1.5
 --- !u!114 &2110000013
 MonoBehaviour:

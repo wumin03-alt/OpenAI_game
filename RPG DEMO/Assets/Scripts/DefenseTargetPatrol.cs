@@ -64,7 +64,7 @@ public sealed class DefenseTargetPatrol : MonoBehaviour
 
     private void ScheduleJump()
     {
-        nextJumpTime = Time.time + Random.Range(jumpIntervalMin, jumpIntervalMax);
+        nextJumpTime = Time.time + Random.Range(jumpIntervalMin, jumpIntervalMax) * 2f;
     }
 
     private bool IsGrounded()
