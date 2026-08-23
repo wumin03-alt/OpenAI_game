@@ -49,6 +49,14 @@ public class EnemyController : MonoBehaviour
     private float hitStunLeft;
     private float visualScaleX = 1f;
 
+    /// <summary>스테이지 웨이브가 생성한 적의 이동 속도를 조정합니다.</summary>
+    public void ApplyMovementSpeedMultiplier(float multiplier)
+    {
+        float clampedMultiplier = Mathf.Max(0f, multiplier);
+        patrolSpeed *= clampedMultiplier;
+        chaseSpeed *= clampedMultiplier;
+    }
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();

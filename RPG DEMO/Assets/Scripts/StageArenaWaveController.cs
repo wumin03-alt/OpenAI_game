@@ -21,6 +21,8 @@ public sealed class StageArenaWaveController : MonoBehaviour
     {
         public EnemyType enemyType;
         public Vector2 spawnPoint;
+        [Min(0.01f)] public float healthMultiplier = 1f;
+        [Min(0f)] public float movementSpeedMultiplier = 1f;
     }
 
     [Serializable]
@@ -37,6 +39,8 @@ public sealed class StageArenaWaveController : MonoBehaviour
 
     public int CurrentWave { get; private set; }
     public bool IsCleared { get; private set; }
+    public event Action OnWaveCleared;
+    public event Action OnStageCleared;
 
     private readonly List<GameObject> livingEnemies = new List<GameObject>();
     private bool waitingForWaveClear;
@@ -81,9 +85,11 @@ public sealed class StageArenaWaveController : MonoBehaviour
         if (livingEnemies.Count != 0) return;
 
         waitingForWaveClear = false;
+        OnWaveCleared?.Invoke();
         if (CurrentWave >= waves.Length)
         {
             IsCleared = true;
+            OnStageCleared?.Invoke();
             Debug.Log("[StageArenaWaveController] Stage clear. Exit unlocked.");
             return;
         }
@@ -142,6 +148,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
             }
 
             enemy.name = $"Wave_{CurrentWave}_{spawn.enemyType}";
+            ApplySpawnStats(enemy, spawn);
             livingEnemies.Add(enemy);
         }
 
@@ -215,12 +222,28 @@ public sealed class StageArenaWaveController : MonoBehaviour
         return enemyType == EnemyType.Ranged ? rangedPrefab : gruntPrefab;
     }
 
-    private static SpawnDefinition Spawn(EnemyType enemyType, float x, float y)
+    private static void ApplySpawnStats(GameObject enemy, SpawnDefinition spawn)
+    {
+        float healthMultiplier = spawn.healthMultiplier > 0f ? spawn.healthMultiplier : 1f;
+        Health health = enemy.GetComponent<Health>();
+        if (health != null && !Mathf.Approximately(healthMultiplier, 1f))
+            health.ApplyMaxHPMultiplier(healthMultiplier);
+
+        float speedMultiplier = spawn.movementSpeedMultiplier > 0f ? spawn.movementSpeedMultiplier : 1f;
+        EnemyController controller = enemy.GetComponent<EnemyController>();
+        if (controller != null && !Mathf.Approximately(speedMultiplier, 1f))
+            controller.ApplyMovementSpeedMultiplier(speedMultiplier);
+    }
+
+    private static SpawnDefinition Spawn(EnemyType enemyType, float x, float y,
+        float healthMultiplier = 1f, float movementSpeedMultiplier = 1f)
     {
         return new SpawnDefinition
         {
             enemyType = enemyType,
-            spawnPoint = new Vector2(x, y)
+            spawnPoint = new Vector2(x, y),
+            healthMultiplier = healthMultiplier,
+            movementSpeedMultiplier = movementSpeedMultiplier
         };
     }
 }
