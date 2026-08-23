@@ -2101,7 +2101,7 @@ GameObject:
   - component: {fileID: 2110000002}
   - component: {fileID: 2110000003}
   m_Layer: 0
-  m_Name: Stage01_ArenaLayout
+  m_Name: Stage02_ArenaLayout
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2148,7 +2148,7 @@ GameObject:
   - component: {fileID: 2110000012}
   - component: {fileID: 2110000013}
   m_Layer: 0
-  m_Name: Stage01_Waves
+  m_Name: Stage02_Waves
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2188,25 +2188,71 @@ MonoBehaviour:
   waves:
   - spawns:
     - enemyType: 0
-      spawnPoint: {x: -8.5, y: -2}
+      spawnPoint: {x: -10.5, y: -2}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
     - enemyType: 0
-      spawnPoint: {x: 8.5, y: -2}
+      spawnPoint: {x: 10.5, y: -2}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
+    - enemyType: 0
+      spawnPoint: {x: -7.2, y: 2.85}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
+    - enemyType: 0
+      spawnPoint: {x: 7.2, y: 2.85}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
+    - enemyType: 0
+      spawnPoint: {x: 0, y: 0.6}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
   - spawns:
     - enemyType: 0
       spawnPoint: {x: -7.5, y: 2.85}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
     - enemyType: 0
       spawnPoint: {x: 0, y: 0.6}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
     - enemyType: 1
-      spawnPoint: {x: 9.5, y: -2}
+      spawnPoint: {x: -10.5, y: -2}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
+    - enemyType: 1
+      spawnPoint: {x: 10.5, y: -2}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
+    - enemyType: 1
+      spawnPoint: {x: 7.2, y: 2.85}
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
   - spawns:
     - enemyType: 0
       spawnPoint: {x: -10.5, y: -2}
+      healthMultiplier: 0.5
+      movementSpeedMultiplier: 1.25
     - enemyType: 0
       spawnPoint: {x: 10.5, y: -2}
-    - enemyType: 1
+      healthMultiplier: 0.5
+      movementSpeedMultiplier: 1.25
+    - enemyType: 0
       spawnPoint: {x: -7.2, y: 2.85}
-    - enemyType: 1
+      healthMultiplier: 0.5
+      movementSpeedMultiplier: 1.25
+    - enemyType: 0
       spawnPoint: {x: 7.2, y: 2.85}
+      healthMultiplier: 0.5
+      movementSpeedMultiplier: 1.25
+    - enemyType: 0
+      spawnPoint: {x: -8.5, y: -2}
+      healthMultiplier: 0.5
+      movementSpeedMultiplier: 1.25
+    - enemyType: 0
+      spawnPoint: {x: 8.5, y: -2}
+      healthMultiplier: 0.5
+      movementSpeedMultiplier: 1.25
 --- !u!114 &2110000013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2377,7 +2423,7 @@ MonoBehaviour:
   m_Name: ''
   m_EditorClassIdentifier: Assembly-CSharp::StageArenaExit
   waveController: {fileID: 2110000012}
-  nextSceneName: Stage02
+  nextSceneName: Stage03
   delay: 0.35
   gateRenderer: {fileID: 2110000023}
   lockedColor: {r: 0.35, g: 0.08, b: 0.12, a: 1}

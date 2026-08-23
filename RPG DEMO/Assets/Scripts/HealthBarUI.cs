@@ -8,15 +8,27 @@ using TMPro;
 /// </summary>
 public class HealthBarUI : MonoBehaviour
 {
+    public enum VisualRole
+    {
+        Automatic,
+        Player,
+        Boss,
+        Defense
+    }
+
     private static readonly Color PanelColor = new Color(0.025f, 0.045f, 0.075f, 0.94f);
     private static readonly Color PlayerHighColor = new Color(0.12f, 0.86f, 0.76f, 1f);
     private static readonly Color PlayerLowColor = new Color(1f, 0.25f, 0.4f, 1f);
     private static readonly Color BossHighColor = new Color(1f, 0.48f, 0.16f, 1f);
     private static readonly Color BossLowColor = new Color(0.88f, 0.07f, 0.25f, 1f);
+    private static readonly Color DefenseHighColor = new Color(1f, 0.72f, 0.24f, 1f);
+    private static readonly Color DefenseLowColor = new Color(0.71f, 0.17f, 1f, 1f);
     private static readonly Color PrimaryTextColor = new Color(0.91f, 0.96f, 1f, 1f);
     private static readonly Color BossTitleColor = new Color(1f, 0.72f, 0.32f, 1f);
+    private static readonly Color DefenseTitleColor = new Color(1f, 0.82f, 0.42f, 1f);
     private static readonly Color PlayerAccentColor = new Color(0.2f, 0.82f, 0.95f, 0.9f);
     private static readonly Color BossAccentColor = new Color(1f, 0.32f, 0.2f, 0.9f);
+    private static readonly Color DefenseAccentColor = new Color(1f, 0.7f, 0.18f, 0.9f);
 
     [Header("── 연결 ──")]
     [Tooltip("표시할 대상의 Health 컴포넌트")]
@@ -25,6 +37,7 @@ public class HealthBarUI : MonoBehaviour
     [SerializeField] private Image fillImage;
     [Tooltip("선택 사항. 숫자 표시용 텍스트")]
     [SerializeField] private TMP_Text label;
+    [SerializeField] private VisualRole visualRole = VisualRole.Automatic;
 
     [Header("── 연출 ──")]
     [Tooltip("0이면 즉시 반영, 크면 부드럽게 줄어듦")]
@@ -44,6 +57,12 @@ public class HealthBarUI : MonoBehaviour
         Apply();
     }
 
+    public void SetVisualRole(VisualRole newRole)
+    {
+        visualRole = newRole;
+        ApplyVisualStyle();
+    }
+
     private void Start()
     {
         ApplyVisualStyle();
@@ -53,9 +72,11 @@ public class HealthBarUI : MonoBehaviour
 
     private void ApplyVisualStyle()
     {
-        bool isBoss = target != null && target.CompareTag("Boss");
-        highColor = isBoss ? BossHighColor : PlayerHighColor;
-        lowColor = isBoss ? BossLowColor : PlayerLowColor;
+        bool isBoss = visualRole == VisualRole.Boss
+                      || (visualRole == VisualRole.Automatic && target != null && target.CompareTag("Boss"));
+        bool isDefense = visualRole == VisualRole.Defense;
+        highColor = isBoss ? BossHighColor : isDefense ? DefenseHighColor : PlayerHighColor;
+        lowColor = isBoss ? BossLowColor : isDefense ? DefenseLowColor : PlayerLowColor;
 
         Image background = GetComponent<Image>();
         if (background != null)
@@ -70,7 +91,7 @@ public class HealthBarUI : MonoBehaviour
         Outline border = GetComponent<Outline>();
         if (border == null)
             border = gameObject.AddComponent<Outline>();
-        border.effectColor = isBoss ? BossAccentColor : PlayerAccentColor;
+        border.effectColor = isBoss ? BossAccentColor : isDefense ? DefenseAccentColor : PlayerAccentColor;
         border.effectDistance = new Vector2(2f, -2f);
         border.useGraphicAlpha = true;
 
@@ -88,7 +109,7 @@ public class HealthBarUI : MonoBehaviour
         foreach (TMP_Text text in texts)
         {
             bool isValueLabel = text == label;
-            text.color = !isValueLabel && isBoss ? BossTitleColor : PrimaryTextColor;
+            text.color = !isValueLabel && isBoss ? BossTitleColor : isDefense ? DefenseTitleColor : PrimaryTextColor;
             text.fontStyle |= FontStyles.Bold;
             text.outlineColor = new Color32(4, 10, 20, 235);
             text.outlineWidth = isValueLabel ? 0.14f : 0.2f;

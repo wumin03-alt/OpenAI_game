@@ -118,6 +118,13 @@ public class Health : MonoBehaviour
         CurrentHP = Mathf.Clamp(value, 0f, maxHP);
     }
 
+    /// <summary>스테이지 스폰 변형용으로 최대 체력을 비율만큼 조정합니다.</summary>
+    public void ApplyMaxHPMultiplier(float multiplier)
+    {
+        maxHP *= Mathf.Max(0.01f, multiplier);
+        CurrentHP = Mathf.Min(CurrentHP, maxHP);
+    }
+
     // ───────────────────────── 사망 처리 ─────────────────────────
     private void Die()
     {

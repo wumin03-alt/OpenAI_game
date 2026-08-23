@@ -51,6 +51,8 @@ public class EnemyController : MonoBehaviour
 
     private Rigidbody2D rb;
     private Health health;
+    private Transform target;
+    private bool usesAssignedTarget;
     private Collider2D bodyCollider;
     private Transform player;
     private Health playerHealth;
@@ -60,6 +62,21 @@ public class EnemyController : MonoBehaviour
     private float hitStunLeft;
     private float nextAttackTime;
     private float visualScaleX = 1f;
+
+    /// <summary>스테이지 웨이브가 생성한 적의 이동 속도를 조정합니다.</summary>
+    public void ApplyMovementSpeedMultiplier(float multiplier)
+    {
+        float clampedMultiplier = Mathf.Max(0f, multiplier);
+        patrolSpeed *= clampedMultiplier;
+        chaseSpeed *= clampedMultiplier;
+    }
+
+    /// <summary>방어 스테이지 등에서 플레이어 대신 추격할 대상을 지정합니다.</summary>
+    public void SetTarget(Transform newTarget)
+    {
+        target = newTarget;
+        usesAssignedTarget = newTarget != null;
+    }
 
     private void Awake()
     {
@@ -87,6 +104,7 @@ public class EnemyController : MonoBehaviour
             player = p.transform;
             playerHealth = p.GetComponent<Health>();
             playerCollider = p.GetComponent<Collider2D>();
+            if (target == null) target = p.transform;
         }
         ApplyFacing();
     }
@@ -120,9 +138,15 @@ public class EnemyController : MonoBehaviour
     // ───────────────────────── 감지 ─────────────────────────
     private void UpdateDetection()
     {
-        if (player == null) return;
+        if (target == null) return;
 
-        float dist = Vector2.Distance(transform.position, player.position);
+        if (usesAssignedTarget)
+        {
+            IsChasing = true;
+            return;
+        }
+
+        float dist = Vector2.Distance(transform.position, target.position);
 
         if (!IsChasing && dist <= detectRange) IsChasing = true;
         else if (IsChasing && dist > loseRange) IsChasing = false;
@@ -131,19 +155,20 @@ public class EnemyController : MonoBehaviour
     // ───────────────────────── 추격 ─────────────────────────
     private void DoChase()
     {
-        float dx = player.position.x - transform.position.x;
+        float dx = target.position.x - transform.position.x;
         int dir = dx > 0f ? 1 : -1;
         if (dir != facing) { facing = dir; ApplyFacing(); }
 
         // 너무 가까우면 멈춤 (플레이어를 계속 밀지 않도록)
-        if (Mathf.Abs(dx) <= stopDistance)
+        float desiredStopDistance = usesAssignedTarget ? 0.25f : stopDistance;
+        if (Mathf.Abs(dx) <= desiredStopDistance)
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             return;
         }
 
         // 낭떠러지나 벽이 있으면 더 가지 않음
-        if (!HasGroundAhead() || HasWallAhead())
+        if ((!usesAssignedTarget && !HasGroundAhead()) || HasWallAhead())
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             return;
