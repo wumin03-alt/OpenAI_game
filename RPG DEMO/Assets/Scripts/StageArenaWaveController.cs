@@ -36,6 +36,9 @@ public sealed class StageArenaWaveController : MonoBehaviour
     [SerializeField] private Transform enemyContainer;
     [SerializeField, Min(0f)] private float nextWaveDelay = 1.25f;
     [SerializeField] private WaveDefinition[] waves = CreateDefaultWaves();
+    [Header("── 방어 스테이지 (선택) ──")]
+    [SerializeField] private Health defenseTarget;
+    [SerializeField, Min(1f)] private float defenseDuration;
 
     public int CurrentWave { get; private set; }
     public bool IsCleared { get; private set; }
@@ -44,6 +47,8 @@ public sealed class StageArenaWaveController : MonoBehaviour
 
     private readonly List<GameObject> livingEnemies = new List<GameObject>();
     private bool waitingForWaveClear;
+    private bool defenseMode;
+    private bool defenseFailed;
 
     private void Awake()
     {
@@ -74,11 +79,22 @@ public sealed class StageArenaWaveController : MonoBehaviour
         }
 
         ClearScenePlacedEnemies();
-        StartWave(0);
+        defenseMode = defenseTarget != null && defenseDuration > 0f;
+        if (defenseMode)
+            StartCoroutine(RunDefenseWaves());
+        else
+            StartWave(0);
     }
 
     private void Update()
     {
+        if (defenseMode)
+        {
+            if (!defenseFailed && defenseTarget != null && defenseTarget.IsDead)
+                FailDefense();
+            return;
+        }
+
         if (!waitingForWaveClear || IsCleared) return;
 
         livingEnemies.RemoveAll(enemy => enemy == null);
@@ -152,8 +168,51 @@ public sealed class StageArenaWaveController : MonoBehaviour
             livingEnemies.Add(enemy);
         }
 
-        waitingForWaveClear = true;
+        waitingForWaveClear = !defenseMode;
         Debug.Log($"[StageArenaWaveController] Wave {CurrentWave}/{waves.Length} started.");
+    }
+
+    private IEnumerator RunDefenseWaves()
+    {
+        float waveDuration = defenseDuration / waves.Length;
+        for (int waveIndex = 0; waveIndex < waves.Length; waveIndex++)
+        {
+            if (defenseFailed) yield break;
+
+            StartWave(waveIndex);
+            float elapsed = 0f;
+            while (elapsed < waveDuration)
+            {
+                if (defenseTarget == null || defenseTarget.IsDead)
+                {
+                    FailDefense();
+                    yield break;
+                }
+
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            OnWaveCleared?.Invoke();
+        }
+
+        if (defenseTarget == null || defenseTarget.IsDead)
+        {
+            FailDefense();
+            yield break;
+        }
+
+        IsCleared = true;
+        OnStageCleared?.Invoke();
+        Debug.Log("[StageArenaWaveController] Defense stage clear. Exit unlocked.");
+    }
+
+    private void FailDefense()
+    {
+        if (defenseFailed) return;
+        defenseFailed = true;
+        waitingForWaveClear = false;
+        Debug.Log("[StageArenaWaveController] Defense target destroyed. Stage failed.");
     }
 
     private void ClearScenePlacedEnemies()
@@ -222,7 +281,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
         return enemyType == EnemyType.Ranged ? rangedPrefab : gruntPrefab;
     }
 
-    private static void ApplySpawnStats(GameObject enemy, SpawnDefinition spawn)
+    private void ApplySpawnStats(GameObject enemy, SpawnDefinition spawn)
     {
         float healthMultiplier = spawn.healthMultiplier > 0f ? spawn.healthMultiplier : 1f;
         Health health = enemy.GetComponent<Health>();
@@ -231,8 +290,14 @@ public sealed class StageArenaWaveController : MonoBehaviour
 
         float speedMultiplier = spawn.movementSpeedMultiplier > 0f ? spawn.movementSpeedMultiplier : 1f;
         EnemyController controller = enemy.GetComponent<EnemyController>();
-        if (controller != null && !Mathf.Approximately(speedMultiplier, 1f))
-            controller.ApplyMovementSpeedMultiplier(speedMultiplier);
+        if (controller != null)
+        {
+            if (!Mathf.Approximately(speedMultiplier, 1f))
+                controller.ApplyMovementSpeedMultiplier(speedMultiplier);
+
+            if (defenseMode && defenseTarget != null)
+                controller.SetTarget(defenseTarget.transform);
+        }
     }
 
     private static SpawnDefinition Spawn(EnemyType enemyType, float x, float y,
