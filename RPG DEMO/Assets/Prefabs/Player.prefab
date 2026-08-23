@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 2432708866070934687}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.35, y: 0, z: 0}
+  m_LocalPosition: {x: 1.2, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -77,7 +77,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2, y: 1.6}
+  m_Size: {x: 2.3, y: 1.6}
   m_EdgeRadius: 0
 --- !u!114 &3461451826843266146
 MonoBehaviour:
@@ -229,6 +229,10 @@ MonoBehaviour:
     m_Bits: 64
   coyoteTime: 0.1
   jumpBufferTime: 0.1
+  dropTapWindow: 0.32
+  dropThroughSpeed: 3
+  platformNameToken: Platform
+  platformLandingSnapDistance: 0.22
   crouchSpeedMultiplier: 0.35
   crouchHeightRatio: 0.5
   dashSpeed: 22
@@ -250,6 +254,7 @@ MonoBehaviour:
   autoAimTargetTag: Boss
   autoAimVerticalOffset: 1.2
   visual: {fileID: 4188887094865168853}
+  commonHudPrefab: {fileID: 7241224105016430318, guid: 977da5cb3f6c83e45a596bdde7a9a8b6, type: 3}
 --- !u!114 &2261863406042718281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -465,11 +470,11 @@ MonoBehaviour:
   moveFrames:
   - {fileID: 21300000, guid: 9e807fe12c9bbff418b80dd06db5cd44, type: 3}
   - {fileID: 21300000, guid: 7db68a0a66e67c546b738184341960f0, type: 3}
-  - {fileID: 21300000, guid: ce9f1a6f6df4caf4ab61e6f216aa5537, type: 3}
-  - {fileID: 21300000, guid: 9980adc3f1539774fa1b87cbd3b61b67, type: 3}
+  - {fileID: 21300000, guid: 5a13d9462cc94d329684d0f7812b4a51, type: 3}
+  - {fileID: 21300000, guid: 63b20f8e29dd42a8b41cfa76d9345812, type: 3}
   attackFrames:
-  - {fileID: 21300000, guid: 6ee5ee6d802460c44841c79f054c298e, type: 3}
-  - {fileID: 21300000, guid: 648fb99287c477141a1d819f9221c7d5, type: 3}
+  - {fileID: 21300000, guid: 721cf64a5e974ace901bc867d4053e29, type: 3}
+  - {fileID: 21300000, guid: 8df16ab420fc47d9a83e25f74159bc06, type: 3}
   crouchFrames:
   - {fileID: 21300000, guid: f37401da433647e40ad8a65bf2a1e0b4, type: 3}
   - {fileID: 21300000, guid: 4ed82ea8c0de12e47947bcd01b734cd3, type: 3}

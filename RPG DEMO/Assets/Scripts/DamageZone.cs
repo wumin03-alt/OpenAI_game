@@ -34,9 +34,16 @@ public class DamageZone : MonoBehaviour
     private readonly HashSet<Health> hitThisActivation = new HashSet<Health>();
     // Repeating 모드에서 대상별 마지막 타격 시각
     private readonly Dictionary<Health, float> lastHitTime = new Dictionary<Health, float>();
+    private readonly Collider2D[] overlapBuffer = new Collider2D[16];
+    private Collider2D zoneCollider;
 
     /// <summary>보스 페이즈에 따라 데미지를 바꿀 때 사용</summary>
     public void SetDamage(float value) => damage = value;
+
+    private void Awake()
+    {
+        zoneCollider = GetComponent<Collider2D>();
+    }
 
     private void OnEnable()
     {
@@ -44,8 +51,34 @@ public class DamageZone : MonoBehaviour
         hitThisActivation.Clear();
     }
 
+    private void FixedUpdate()
+    {
+        // 접촉 피해는 물리 Trigger 콜백 누락에 의존하지 않고 현재 겹침을 직접 확인합니다.
+        if (mode == HitMode.Repeating)
+            HitCurrentOverlaps();
+    }
+
     private void OnTriggerEnter2D(Collider2D other) => TryHit(other);
     private void OnTriggerStay2D(Collider2D other) => TryHit(other);
+
+    /// <summary>현재 히트박스와 겹친 대상들을 즉시 판정합니다.</summary>
+    public void HitCurrentOverlaps()
+    {
+        if (zoneCollider == null) zoneCollider = GetComponent<Collider2D>();
+        if (zoneCollider == null || !zoneCollider.enabled) return;
+
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.SetLayerMask(targetLayers);
+        filter.useTriggers = true;
+
+        int count = zoneCollider.Overlap(filter, overlapBuffer);
+        for (int i = 0; i < count; i++)
+        {
+            Collider2D other = overlapBuffer[i];
+            if (other != null) TryHit(other);
+            overlapBuffer[i] = null;
+        }
+    }
 
     private void TryHit(Collider2D other)
     {
@@ -68,8 +101,10 @@ public class DamageZone : MonoBehaviour
             lastHitTime[hp] = Time.time;
         }
 
-        // 4) 데미지
+        // 4) 데미지. 패링/무적 등으로 HP가 줄지 않았다면 일반 피격 후처리를 하지 않습니다.
+        float hpBeforeHit = hp.CurrentHP;
         hp.TakeDamage(damage);
+        if (hp.CurrentHP >= hpBeforeHit) return;
 
         // 플레이어가 아닌 대상(잡몹/보스)에 타격이 발생했을 때 공통 명중음을 냅니다.
         if (hp.GetComponent<PlayerController>() == null)

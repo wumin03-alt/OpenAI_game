@@ -31,6 +31,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Min(0.1f)] private float dropThroughSpeed = 3f;
     [Tooltip("일반 BoxCollider를 단방향 발판으로 인식할 오브젝트 이름 토큰")]
     [SerializeField] private string platformNameToken = "Platform";
+    [Tooltip("점프 정점에서 발판 윗면에 조금 못 미쳤을 때 착지를 보정할 최대 거리")]
+    [SerializeField, Min(0f)] private float platformLandingSnapDistance = 0.22f;
 
     [Header("── 엎드리기 (↓) ──")]
     [Tooltip("엎드린 상태의 이동 속도 배율. 0으로 두면 이동 불가")]
@@ -81,6 +83,10 @@ public class PlayerController : MonoBehaviour
     [Header("── 비주얼 ──")]
     [SerializeField] private Transform visual;
 
+    [Header("── 공통 HUD ──")]
+    [Tooltip("씬에 공통 HUD가 없을 때 자동으로 생성할 프리팹")]
+    [SerializeField] private PlayerCommonHUD commonHudPrefab;
+
     // ── 다른 스크립트가 읽어갈 상태값 ──
     public int Facing { get; private set; } = 1;   // 1 = 오른쪽, -1 = 왼쪽
     public bool IsGrounded { get; private set; }
@@ -114,6 +120,7 @@ public class PlayerController : MonoBehaviour
 
     private float meleeCooldownLeft;
     private float meleeHitboxBaseX;
+    private DamageZone meleeDamageZone;
     private float rangedCooldownLeft;
     private float firePointBaseX;
     private GameObject activeBullet;
@@ -146,6 +153,7 @@ public class PlayerController : MonoBehaviour
         if (meleeHitbox != null)
         {
             meleeHitboxBaseX = Mathf.Abs(meleeHitbox.transform.localPosition.x);
+            meleeDamageZone = meleeHitbox.GetComponent<DamageZone>();
             meleeHitbox.SetActive(false);
         }
 
@@ -160,6 +168,8 @@ public class PlayerController : MonoBehaviour
     // ★ 신규 ② : 자동 조준 대상 캐싱 (없으면 null → 수평 발사)
     private void Start()
     {
+        EnsureCommonHud();
+
         if (autoAimEnabled && !string.IsNullOrEmpty(autoAimTargetTag))
         {
             GameObject t = GameObject.FindGameObjectWithTag(autoAimTargetTag);
@@ -207,6 +217,7 @@ public class PlayerController : MonoBehaviour
             jumpRequested = false;
         }
 
+        PreparePassThroughPlatformsWhileRising();
         upwardVelocityBeforePhysics = rb.linearVelocity.y;
     }
 
@@ -326,6 +337,52 @@ public class PlayerController : MonoBehaviour
                    System.StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
+    /// <summary>
+    /// 상승 중 다음 물리 프레임에 닿을 단방향 발판을 미리 감지해 통과시킵니다.
+    /// 충돌 콜백이 먼저 속도를 꺾는 얇은 발판에서도 점프 관성을 보존합니다.
+    /// </summary>
+    private void PreparePassThroughPlatformsWhileRising()
+    {
+        if (col == null || rb.linearVelocity.y <= 0.05f) return;
+
+        float castDistance = Mathf.Max(0.08f,
+            rb.linearVelocity.y * Time.fixedDeltaTime + 0.05f);
+        RaycastHit2D[] hits = Physics2D.CapsuleCastAll(
+            col.bounds.center,
+            col.bounds.size,
+            col.direction,
+            0f,
+            Vector2.up,
+            castDistance,
+            groundLayer);
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            Collider2D platform = hit.collider;
+            if (!IsPassThroughPlatform(platform) || ignoredPlatforms.ContainsKey(platform))
+                continue;
+            if (platform.bounds.center.y <= col.bounds.center.y) continue;
+
+            IgnorePlatform(platform, false);
+        }
+    }
+
+    private void EnsureCommonHud()
+    {
+        if (FindAnyObjectByType<PlayerCommonHUD>() != null || commonHudPrefab == null) return;
+
+        HealthBarUI[] healthBars = FindObjectsByType<HealthBarUI>(
+            FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (HealthBarUI healthBar in healthBars)
+        {
+            if (healthBar != null && healthBar.gameObject.name == "PlayerHPBar")
+                healthBar.gameObject.SetActive(false);
+        }
+
+        PlayerCommonHUD hud = Instantiate(commonHudPrefab);
+        hud.name = commonHudPrefab.name;
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         PassThroughPlatformWhileRising(collision);
@@ -374,9 +431,20 @@ public class PlayerController : MonoBehaviour
 
             Bounds playerBounds = col.bounds;
             Bounds platformBounds = platform.bounds;
+            bool descendingNearSurface = !pair.Value.DroppingDown
+                                         && rb.linearVelocity.y <= 0.05f
+                                         && playerBounds.center.y > platformBounds.center.y
+                                         && playerBounds.min.y >= platformBounds.max.y - platformLandingSnapDistance;
+
+            if (descendingNearSurface && playerBounds.min.y < platformBounds.max.y + 0.02f)
+            {
+                float correction = platformBounds.max.y + 0.02f - playerBounds.min.y;
+                rb.position += Vector2.up * correction;
+            }
+
             bool cleared = pair.Value.DroppingDown
                 ? playerBounds.max.y < platformBounds.min.y - 0.03f
-                : playerBounds.min.y > platformBounds.max.y + 0.03f;
+                : playerBounds.min.y > platformBounds.max.y + 0.03f || descendingNearSurface;
             bool safetyExpired = Time.time >= pair.Value.SafetyEndTime
                                  && !playerBounds.Intersects(platformBounds);
 
@@ -561,6 +629,8 @@ public class PlayerController : MonoBehaviour
             meleeHitbox.transform.localPosition = p;
 
             meleeHitbox.SetActive(true);
+            Physics2D.SyncTransforms();
+            meleeDamageZone?.HitCurrentOverlaps();
         }
 
         yield return new WaitForSeconds(meleeActiveTime);
