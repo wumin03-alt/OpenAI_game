@@ -45,6 +45,16 @@ public sealed class StageArenaWaveController : MonoBehaviour
     [SerializeField] private Health defenseTarget;
     [SerializeField, Min(1f)] private float defenseDuration;
     [SerializeField] private Canvas stageCanvas;
+    [Header("── 스피드런 스테이지 (선택) ──")]
+    [SerializeField] private bool speedrunMode;
+    [SerializeField, Min(1f)] private float speedrunTimeLimit = 60f;
+    [SerializeField, Min(1)] private int speedrunKillGoal = 15;
+    [SerializeField, Min(0.05f)] private float speedrunSpawnInterval = 1.4f;
+    [SerializeField, Min(1)] private int speedrunMaxConcurrentEnemies = 6;
+    [SerializeField, Min(1f)] private float speedrunEnemyMaxHP = 20f;
+    [SerializeField] private Vector2[] speedrunSpawnPoints;
+    [SerializeField] private TMP_Text speedrunHudText;
+    [SerializeField, Min(0f)] private float speedrunFailureReloadDelay = 1.5f;
 
     public int CurrentWave { get; private set; }
     public bool IsCleared { get; private set; }
@@ -59,13 +69,18 @@ public sealed class StageArenaWaveController : MonoBehaviour
     private Health playerHealth;
     private GameObject failureRoot;
     private TextMeshProUGUI failureText;
+    private float speedrunTimeRemaining;
+    private float nextSpeedrunSpawnTime;
+    private int speedrunKills;
+    private int speedrunSpawnIndex;
+    private bool speedrunFailed;
 
     private void Awake()
     {
         Debug.Log("[Stage01] WaveController Awake", this);
 
         // 수동 YAML 연결이나 씬 복제 과정에서 하위 배열이 누락된 경우에도 Stage01은 막히지 않습니다.
-        if (!HasValidWaveData())
+        if (!speedrunMode && !HasValidWaveData())
         {
             Debug.LogWarning("[Stage01] Wave data was invalid; restoring defaults.", this);
             waves = CreateDefaultWaves();
@@ -75,6 +90,12 @@ public sealed class StageArenaWaveController : MonoBehaviour
     private void Start()
     {
         Debug.Log("[Stage01] WaveController Start", this);
+
+        if (speedrunMode)
+        {
+            StartSpeedrun();
+            return;
+        }
 
         if (gruntPrefab == null || waves == null || waves.Length == 0)
         {
@@ -101,6 +122,12 @@ public sealed class StageArenaWaveController : MonoBehaviour
 
     private void Update()
     {
+        if (speedrunMode)
+        {
+            UpdateSpeedrun();
+            return;
+        }
+
         if (defenseMode)
         {
             if (!IsCleared && !defenseFailed && defenseTarget != null && defenseTarget.IsDead)
@@ -130,6 +157,121 @@ public sealed class StageArenaWaveController : MonoBehaviour
     {
         yield return new WaitForSeconds(nextWaveDelay);
         StartWave(CurrentWave);
+    }
+
+    private void StartSpeedrun()
+    {
+        if (gruntPrefab == null || enemyContainer == null || speedrunSpawnPoints == null || speedrunSpawnPoints.Length == 0)
+        {
+            Debug.LogError("[StageArenaWaveController] Speedrun start aborted: Grunt prefab, enemy container, or spawn points are missing.", this);
+            enabled = false;
+            return;
+        }
+
+        ClearScenePlacedEnemies();
+        CurrentWave = 1;
+        speedrunTimeRemaining = speedrunTimeLimit;
+        nextSpeedrunSpawnTime = Time.time;
+        UpdateSpeedrunHud();
+    }
+
+    private void UpdateSpeedrun()
+    {
+        if (IsCleared || speedrunFailed) return;
+
+        livingEnemies.RemoveAll(enemy => enemy == null);
+        speedrunTimeRemaining -= Time.deltaTime;
+        if (speedrunTimeRemaining <= 0f)
+        {
+            FailSpeedrun();
+            return;
+        }
+
+        if (Time.time >= nextSpeedrunSpawnTime && livingEnemies.Count < speedrunMaxConcurrentEnemies)
+        {
+            SpawnSpeedrunEnemy();
+            nextSpeedrunSpawnTime = Time.time + speedrunSpawnInterval;
+        }
+
+        UpdateSpeedrunHud();
+    }
+
+    private void SpawnSpeedrunEnemy()
+    {
+        Vector2 spawnPoint = speedrunSpawnPoints[speedrunSpawnIndex % speedrunSpawnPoints.Length];
+        speedrunSpawnIndex++;
+
+        GameObject enemy = Instantiate(gruntPrefab, spawnPoint, Quaternion.identity, enemyContainer);
+        enemy.name = $"Speedrun_Grunt_{speedrunSpawnIndex}";
+
+        Health health = enemy.GetComponent<Health>();
+        if (health != null)
+        {
+            float healthMultiplier = speedrunEnemyMaxHP / Mathf.Max(0.01f, health.MaxHP);
+            health.ApplyMaxHPMultiplier(healthMultiplier);
+            health.onDeath.AddListener(HandleSpeedrunEnemyDefeated);
+        }
+
+        livingEnemies.Add(enemy);
+    }
+
+    private void HandleSpeedrunEnemyDefeated()
+    {
+        if (IsCleared || speedrunFailed) return;
+
+        speedrunKills++;
+        if (speedrunKills < speedrunKillGoal)
+        {
+            UpdateSpeedrunHud();
+            return;
+        }
+
+        IsCleared = true;
+        OnWaveCleared?.Invoke();
+        OnStageCleared?.Invoke();
+        UpdateSpeedrunHud();
+        Debug.Log("[StageArenaWaveController] Speedrun stage clear. Exit unlocked.");
+    }
+
+    private void FailSpeedrun()
+    {
+        if (speedrunFailed) return;
+
+        speedrunFailed = true;
+        FreezeSpeedrunEnemies();
+        if (speedrunHudText != null)
+            speedrunHudText.text = "실패! 재도전...";
+        StartCoroutine(ReloadSpeedrunAfterDelay());
+    }
+
+    private void FreezeSpeedrunEnemies()
+    {
+        foreach (Transform enemyTransform in enemyContainer)
+        {
+            EnemyController controller = enemyTransform.GetComponent<EnemyController>();
+            if (controller != null) controller.enabled = false;
+            FreezeBody(enemyTransform.GetComponent<Rigidbody2D>());
+        }
+    }
+
+    private IEnumerator ReloadSpeedrunAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(speedrunFailureReloadDelay);
+
+        if (SceneLoader.Instance != null)
+            SceneLoader.Instance.ReloadCurrentScene();
+        else
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    private void UpdateSpeedrunHud()
+    {
+        if (speedrunHudText == null) return;
+
+        if (IsCleared)
+            speedrunHudText.text = "목표 달성! 출구로 이동";
+        else if (!speedrunFailed)
+            speedrunHudText.text = $"처치 {speedrunKills}/{speedrunKillGoal}  |  {Mathf.CeilToInt(speedrunTimeRemaining)}초";
     }
 
     private void StartWave(int waveIndex)
