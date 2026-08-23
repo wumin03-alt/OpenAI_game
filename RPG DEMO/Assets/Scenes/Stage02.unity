@@ -2232,35 +2232,27 @@ MonoBehaviour:
     - enemyType: 0
       spawnPoint: {x: -10.5, y: -2}
       healthMultiplier: 0.5
-      movementSpeedMultiplier: 1.5
+      movementSpeedMultiplier: 1.25
     - enemyType: 0
       spawnPoint: {x: 10.5, y: -2}
       healthMultiplier: 0.5
-      movementSpeedMultiplier: 1.5
+      movementSpeedMultiplier: 1.25
     - enemyType: 0
       spawnPoint: {x: -7.2, y: 2.85}
       healthMultiplier: 0.5
-      movementSpeedMultiplier: 1.5
+      movementSpeedMultiplier: 1.25
     - enemyType: 0
       spawnPoint: {x: 7.2, y: 2.85}
       healthMultiplier: 0.5
-      movementSpeedMultiplier: 1.5
+      movementSpeedMultiplier: 1.25
     - enemyType: 0
       spawnPoint: {x: -8.5, y: -2}
       healthMultiplier: 0.5
-      movementSpeedMultiplier: 1.5
+      movementSpeedMultiplier: 1.25
     - enemyType: 0
       spawnPoint: {x: 8.5, y: -2}
       healthMultiplier: 0.5
-      movementSpeedMultiplier: 1.5
-    - enemyType: 0
-      spawnPoint: {x: -3.5, y: 0.6}
-      healthMultiplier: 0.5
-      movementSpeedMultiplier: 1.5
-    - enemyType: 0
-      spawnPoint: {x: 3.5, y: 0.6}
-      healthMultiplier: 0.5
-      movementSpeedMultiplier: 1.5
+      movementSpeedMultiplier: 1.25
 --- !u!114 &2110000013
 MonoBehaviour:
   m_ObjectHideFlags: 0
