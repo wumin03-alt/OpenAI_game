@@ -1,7 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Game.Core;
+using Game.SceneManagement;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// 일반 스테이지용 순차 웨이브 진행기입니다.
@@ -39,6 +44,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
     [Header("── 방어 스테이지 (선택) ──")]
     [SerializeField] private Health defenseTarget;
     [SerializeField, Min(1f)] private float defenseDuration;
+    [SerializeField] private Canvas stageCanvas;
 
     public int CurrentWave { get; private set; }
     public bool IsCleared { get; private set; }
@@ -49,6 +55,10 @@ public sealed class StageArenaWaveController : MonoBehaviour
     private bool waitingForWaveClear;
     private bool defenseMode;
     private bool defenseFailed;
+    private PlayerController defensePlayer;
+    private Health playerHealth;
+    private GameObject failureRoot;
+    private TextMeshProUGUI failureText;
 
     private void Awake()
     {
@@ -81,7 +91,10 @@ public sealed class StageArenaWaveController : MonoBehaviour
         ClearScenePlacedEnemies();
         defenseMode = defenseTarget != null && defenseDuration > 0f;
         if (defenseMode)
+        {
+            InitializeDefenseFailureHandling();
             StartCoroutine(RunDefenseWaves());
+        }
         else
             StartWave(0);
     }
@@ -90,7 +103,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
     {
         if (defenseMode)
         {
-            if (!defenseFailed && defenseTarget != null && defenseTarget.IsDead)
+            if (!IsCleared && !defenseFailed && defenseTarget != null && defenseTarget.IsDead)
                 FailDefense();
             return;
         }
@@ -212,7 +225,130 @@ public sealed class StageArenaWaveController : MonoBehaviour
         if (defenseFailed) return;
         defenseFailed = true;
         waitingForWaveClear = false;
-        Debug.Log("[StageArenaWaveController] Defense target destroyed. Stage failed.");
+        Debug.Log("[StageArenaWaveController] Defense failed. Restart countdown started.");
+        FreezeDefenseActors();
+        StartCoroutine(ShowFailureCountdownAndReload());
+    }
+
+    private void InitializeDefenseFailureHandling()
+    {
+        defensePlayer = FindFirstObjectByType<PlayerController>();
+        if (defensePlayer == null)
+        {
+            Debug.LogError("[StageArenaWaveController] Defense mode cannot find PlayerController.", this);
+            return;
+        }
+
+        playerHealth = defensePlayer.GetComponent<Health>();
+        if (playerHealth != null)
+            playerHealth.onDeath.AddListener(HandlePlayerDeath);
+        else
+            Debug.LogError("[StageArenaWaveController] Defense mode player Health is missing.", this);
+
+        PlayerRespawn playerRespawn = defensePlayer.GetComponent<PlayerRespawn>();
+        if (playerRespawn != null)
+            playerRespawn.enabled = false;
+    }
+
+    private void OnDestroy()
+    {
+        if (playerHealth != null)
+            playerHealth.onDeath.RemoveListener(HandlePlayerDeath);
+    }
+
+    private void HandlePlayerDeath()
+    {
+        if (defenseMode)
+            FailDefense();
+    }
+
+    private void FreezeDefenseActors()
+    {
+        FreezeBody(defensePlayer != null ? defensePlayer.GetComponent<Rigidbody2D>() : null);
+        if (defensePlayer != null) defensePlayer.enabled = false;
+
+        if (defenseTarget != null)
+        {
+            DefenseTargetPatrol patrol = defenseTarget.GetComponent<DefenseTargetPatrol>();
+            if (patrol != null) patrol.enabled = false;
+            FreezeBody(defenseTarget.GetComponent<Rigidbody2D>());
+        }
+
+        if (enemyContainer == null) return;
+        foreach (Transform enemyTransform in enemyContainer)
+        {
+            EnemyController controller = enemyTransform.GetComponent<EnemyController>();
+            if (controller != null) controller.enabled = false;
+            FreezeBody(enemyTransform.GetComponent<Rigidbody2D>());
+        }
+    }
+
+    private static void FreezeBody(Rigidbody2D body)
+    {
+        if (body == null) return;
+        body.linearVelocity = Vector2.zero;
+        body.angularVelocity = 0f;
+        body.simulated = false;
+    }
+
+    private IEnumerator ShowFailureCountdownAndReload()
+    {
+        CreateFailureVisual();
+        for (int seconds = 5; seconds > 0; seconds--)
+        {
+            if (failureText != null)
+                failureText.text = $"대상을 지키지 못했습니다.\n해당 스테이지를 재시작합니다.\n\n{seconds}";
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        if (SceneLoader.Instance != null)
+            SceneLoader.Instance.ReloadCurrentScene();
+        else
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    private void CreateFailureVisual()
+    {
+        if (failureRoot != null) return;
+
+        Canvas canvas = stageCanvas != null ? stageCanvas : FindFirstObjectByType<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("[StageArenaWaveController] Defense failure UI cannot find a Canvas.", this);
+            return;
+        }
+
+        failureRoot = new GameObject("DefenseFailureNotice", typeof(RectTransform), typeof(CanvasGroup), typeof(Image));
+        failureRoot.transform.SetParent(canvas.transform, false);
+        failureRoot.transform.SetAsLastSibling();
+
+        Image panel = failureRoot.GetComponent<Image>();
+        panel.color = new Color(0.03f, 0.02f, 0.08f, 0.92f);
+        panel.raycastTarget = false;
+
+        RectTransform rootRect = failureRoot.GetComponent<RectTransform>();
+        rootRect.anchorMin = rootRect.anchorMax = new Vector2(0.5f, 0.5f);
+        rootRect.pivot = new Vector2(0.5f, 0.5f);
+        rootRect.sizeDelta = new Vector2(780f, 230f);
+
+        GameObject textObject = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        textObject.transform.SetParent(failureRoot.transform, false);
+        failureText = textObject.GetComponent<TextMeshProUGUI>();
+        TMP_Text template = FindFirstObjectByType<TMP_Text>();
+        failureText.font = template != null ? template.font : TMP_Settings.defaultFontAsset;
+        failureText.fontSize = 34f;
+        failureText.fontStyle = FontStyles.Bold;
+        failureText.alignment = TextAlignmentOptions.Center;
+        failureText.color = new Color(1f, 0.32f, 0.45f, 1f);
+        failureText.outlineColor = new Color(0.04f, 0.01f, 0.05f, 1f);
+        failureText.outlineWidth = 0.2f;
+        failureText.raycastTarget = false;
+
+        RectTransform textRect = failureText.rectTransform;
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = new Vector2(24f, 18f);
+        textRect.offsetMax = new Vector2(-24f, -18f);
     }
 
     private void ClearScenePlacedEnemies()

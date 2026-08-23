@@ -2187,6 +2187,7 @@ MonoBehaviour:
   nextWaveDelay: 1.25
   defenseTarget: {fileID: 3110000004}
   defenseDuration: 36
+  stageCanvas: {fileID: 423002318}
   waves:
   - spawns:
     - enemyType: 0
@@ -2407,6 +2408,9 @@ GameObject:
   - component: {fileID: 3110000003}
   - component: {fileID: 3110000004}
   - component: {fileID: 3110000005}
+  - component: {fileID: 3110000006}
+  - component: {fileID: 3110000007}
+  - component: {fileID: 3110000008}
   m_Layer: 7
   m_Name: DefenseCore
   m_TagString: Untagged
@@ -2445,6 +2449,27 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1.4, y: 2.2}
   m_EdgeRadius: 0
+--- !u!50 &3110000006
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3110000000}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 4
+  m_Material: {fileID: 0}
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 1
+  m_Constraints: 4
 --- !u!212 &3110000003
 SpriteRenderer:
   serializedVersion: 2
@@ -2487,10 +2512,11 @@ MonoBehaviour:
   flashInterval: 0.08
   destroyOnDeath: 0
   destroyDelay: 0
-  disableOnDeath: []
-  stopMovementOnDeath: 0
-  stopMovementFrames: 0
-  freezePositionOnDeath: 0
+  disableOnDeath:
+  - {fileID: 3110000007}
+  stopMovementOnDeath: 1
+  stopMovementFrames: 6
+  freezePositionOnDeath: 1
   usePlayerParry: 0
   onDamaged:
     m_PersistentCalls:
@@ -2515,6 +2541,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageDefenseWarning
   stageCanvas: {fileID: 423002318}
   warningThreshold: 0.3
+--- !u!114 &3110000007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3110000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a4cd3cb8dda479490d5f5b111405f26, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::DefenseTargetPatrol
+  moveSpeed: 0.95
+  jumpForce: 15.5
+  minX: -9
+  maxX: 9
+  directionChangeMin: 1.4
+  directionChangeMax: 3.2
+  jumpIntervalMin: 1.8
+  jumpIntervalMax: 4.2
+  groundCheckDistance: 0.2
+  edgeCheckDistance: 1.35
+  edgeProbeOffset: 0.9
+  wallCheckDistance: 0.7
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &3110000008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3110000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4de086f830064fd28c60fb34efdda12e, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::StageDefenseHealthBar
+  playerHealthBar: {fileID: 390750787}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
