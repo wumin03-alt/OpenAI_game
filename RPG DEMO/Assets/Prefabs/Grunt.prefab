@@ -166,6 +166,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   hitStunTime: 0.25
+  attackReach: 0.3
+  attackInterval: 0.9
+  attackDamage: 12
+  attackKnockbackForce: 7
+  attackKnockbackUp: 3
   visual: {fileID: 618831109272739442}
 --- !u!1 &5725338763742060759
 GameObject:
@@ -215,7 +220,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3737048648426086989
 Transform:
   m_ObjectHideFlags: 0
@@ -275,7 +280,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.5, y: 1.2}
+  m_Size: {x: 0.6, y: 1.2}
   m_EdgeRadius: 0
 --- !u!114 &7300740458529402409
 MonoBehaviour:

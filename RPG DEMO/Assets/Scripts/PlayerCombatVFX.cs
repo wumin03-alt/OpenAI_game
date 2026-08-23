@@ -20,7 +20,6 @@ public sealed class PlayerCombatVFX : MonoBehaviour
     private Material spriteMaterial;
     private bool previousParryState;
     private int previousMeleeCount;
-    private int previousRangedCount;
     private int previousDashCount;
 
     public void Configure(PlayerController controller, PlayerCombatTracker combatTracker,
@@ -42,7 +41,6 @@ public sealed class PlayerCombatVFX : MonoBehaviour
 
         previousParryState = player != null && player.IsParrying;
         previousMeleeCount = tracker != null ? tracker.MeleeCount : 0;
-        previousRangedCount = tracker != null ? tracker.RangedCount : 0;
         previousDashCount = tracker != null ? tracker.DashCount : 0;
     }
 
@@ -93,13 +91,6 @@ public sealed class PlayerCombatVFX : MonoBehaviour
                 new Color(0.4f, 1f, 0.78f, 0.95f), player.Facing, -75f);
         }
 
-        if (tracker.RangedCount > previousRangedCount)
-        {
-            Vector3 point = transform.position + Vector3.up * 0.2f + Vector3.right * player.Facing * 0.95f;
-            SpawnFacingPulse("PlayerRangedBurst", point, rangedScale, 0.22f,
-                Color.white, player.Facing, 0f);
-        }
-
         if (tracker.DashCount > previousDashCount)
         {
             Vector3 point = transform.position + Vector3.up * 0.05f - Vector3.right * player.Facing * 0.35f;
@@ -108,7 +99,6 @@ public sealed class PlayerCombatVFX : MonoBehaviour
         }
 
         previousMeleeCount = tracker.MeleeCount;
-        previousRangedCount = tracker.RangedCount;
         previousDashCount = tracker.DashCount;
     }
 
