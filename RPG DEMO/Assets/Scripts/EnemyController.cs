@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// 잡몹 AI. 순찰 → 플레이어 감지 → 추격 → 접촉 데미지.
-/// 접촉 데미지 자체는 자식 오브젝트의 DamageZone(Repeating)이 처리합니다.
+/// 잡몹 AI. 순찰 → 플레이어 감지 → 추격 → 거리 기반 근접 공격.
+/// 물리 접촉이 풀려도 콜라이더 표면 사이가 사거리 안이면 주기적으로 공격합니다.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemyController : MonoBehaviour
@@ -36,6 +36,14 @@ public class EnemyController : MonoBehaviour
     [Tooltip("맞았을 때 넉백이 먹히도록 잠시 이동 정지")]
     [SerializeField] private float hitStunTime = 0.25f;
 
+    [Header("── 근접 공격 ──")]
+    [Tooltip("두 몸 콜라이더 표면 사이의 최대 공격 거리")]
+    [SerializeField, Min(0f)] private float attackReach = 0.3f;
+    [SerializeField, Min(0.05f)] private float attackInterval = 0.9f;
+    [SerializeField, Min(0f)] private float attackDamage = 12f;
+    [SerializeField, Min(0f)] private float attackKnockbackForce = 7f;
+    [SerializeField, Min(0f)] private float attackKnockbackUp = 3f;
+
     [Header("── 비주얼 ──")]
     [SerializeField] private Transform visual;
 
@@ -43,16 +51,21 @@ public class EnemyController : MonoBehaviour
 
     private Rigidbody2D rb;
     private Health health;
+    private Collider2D bodyCollider;
     private Transform player;
+    private Health playerHealth;
+    private Collider2D playerCollider;
     private Vector2 startPos;
     private int facing = -1;          // 1 = 오른쪽, -1 = 왼쪽
     private float hitStunLeft;
+    private float nextAttackTime;
     private float visualScaleX = 1f;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
+        bodyCollider = GetComponent<Collider2D>();
         startPos = transform.position;
 
         if (visual == null)
@@ -69,7 +82,12 @@ public class EnemyController : MonoBehaviour
     private void Start()
     {
         GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
+        if (p != null)
+        {
+            player = p.transform;
+            playerHealth = p.GetComponent<Health>();
+            playerCollider = p.GetComponent<Collider2D>();
+        }
         ApplyFacing();
     }
 
@@ -85,6 +103,7 @@ public class EnemyController : MonoBehaviour
         if (hitStunLeft > 0f) hitStunLeft -= Time.deltaTime;
 
         UpdateDetection();
+        TryMeleeAttack();
     }
 
     private void FixedUpdate()
@@ -113,6 +132,8 @@ public class EnemyController : MonoBehaviour
     private void DoChase()
     {
         float dx = player.position.x - transform.position.x;
+        int dir = dx > 0f ? 1 : -1;
+        if (dir != facing) { facing = dir; ApplyFacing(); }
 
         // 너무 가까우면 멈춤 (플레이어를 계속 밀지 않도록)
         if (Mathf.Abs(dx) <= stopDistance)
@@ -120,9 +141,6 @@ public class EnemyController : MonoBehaviour
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             return;
         }
-
-        int dir = dx > 0f ? 1 : -1;
-        if (dir != facing) { facing = dir; ApplyFacing(); }
 
         // 낭떠러지나 벽이 있으면 더 가지 않음
         if (!HasGroundAhead() || HasWallAhead())
@@ -132,6 +150,43 @@ public class EnemyController : MonoBehaviour
         }
 
         rb.linearVelocity = new Vector2(facing * chaseSpeed, rb.linearVelocity.y);
+    }
+
+    // ───────────────────────── 근접 공격 ─────────────────────────
+    private void TryMeleeAttack()
+    {
+        if (!IsChasing || player == null || playerHealth == null || playerHealth.IsDead) return;
+        if (hitStunLeft > 0f || Time.time < nextAttackTime || !IsPlayerInAttackRange()) return;
+
+        nextAttackTime = Time.time + attackInterval;
+
+        float hpBefore = playerHealth.CurrentHP;
+        playerHealth.TakeDamage(attackDamage);
+
+        // 패링/무적 등으로 실제 체력이 줄지 않았다면 넉백도 주지 않습니다.
+        if (playerHealth.CurrentHP >= hpBefore) return;
+
+        Rigidbody2D playerBody = player.GetComponent<Rigidbody2D>();
+        if (playerBody == null) return;
+
+        float direction = player.position.x >= transform.position.x ? 1f : -1f;
+        Vector2 velocity = playerBody.linearVelocity;
+        velocity.x = 0f;
+        playerBody.linearVelocity = velocity;
+        playerBody.AddForce(new Vector2(direction * attackKnockbackForce, attackKnockbackUp),
+                            ForceMode2D.Impulse);
+    }
+
+    private bool IsPlayerInAttackRange()
+    {
+        if (bodyCollider != null && playerCollider != null)
+        {
+            ColliderDistance2D distance = bodyCollider.Distance(playerCollider);
+            return distance.isOverlapped || distance.distance <= attackReach;
+        }
+
+        // 콜라이더 참조가 없는 비정상 프리팹에서도 완전히 공격 불능이 되지 않게 폴백합니다.
+        return Vector2.Distance(transform.position, player.position) <= stopDistance + attackReach;
     }
 
     // ───────────────────────── 순찰 ─────────────────────────
