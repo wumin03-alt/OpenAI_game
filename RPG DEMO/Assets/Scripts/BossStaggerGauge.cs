@@ -3,8 +3,8 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 보스 종류와 무관하게 패링 누적과 긴 그로기 시간을 관리합니다.
-/// 패링 세 번으로 게이지가 소진되며, 그로기 종료 후 다시 충전됩니다.
+/// 보스 종류와 무관하게 연속형 그로기 게이지와 긴 그로기 시간을 관리합니다.
+/// 일반 공격 적중과 패링/특수 반사 피해가 서로 다른 비율로 게이지를 소진합니다.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class BossStaggerGauge : MonoBehaviour
@@ -12,6 +12,7 @@ public sealed class BossStaggerGauge : MonoBehaviour
     [SerializeField, Min(1)] private int parriesRequired = 3;
     [SerializeField, Min(0.1f)] private float staggerDuration = 10f;
     [SerializeField, Min(1f)] private float maxGroggy = 100f;
+    [SerializeField, Min(0f)] private float normalHitGroggyDamage = 2f;
 
     public event Action<float> GaugeChanged;
     public event Action<float> StaggerStarted;
@@ -23,12 +24,18 @@ public sealed class BossStaggerGauge : MonoBehaviour
         Mathf.CeilToInt(Normalized * parriesRequired - 0.0001f), 0, parriesRequired);
     public float CurrentGroggy { get; private set; }
     public float MaxGroggy => maxGroggy;
+    public float NormalHitGroggyDamage => normalHitGroggyDamage;
+    public int NormalHitsRequired => normalHitGroggyDamage <= 0f
+        ? int.MaxValue
+        : Mathf.CeilToInt(maxGroggy / normalHitGroggyDamage);
     public float Normalized => IsStaggered ? 0f : Mathf.Clamp01(CurrentGroggy / maxGroggy);
     public bool IsStaggered { get; private set; }
     public float StaggerDuration => staggerDuration;
     public float StaggerTimeRemaining { get; private set; }
 
     private Coroutine staggerRoutine;
+    private Health trackedHealth;
+    private float lastKnownHealth;
 
     private void Awake()
     {
@@ -37,7 +44,20 @@ public sealed class BossStaggerGauge : MonoBehaviour
 
     private void Start()
     {
+        trackedHealth = GetComponent<Health>();
+        if (trackedHealth != null)
+        {
+            lastKnownHealth = trackedHealth.CurrentHP;
+            trackedHealth.HealthChanged += HandleHealthChanged;
+        }
+
         GaugeChanged?.Invoke(Normalized);
+    }
+
+    private void OnDestroy()
+    {
+        if (trackedHealth != null)
+            trackedHealth.HealthChanged -= HandleHealthChanged;
     }
 
     public void Configure(int requiredParries, float duration)
@@ -66,6 +86,18 @@ public sealed class BossStaggerGauge : MonoBehaviour
         if (staggerRoutine != null) StopCoroutine(staggerRoutine);
         staggerRoutine = StartCoroutine(StaggerRoutine());
         return true;
+    }
+
+    private void HandleHealthChanged(float currentHealth, float maxHealth)
+    {
+        float healthDamage = Mathf.Max(0f, lastKnownHealth - currentHealth);
+        lastKnownHealth = currentHealth;
+
+        if (healthDamage <= 0f || normalHitGroggyDamage <= 0f) return;
+
+        // 공격력 강화가 일반 공격의 그로기 효율까지 올리지 않도록 적중당 고정값을 적용합니다.
+        // 기본값 2 / 최대 게이지 100이므로 근접·원거리 모두 50회 적중이 필요합니다.
+        ApplyGroggyDamage(normalHitGroggyDamage);
     }
 
     public void ResetGauge()
