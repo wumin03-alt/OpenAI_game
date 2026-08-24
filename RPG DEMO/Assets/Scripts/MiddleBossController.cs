@@ -14,8 +14,16 @@ public sealed class MiddleBossController : MonoBehaviour
     [Header("Scene references")]
     [SerializeField] private SpriteRenderer visual;
     [SerializeField] private Sprite attackSprite;
+    [SerializeField] private Sprite nutrientBlockSprite;
     [SerializeField] private GameObject exitGate;
     [SerializeField] private Transform aimTarget;
+
+    [Header("Attack art")]
+    [SerializeField] private Sprite[] groundClawFrames;
+    [SerializeField] private Sprite[] suctionFrames;
+    [SerializeField] private Sprite[] feedJetFrames;
+    [SerializeField] private Sprite[] pressFrames;
+    [SerializeField] private Sprite[] conveyorFrames;
 
     [Header("Arena")]
     [SerializeField] private float arenaMinX = -10f;
@@ -185,16 +193,29 @@ public sealed class MiddleBossController : MonoBehaviour
     private IEnumerator SuctionPattern()
     {
         CurrentPattern = "원료 흡입";
-        GameObject field = CreateWorldRect("SuctionTelegraph",
+        GameObject telegraph = CreateWorldRect("SuctionTelegraph",
             new Vector2((transform.position.x + arenaMinX) * 0.5f, groundY + 1.5f),
             new Vector2(Mathf.Abs(transform.position.x - arenaMinX), 4.2f),
-            new Color(0.15f, 0.9f, 1f, 0.22f), -2);
+            new Color(0.15f, 0.9f, 1f, 0.12f), -2);
         yield return WaitInterruptible(0.95f);
+        if (!CanAttack())
+        {
+            DestroyAttackVisual(telegraph);
+            yield break;
+        }
+
+        DestroyAttackVisual(telegraph);
+        GameObject field = CreateWorldSprite("SuctionVortex",
+            new Vector2((transform.position.x + arenaMinX) * 0.5f, groundY + 1.25f),
+            new Vector2(Mathf.Abs(transform.position.x - arenaMinX), 4.3f), suctionFrames, 17);
 
         float time = 1.35f;
+        float elapsed = 0f;
         while (time > 0f && CanAttack())
         {
             time -= Time.deltaTime;
+            elapsed += Time.deltaTime;
+            SetEffectFrame(field, suctionFrames, elapsed, 0.11f, true);
             bool playerIsOnGroundRoute = player.transform.position.y < groundY + 1.7f;
             if (playerBody != null && playerIsOnGroundRoute)
             {
@@ -220,16 +241,31 @@ public sealed class MiddleBossController : MonoBehaviour
             new Vector2(targetX, groundY + 0.08f), new Vector2(2.4f, 0.18f),
             new Color(1f, 0.65f, 0.16f, 0.86f), 15);
         yield return WaitInterruptible(1.15f);
-        if (!CanAttack()) yield break;
+        if (!CanAttack())
+        {
+            DestroyAttackVisual(marker);
+            yield break;
+        }
 
-        GameObject claw = CreateWorldRect("SortingClaw",
-            new Vector2(targetX, groundY + 3.3f), new Vector2(2.2f, 6.5f),
-            new Color(1f, 0.22f, 0.42f, 0.72f), 14);
-        if (Mathf.Abs(player.transform.position.x - targetX) <= 1.05f &&
-            player.transform.position.y <= groundY + 3.4f)
-            TryCapturePlayer();
-
-        yield return WaitInterruptible(0.55f);
+        DestroyAttackVisual(marker);
+        GameObject claw = CreateWorldSprite("GroundClawAttack",
+            new Vector2(targetX, groundY + 2.15f), new Vector2(4.35f, 4.35f),
+            groundClawFrames, 19);
+        float elapsed = 0f;
+        bool captureChecked = false;
+        while (elapsed < 1.2f && CanAttack())
+        {
+            elapsed += Time.deltaTime;
+            SetEffectFrame(claw, groundClawFrames, elapsed, 0.18f, false);
+            if (!captureChecked && elapsed >= 0.68f)
+            {
+                captureChecked = true;
+                if (Mathf.Abs(player.transform.position.x - targetX) <= 1.05f &&
+                    player.transform.position.y <= groundY + 3.4f)
+                    TryCapturePlayer();
+            }
+            yield return null;
+        }
         DestroyAttackVisual(marker);
         DestroyAttackVisual(claw);
     }
@@ -254,15 +290,21 @@ public sealed class MiddleBossController : MonoBehaviour
     private IEnumerator ForcedTransferPattern()
     {
         CurrentPattern = "강제 이송";
-        GameObject belt = CreateWorldRect("ForcedConveyor",
-            new Vector2(0f, groundY - 0.12f), new Vector2(arenaMaxX - arenaMinX, 0.32f),
-            new Color(1f, 0.32f, 0.18f, 0.68f), 10);
+        List<GameObject> beltSegments = new List<GameObject>();
+        for (float x = arenaMinX + 1.5f; x < arenaMaxX; x += 3f)
+            beltSegments.Add(CreateWorldSprite("ForcedConveyorSegment",
+                new Vector2(x, groundY + 0.12f), new Vector2(3.25f, 0.78f),
+                conveyorFrames, 10));
         yield return WaitInterruptible(0.85f);
 
         float time = 1.8f;
+        float elapsed = 0f;
         while (time > 0f && CanAttack())
         {
             time -= Time.deltaTime;
+            elapsed += Time.deltaTime;
+            foreach (GameObject segment in beltSegments)
+                SetEffectFrame(segment, conveyorFrames, elapsed, 0.09f, true);
             bool playerIsOnGroundRoute = player.transform.position.y < groundY + 1.7f;
             if (playerBody != null && playerIsOnGroundRoute)
             {
@@ -278,7 +320,8 @@ public sealed class MiddleBossController : MonoBehaviour
             }
             yield return null;
         }
-        DestroyAttackVisual(belt);
+        foreach (GameObject segment in beltSegments)
+            DestroyAttackVisual(segment);
     }
 
     private IEnumerator ForceFeedPattern()
@@ -290,33 +333,50 @@ public sealed class MiddleBossController : MonoBehaviour
             new Vector2(Mathf.Abs(transform.position.x - arenaMinX), 0.18f),
             new Color(1f, 0.7f, 0.18f, 0.82f), 16);
         yield return WaitInterruptible(1.05f);
-        if (!CanAttack()) yield break;
+        if (!CanAttack())
+        {
+            DestroyAttackVisual(warning);
+            yield break;
+        }
 
-        warning.transform.localScale = new Vector3(warning.transform.localScale.x, 1.4f, 1f);
-        SpriteRenderer renderer = warning.GetComponent<SpriteRenderer>();
-        renderer.color = new Color(0.42f, 1f, 0.2f, 0.78f);
+        DestroyAttackVisual(warning);
+        GameObject jet = CreateWorldSprite("ForceFeedJet",
+            new Vector2((transform.position.x + arenaMinX) * 0.5f, beamY),
+            new Vector2(Mathf.Abs(transform.position.x - arenaMinX), 2.4f), feedJetFrames, 18);
         if (Mathf.Abs(player.transform.position.y - beamY) < 0.8f &&
             player.transform.position.x < transform.position.x)
             playerHealth.TakeDamage(15f);
-        yield return WaitInterruptible(0.55f);
-        DestroyAttackVisual(warning);
+        float elapsed = 0f;
+        while (elapsed < 0.62f && CanAttack())
+        {
+            elapsed += Time.deltaTime;
+            SetEffectFrame(jet, feedJetFrames, elapsed, 0.12f, true);
+            yield return null;
+        }
+        DestroyAttackVisual(jet);
     }
 
     private IEnumerator CompressionDistributionPattern()
     {
         CurrentPattern = "과부하 압축 배급";
-        GameObject leftPress = CreateWorldRect("LeftPress",
-            new Vector2(arenaMinX + 0.6f, groundY + 2.3f), new Vector2(1.2f, 6f),
-            new Color(1f, 0.2f, 0.4f, 0.74f), 14);
-        GameObject rightPress = CreateWorldRect("RightPress",
-            new Vector2(arenaMaxX - 0.6f, groundY + 2.3f), new Vector2(1.2f, 6f),
-            new Color(1f, 0.2f, 0.4f, 0.74f), 14);
+        GameObject leftPress = CreateWorldSprite("LeftPress",
+            new Vector2(arenaMinX + 0.8f, groundY + 2.1f), new Vector2(2.5f, 5.5f),
+            pressFrames, 18);
+        GameObject rightPress = CreateWorldSprite("RightPress",
+            new Vector2(arenaMaxX - 0.8f, groundY + 2.1f), new Vector2(2.5f, 5.5f),
+            pressFrames, 18);
+        SpriteRenderer rightRenderer = rightPress.GetComponent<SpriteRenderer>();
+        if (rightRenderer != null) rightRenderer.flipX = true;
         yield return WaitInterruptible(0.9f);
 
         float moveTime = 0.85f;
+        float elapsed = 0f;
         while (moveTime > 0f && CanAttack())
         {
             moveTime -= Time.deltaTime;
+            elapsed += Time.deltaTime;
+            SetEffectFrame(leftPress, pressFrames, elapsed, 0.12f, true);
+            SetEffectFrame(rightPress, pressFrames, elapsed, 0.12f, true);
             float step = 5.8f * Time.deltaTime;
             leftPress.transform.position += Vector3.right * step;
             rightPress.transform.position += Vector3.left * step;
@@ -338,9 +398,10 @@ public sealed class MiddleBossController : MonoBehaviour
         block.transform.position = transform.position + new Vector3(-2.3f, 0.8f, 0f);
 
         SpriteRenderer renderer = block.AddComponent<SpriteRenderer>();
-        renderer.sprite = attackSprite;
-        SetWorldSize(block.transform, attackSprite, new Vector2(0.72f, 0.72f));
-        renderer.color = new Color(0.72f, 0.18f, 1f, 1f);
+        Sprite blockSprite = nutrientBlockSprite != null ? nutrientBlockSprite : attackSprite;
+        renderer.sprite = blockSprite;
+        SetWorldSize(block.transform, blockSprite, new Vector2(0.9f, 0.9f));
+        renderer.color = Color.white;
         renderer.sortingOrder = 20;
 
         Rigidbody2D body = block.AddComponent<Rigidbody2D>();
@@ -348,7 +409,7 @@ public sealed class MiddleBossController : MonoBehaviour
         body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         BoxCollider2D collider = block.AddComponent<BoxCollider2D>();
         collider.isTrigger = true;
-        collider.size = attackSprite != null ? attackSprite.bounds.size : Vector2.one;
+        collider.size = blockSprite != null ? blockSprite.bounds.size : Vector2.one;
 
         Vector2 direction = player != null
             ? (player.transform.position + Vector3.up * 0.6f - block.transform.position).normalized
@@ -434,7 +495,10 @@ public sealed class MiddleBossController : MonoBehaviour
         gameObject.tag = "Untagged";
         if (aimTarget != null) aimTarget.gameObject.tag = "Untagged";
         if (visual != null) visual.color = new Color(0.24f, 0.3f, 0.34f, 1f);
+        foreach (Collider2D bossCollider in GetComponentsInChildren<Collider2D>())
+            bossCollider.enabled = false;
         if (exitGate != null) exitGate.SetActive(true);
+        StartCoroutine(FadeOutDefeatedBoss());
 
         if (phaseText != null)
         {
@@ -476,6 +540,56 @@ public sealed class MiddleBossController : MonoBehaviour
         renderer.sortingOrder = sortingOrder;
         attackVisuals.Add(go);
         return go;
+    }
+
+    private GameObject CreateWorldSprite(string objectName, Vector2 position, Vector2 worldSize,
+        Sprite[] frames, int sortingOrder)
+    {
+        GameObject go = new GameObject(objectName);
+        go.transform.position = position;
+        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+        Sprite firstFrame = frames != null && frames.Length > 0 ? frames[0] : attackSprite;
+        renderer.sprite = firstFrame;
+        SetWorldSize(go.transform, firstFrame, worldSize);
+        renderer.color = Color.white;
+        renderer.sortingOrder = sortingOrder;
+        attackVisuals.Add(go);
+        return go;
+    }
+
+    private static void SetEffectFrame(GameObject effect, Sprite[] frames, float elapsed,
+        float secondsPerFrame, bool loop)
+    {
+        if (effect == null || frames == null || frames.Length == 0) return;
+        int frame = Mathf.FloorToInt(elapsed / Mathf.Max(secondsPerFrame, 0.01f));
+        frame = loop ? frame % frames.Length : Mathf.Min(frame, frames.Length - 1);
+        SpriteRenderer renderer = effect.GetComponent<SpriteRenderer>();
+        if (renderer != null && frames[frame] != null) renderer.sprite = frames[frame];
+    }
+
+    private IEnumerator FadeOutDefeatedBoss()
+    {
+        SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
+        Color[] startColors = new Color[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++) startColors[i] = renderers[i].color;
+
+        float elapsed = 0f;
+        const float duration = 0.75f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = 1f - Mathf.Clamp01(elapsed / duration);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Color color = startColors[i];
+                color.a *= alpha;
+                renderers[i].color = color;
+            }
+            yield return null;
+        }
+
+        foreach (SpriteRenderer renderer in renderers)
+            renderer.enabled = false;
     }
 
     private static void SetWorldSize(Transform target, Sprite sprite, Vector2 worldSize)

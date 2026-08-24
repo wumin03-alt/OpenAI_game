@@ -34,3 +34,45 @@
 - Prompt intent: Four-frame transparent horizontal sprite strip of a heavy industrial crawler track with visibly advancing tread and wheel positions, matching F.E.E.D.-6.
 - Modifications: Transparent-background cleanup, shared-scale normalization, and extraction into `Animation/Frames/Track/`.
 - Third-party trademarks or logos: None requested.
+
+## `SPR_FEED6_Idle_V2.png`
+
+- Source: Generated for this project with OpenAI's built-in image generation tool on 2026-08-24.
+- Prompt intent: Cleaner side-view F.E.E.D.-6 redesign with exactly one raised sorting claw and one compact feeding nozzle, while retaining the hopper, green core, magenta tank, and crawler chassis.
+- Modifications: Edge-connected checkerboard pixels were removed into transparency; Unity import settings provide in-engine sizing.
+- Third-party trademarks or logos: None requested.
+
+## `Environment/SPR_MiddleBoss_RubblePlatform.png`
+
+- Source: Generated for this project with OpenAI's built-in image generation tool on 2026-08-24.
+- Prompt intent: Transparent ruined-city platform made from a broken elevated-road slab, exposed rebar, steel supports, amber hazard stripes, and small cyan machine lights.
+- Modifications: Copied into the Unity project and imported as a single sprite above a separate invisible collision slab.
+- Third-party trademarks or logos: None requested.
+
+## `VFX/Sheets/SPR_FEED6_GroundClaw_Sheet.png`
+
+- Source: Generated for this project with OpenAI's built-in image generation tool on 2026-08-24.
+- Prompt intent: Six-frame ground-claw attack sequence showing warning cracks, emergence, opening, snapping, and retraction.
+- Modifications: Edge-connected checkerboard pixels were removed into transparency, then frames were normalized to a shared bottom anchor and extracted into `VFX/Frames/GroundClaw/`.
+- Third-party trademarks or logos: None requested.
+
+## `VFX/Sheets/SPR_FEED6_Suction_Sheet.png`
+
+- Source: Generated for this project with OpenAI's built-in image generation tool on 2026-08-24.
+- Prompt intent: Four-frame cyan-and-green industrial suction vortex loop pulling dust and rubble toward the boss on the right.
+- Modifications: Frames were normalized to a shared center anchor and extracted into `VFX/Frames/Suction/`.
+- Third-party trademarks or logos: None requested.
+
+## `VFX/Sheets/SPR_FEED6_FeedJet_Sheet.png`
+
+- Source: Generated for this project with OpenAI's built-in image generation tool on 2026-08-24.
+- Prompt intent: Four-frame toxic-green nutrient jet with cyan pressure streaks, firing from right to left.
+- Modifications: Frames were normalized to a shared center anchor and extracted into `VFX/Frames/FeedJet/`.
+- Third-party trademarks or logos: None requested.
+
+## `VFX/SPR_FEED6_NutrientBlock.png`
+
+- Source: Generated for this project with OpenAI's built-in image generation tool on 2026-08-24.
+- Prompt intent: Transparent industrial nutrient cartridge with magenta gel, cream cage, hazard-yellow corners, and cyan status light.
+- Modifications: Copied into the Unity project and imported as a single projectile sprite.
+- Third-party trademarks or logos: None requested.
