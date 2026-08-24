@@ -2074,7 +2074,7 @@ MonoBehaviour:
       spawnPoint: {x: -11.5, y: -2}
       healthMultiplier: 1
       movementSpeedMultiplier: 1
-    - enemyType: 1
+    - enemyType: 0
       spawnPoint: {x: -7.2, y: 2.85}
       healthMultiplier: 1
       movementSpeedMultiplier: 1
@@ -2082,7 +2082,7 @@ MonoBehaviour:
       spawnPoint: {x: 11.5, y: -2}
       healthMultiplier: 1
       movementSpeedMultiplier: 1
-    - enemyType: 1
+    - enemyType: 0
       spawnPoint: {x: 7.2, y: 2.85}
       healthMultiplier: 1
       movementSpeedMultiplier: 1
@@ -2090,11 +2090,11 @@ MonoBehaviour:
     - enemyType: 0
       spawnPoint: {x: -11.5, y: -2}
       healthMultiplier: 1
-      movementSpeedMultiplier: 1.2
+      movementSpeedMultiplier: 1
     - enemyType: 0
       spawnPoint: {x: 11.5, y: -2}
       healthMultiplier: 1
-      movementSpeedMultiplier: 1.2
+      movementSpeedMultiplier: 1
     - enemyType: 0
       spawnPoint: {x: 0, y: 0.6}
       healthMultiplier: 1
@@ -2122,11 +2122,11 @@ MonoBehaviour:
       movementSpeedMultiplier: 1
     - enemyType: 0
       spawnPoint: {x: 3.5, y: -2}
-      healthMultiplier: 0.9
-      movementSpeedMultiplier: 1.5
+      healthMultiplier: 1
+      movementSpeedMultiplier: 1
     - enemyType: 1
       spawnPoint: {x: -7.2, y: 2.85}
-      healthMultiplier: 1.35
+      healthMultiplier: 1
       movementSpeedMultiplier: 1
     - enemyType: 1
       spawnPoint: {x: 7.2, y: 2.85}
