@@ -22,10 +22,10 @@ EditorBuildSettings:
     guid: 3647a5901bf3463db679a4cd99611ab6
   - enabled: 1
     path: Assets/Scenes/Stage04.unity
-    guid: e4a53f7c916b4d0eab2f9e6c4d8a7b31
+    guid: b3f8e2c00e4d4b13b9721fef4d634d8a
   - enabled: 1
     path: Assets/Scenes/Stage05.unity
-    guid: b3f8e2c00e4d4b13b9721fef4d634d8a
+    guid: e4a53f7c916b4d0eab2f9e6c4d8a7b31
   - enabled: 1
     path: Assets/Scenes/BossArena.unity
     guid: c1986fa685a602f4394164db045de2c7
