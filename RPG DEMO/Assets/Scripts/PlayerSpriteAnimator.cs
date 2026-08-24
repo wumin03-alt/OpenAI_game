@@ -17,6 +17,10 @@ public sealed class PlayerSpriteAnimator : MonoBehaviour
     [SerializeField] private float idleFps = 2.4f;
     [SerializeField] private float moveFps = 10f;
     [SerializeField] private float attackFps = 12f;
+    [SerializeField] private float crouchFps = 8f;
+    [Header("Crouch Presentation")]
+    [Tooltip("웅크리기 원화의 큰 여백/체격을 일반 프레임과 같은 크기로 맞추는 배율")]
+    [SerializeField, Range(0.4f, 1f)] private float crouchArtScale = 0.78f;
 
     private Sprite[] activeFrames;
     private float frameTimer;
@@ -56,12 +60,18 @@ public sealed class PlayerSpriteAnimator : MonoBehaviour
 
         if (activeFrames != desired) ResetAnimation(desired);
 
-        float fps = desired == attackFrames ? attackFps : desired == moveFrames ? moveFps : idleFps;
+        float fps = desired == attackFrames ? attackFps
+            : desired == moveFrames ? moveFps
+            : desired == crouchFrames ? crouchFps
+            : idleFps;
         frameTimer += Time.deltaTime;
         if (frameTimer < 1f / Mathf.Max(0.01f, fps)) return;
 
         frameTimer = 0f;
-        frameIndex = (frameIndex + 1) % desired.Length;
+        // 웅크리기는 첫 프레임에서 두 번째 프레임으로 앉은 뒤 마지막 자세를 유지한다.
+        frameIndex = desired == crouchFrames
+            ? Mathf.Min(frameIndex + 1, desired.Length - 1)
+            : (frameIndex + 1) % desired.Length;
         targetRenderer.sprite = desired[frameIndex];
     }
 
@@ -69,11 +79,15 @@ public sealed class PlayerSpriteAnimator : MonoBehaviour
     {
         if (player == null) return;
 
-        // PlayerController의 프로토타입 웅크리기 스케일 보정을 전용 프레임으로 대체하고,
-        // 모든 애니메이션의 발 위치를 동일하게 유지합니다.
+        // 원화 크기 차이만 프레임 교체와 동시에 보정한다. Transform 전체를 시간에 따라
+        // 축소하지 않아 캐릭터가 갑자기 오그라드는 느낌이 나지 않게 한다.
+        float artScale = player.IsCrouching ? crouchArtScale : 1f;
+
+        // 전용 웅크리기 원화가 일반 프레임보다 크게 그려져 있으므로 X/Y를 같은 비율로
+        // 한 번만 보정하고, 실제 앉는 움직임은 두 장의 자세 프레임으로 표현한다.
         transform.localScale = new Vector3(
-            Mathf.Abs(stableLocalScale.x) * player.Facing,
-            stableLocalScale.y,
+            Mathf.Abs(stableLocalScale.x) * artScale * player.Facing,
+            stableLocalScale.y * artScale,
             stableLocalScale.z);
         transform.localPosition = stableLocalPosition;
     }

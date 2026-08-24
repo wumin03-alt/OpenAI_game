@@ -21,6 +21,10 @@ public sealed class BossArenaSpriteAnimator : MonoBehaviour
     [SerializeField] private float idleFps = 2.4f;
     [SerializeField] private float moveFps = 10f;
     [SerializeField] private float attackFps = 12f;
+    [SerializeField] private float crouchFps = 8f;
+    [Header("Player Crouch Presentation")]
+    [Tooltip("웅크리기 원화의 큰 여백/체격을 일반 프레임과 같은 크기로 맞추는 배율")]
+    [SerializeField, Range(0.4f, 1f)] private float crouchArtScale = 0.78f;
 
     private Sprite[] activeFrames;
     private float frameTimer;
@@ -66,11 +70,12 @@ public sealed class BossArenaSpriteAnimator : MonoBehaviour
     {
         if (actorKind != ActorKind.Player || player == null) return;
 
-        // PlayerController는 공용 프로토타입 호환을 위해 웅크릴 때 visual의 Y축을 줄입니다.
-        // BossArena에서는 전용 웅크리기 프레임을 쓰므로 비율과 발 위치를 원래대로 고정합니다.
+        float artScale = player.IsCrouching ? crouchArtScale : 1f;
+
+        // 보스 스테이지에서도 전체 축소 트윈 없이 원화 크기 차이만 보정한다.
         transform.localScale = new Vector3(
-            Mathf.Abs(stableLocalScale.x) * player.Facing,
-            stableLocalScale.y,
+            Mathf.Abs(stableLocalScale.x) * artScale * player.Facing,
+            stableLocalScale.y * artScale,
             stableLocalScale.z);
         transform.localPosition = stableLocalPosition;
     }
@@ -82,12 +87,17 @@ public sealed class BossArenaSpriteAnimator : MonoBehaviour
 
         if (activeFrames != desired) ResetAnimation(desired);
 
-        float fps = desired == attackFrames ? attackFps : desired == moveFrames ? moveFps : idleFps;
+        float fps = desired == attackFrames ? attackFps
+            : desired == moveFrames ? moveFps
+            : desired == crouchFrames ? crouchFps
+            : idleFps;
         frameTimer += Time.deltaTime;
         if (frameTimer >= 1f / Mathf.Max(0.01f, fps))
         {
             frameTimer = 0f;
-            frameIndex = (frameIndex + 1) % desired.Length;
+            frameIndex = desired == crouchFrames
+                ? Mathf.Min(frameIndex + 1, desired.Length - 1)
+                : (frameIndex + 1) % desired.Length;
             targetRenderer.sprite = desired[frameIndex];
         }
     }
