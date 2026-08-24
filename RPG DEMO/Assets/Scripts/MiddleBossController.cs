@@ -23,10 +23,10 @@ public sealed class MiddleBossController : MonoBehaviour
     [SerializeField] private float groundY = -3.65f;
 
     [Header("Combat")]
-    [SerializeField, Min(0.1f)] private float patternCooldown = 1.1f;
-    [SerializeField, Min(1f)] private float captureFailureDamage = 42f;
-    [SerializeField, Min(1f)] private float nutrientBlockDamage = 13f;
-    [SerializeField, Min(1f)] private float nutrientBlockSpeed = 9f;
+    [SerializeField, Min(0.1f)] private float patternCooldown = 1.55f;
+    [SerializeField, Min(1f)] private float captureFailureDamage = 36f;
+    [SerializeField, Min(1f)] private float nutrientBlockDamage = 9f;
+    [SerializeField, Min(1f)] private float nutrientBlockSpeed = 7.2f;
 
     public int Phase { get; private set; } = 1;
     public string CurrentPattern { get; private set; } = "BOOT SEQUENCE";
@@ -106,11 +106,11 @@ public sealed class MiddleBossController : MonoBehaviour
         if (Phase == 1 && health.Normalized <= 0.5f)
         {
             Phase = 2;
-            patternCooldown = Mathf.Max(0.65f, patternCooldown * 0.72f);
+            patternCooldown = Mathf.Max(1.05f, patternCooldown * 0.82f);
             CurrentPattern = "DIRECT RECYCLING AUTHORIZED";
             if (phaseText != null)
             {
-                phaseText.text = "PHASE 02 // 직접 재활용";
+                phaseText.text = "2페이즈 · 직접 재활용";
                 phaseText.color = new Color(1f, 0.25f, 0.48f);
             }
             if (visual != null) visual.color = new Color(1f, 0.76f, 0.78f, 1f);
@@ -119,14 +119,14 @@ public sealed class MiddleBossController : MonoBehaviour
 
         if (healthFill != null)
         {
-            healthFill.fillAmount = health.Normalized;
+            MiddleBossUIStyle.HorizontalFill(healthFill, health.Normalized, 4f);
             healthFill.color = Color.Lerp(new Color(0.9f, 0.08f, 0.24f),
                 new Color(1f, 0.55f, 0.16f), health.Normalized);
             healthText.text = $"F.E.E.D.-6   {Mathf.CeilToInt(health.CurrentHP)} / {Mathf.CeilToInt(health.MaxHP)}";
         }
 
         if (statusText != null && !staggerGauge.IsStaggered && !escapeSequence.IsActive && !dead)
-            statusText.text = $"PROCESS // {CurrentPattern}";
+            statusText.text = $"패턴 · {CurrentPattern}";
     }
 
     private IEnumerator BrainLoop()
@@ -189,24 +189,26 @@ public sealed class MiddleBossController : MonoBehaviour
             new Vector2((transform.position.x + arenaMinX) * 0.5f, groundY + 1.5f),
             new Vector2(Mathf.Abs(transform.position.x - arenaMinX), 4.2f),
             new Color(0.15f, 0.9f, 1f, 0.22f), -2);
-        yield return WaitInterruptible(0.75f);
+        yield return WaitInterruptible(0.95f);
 
-        float time = 1.8f;
+        float time = 1.35f;
         while (time > 0f && CanAttack())
         {
             time -= Time.deltaTime;
-            if (playerBody != null)
+            bool playerIsOnGroundRoute = player.transform.position.y < groundY + 1.7f;
+            if (playerBody != null && playerIsOnGroundRoute)
             {
-                float targetVelocity = Mathf.Sign(transform.position.x - player.transform.position.x) * 8f;
+                float targetVelocity = Mathf.Sign(transform.position.x - player.transform.position.x) * 5.5f;
                 Vector2 velocity = playerBody.linearVelocity;
-                velocity.x = Mathf.MoveTowards(velocity.x, targetVelocity, 18f * Time.deltaTime);
+                velocity.x = Mathf.MoveTowards(velocity.x, targetVelocity, 12f * Time.deltaTime);
                 playerBody.linearVelocity = velocity;
             }
             yield return null;
         }
 
-        if (CanAttack() && Mathf.Abs(player.transform.position.x - transform.position.x) < 2.3f)
-            playerHealth.TakeDamage(15f);
+        if (CanAttack() && player.transform.position.y < groundY + 1.7f &&
+            Mathf.Abs(player.transform.position.x - transform.position.x) < 1.9f)
+            playerHealth.TakeDamage(10f);
         DestroyAttackVisual(field);
     }
 
@@ -215,15 +217,15 @@ public sealed class MiddleBossController : MonoBehaviour
         CurrentPattern = "자동 선별 집게";
         float targetX = Mathf.Clamp(player.transform.position.x, arenaMinX + 1f, arenaMaxX - 1f);
         GameObject marker = CreateWorldRect("ClawTarget",
-            new Vector2(targetX, groundY + 0.08f), new Vector2(2.8f, 0.18f),
+            new Vector2(targetX, groundY + 0.08f), new Vector2(2.4f, 0.18f),
             new Color(1f, 0.65f, 0.16f, 0.86f), 15);
-        yield return WaitInterruptible(0.85f);
+        yield return WaitInterruptible(1.15f);
         if (!CanAttack()) yield break;
 
         GameObject claw = CreateWorldRect("SortingClaw",
             new Vector2(targetX, groundY + 3.3f), new Vector2(2.2f, 6.5f),
             new Color(1f, 0.22f, 0.42f, 0.72f), 14);
-        if (Mathf.Abs(player.transform.position.x - targetX) <= 1.25f &&
+        if (Mathf.Abs(player.transform.position.x - targetX) <= 1.05f &&
             player.transform.position.y <= groundY + 3.4f)
             TryCapturePlayer();
 
@@ -238,13 +240,14 @@ public sealed class MiddleBossController : MonoBehaviour
         GameObject warning = CreateWorldRect("BlockWarning",
             new Vector2(transform.position.x - 1.7f, transform.position.y + 1f),
             new Vector2(0.35f, 2.7f), new Color(0.72f, 0.2f, 1f, 0.78f), 18);
-        yield return WaitInterruptible(fast ? 0.45f : 0.7f);
+        yield return WaitInterruptible(fast ? 0.65f : 0.9f);
         DestroyAttackVisual(warning);
 
-        for (int i = 0; i < 3 && CanAttack(); i++)
+        int blockCount = fast ? 3 : 2;
+        for (int i = 0; i < blockCount && CanAttack(); i++)
         {
-            FireNutrientBlock(fast ? 11.5f : nutrientBlockSpeed);
-            yield return WaitInterruptible(fast ? 0.3f : 0.48f);
+            FireNutrientBlock(fast ? 9.2f : nutrientBlockSpeed);
+            yield return WaitInterruptible(fast ? 0.42f : 0.62f);
         }
     }
 
@@ -254,20 +257,21 @@ public sealed class MiddleBossController : MonoBehaviour
         GameObject belt = CreateWorldRect("ForcedConveyor",
             new Vector2(0f, groundY - 0.12f), new Vector2(arenaMaxX - arenaMinX, 0.32f),
             new Color(1f, 0.32f, 0.18f, 0.68f), 10);
-        yield return WaitInterruptible(0.6f);
+        yield return WaitInterruptible(0.85f);
 
-        float time = 2.25f;
+        float time = 1.8f;
         while (time > 0f && CanAttack())
         {
             time -= Time.deltaTime;
-            if (playerBody != null)
+            bool playerIsOnGroundRoute = player.transform.position.y < groundY + 1.7f;
+            if (playerBody != null && playerIsOnGroundRoute)
             {
                 Vector2 velocity = playerBody.linearVelocity;
-                velocity.x = Mathf.MoveTowards(velocity.x, 10f, 22f * Time.deltaTime);
+                velocity.x = Mathf.MoveTowards(velocity.x, 7f, 14f * Time.deltaTime);
                 playerBody.linearVelocity = velocity;
             }
 
-            if (Mathf.Abs(player.transform.position.x - transform.position.x) < 2.4f)
+            if (playerIsOnGroundRoute && Mathf.Abs(player.transform.position.x - transform.position.x) < 2f)
             {
                 TryCapturePlayer();
                 break;
@@ -285,7 +289,7 @@ public sealed class MiddleBossController : MonoBehaviour
             new Vector2((transform.position.x + arenaMinX) * 0.5f, beamY),
             new Vector2(Mathf.Abs(transform.position.x - arenaMinX), 0.18f),
             new Color(1f, 0.7f, 0.18f, 0.82f), 16);
-        yield return WaitInterruptible(0.75f);
+        yield return WaitInterruptible(1.05f);
         if (!CanAttack()) yield break;
 
         warning.transform.localScale = new Vector3(warning.transform.localScale.x, 1.4f, 1f);
@@ -293,7 +297,7 @@ public sealed class MiddleBossController : MonoBehaviour
         renderer.color = new Color(0.42f, 1f, 0.2f, 0.78f);
         if (Mathf.Abs(player.transform.position.y - beamY) < 0.8f &&
             player.transform.position.x < transform.position.x)
-            playerHealth.TakeDamage(22f);
+            playerHealth.TakeDamage(15f);
         yield return WaitInterruptible(0.55f);
         DestroyAttackVisual(warning);
     }
@@ -307,13 +311,13 @@ public sealed class MiddleBossController : MonoBehaviour
         GameObject rightPress = CreateWorldRect("RightPress",
             new Vector2(arenaMaxX - 0.6f, groundY + 2.3f), new Vector2(1.2f, 6f),
             new Color(1f, 0.2f, 0.4f, 0.74f), 14);
-        yield return WaitInterruptible(0.65f);
+        yield return WaitInterruptible(0.9f);
 
         float moveTime = 0.85f;
         while (moveTime > 0f && CanAttack())
         {
             moveTime -= Time.deltaTime;
-            float step = 8.2f * Time.deltaTime;
+            float step = 5.8f * Time.deltaTime;
             leftPress.transform.position += Vector3.right * step;
             rightPress.transform.position += Vector3.left * step;
             yield return null;
@@ -321,7 +325,7 @@ public sealed class MiddleBossController : MonoBehaviour
 
         if (CanAttack() && player.transform.position.x > leftPress.transform.position.x - 0.8f &&
             player.transform.position.x < rightPress.transform.position.x + 0.8f)
-            playerHealth.TakeDamage(26f);
+            playerHealth.TakeDamage(18f);
 
         DestroyAttackVisual(leftPress);
         DestroyAttackVisual(rightPress);
@@ -501,39 +505,56 @@ public sealed class MiddleBossController : MonoBehaviour
     {
         hudCanvas = RuntimeUIFactory.CreateCanvas("MiddleBossCombatCanvas", null, 220);
 
-        Image panel = RuntimeUIFactory.CreateImage(hudCanvas.transform, "MiddleBossPanel",
-            new Color(0.02f, 0.035f, 0.07f, 0.94f));
+        Image panel = RuntimeUIFactory.CreateImage(hudCanvas.transform, "MiddleBossNamePlate",
+            new Color(0.18f, 0.07f, 0.06f, 0.96f));
+        MiddleBossUIStyle.Rounded(panel, new Color(0.18f, 0.07f, 0.06f, 0.96f));
+        MiddleBossUIStyle.Outline(panel, new Color(1f, 0.78f, 0.28f, 0.95f), 3f);
+        MiddleBossUIStyle.Shadow(panel, new Color(0f, 0f, 0f, 0.72f), 6f);
         RectTransform panelRect = panel.rectTransform;
         panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 1f);
         panelRect.pivot = new Vector2(0.5f, 1f);
-        panelRect.anchoredPosition = new Vector2(0f, -20f);
-        panelRect.sizeDelta = new Vector2(940f, 72f);
+        panelRect.anchoredPosition = new Vector2(0f, -18f);
+        panelRect.sizeDelta = new Vector2(850f, 104f);
 
-        phaseText = RuntimeUIFactory.CreateText(panelRect, "PHASE 01 // 정상 생산", 19,
-            new Vector2(-325f, 20f), new Vector2(270f, 28f), new Color(0.2f, 0.9f, 1f));
+        Image innerPanel = RuntimeUIFactory.CreateImage(panelRect, "CreamInlay",
+            new Color(0.98f, 0.86f, 0.57f, 0.98f));
+        MiddleBossUIStyle.Rounded(innerPanel, new Color(0.98f, 0.86f, 0.57f, 0.98f));
+        RuntimeUIFactory.Stretch(innerPanel.rectTransform, 7f, -7f, 7f, -7f);
+
+        Image titleRibbon = RuntimeUIFactory.CreateImage(innerPanel.rectTransform, "TitleRibbon",
+            new Color(0.34f, 0.12f, 0.1f, 1f));
+        MiddleBossUIStyle.Rounded(titleRibbon, new Color(0.34f, 0.12f, 0.1f, 1f));
+        RectTransform ribbonRect = titleRibbon.rectTransform;
+        ribbonRect.anchorMin = ribbonRect.anchorMax = new Vector2(0.5f, 1f);
+        ribbonRect.pivot = new Vector2(0.5f, 1f);
+        ribbonRect.anchoredPosition = new Vector2(0f, -7f);
+        ribbonRect.sizeDelta = new Vector2(800f, 39f);
+
+        phaseText = RuntimeUIFactory.CreateText(ribbonRect, "1페이즈 · 정상 생산", 18,
+            new Vector2(-285f, 0f), new Vector2(230f, 31f), new Color(1f, 0.82f, 0.36f));
         phaseText.alignment = TextAnchor.MiddleLeft;
         phaseText.fontStyle = FontStyle.Bold;
 
-        healthText = RuntimeUIFactory.CreateText(panelRect, "F.E.E.D.-6", 21,
-            new Vector2(0f, 20f), new Vector2(360f, 28f), Color.white);
+        healthText = RuntimeUIFactory.CreateText(ribbonRect, "F.E.E.D.-6", 23,
+            new Vector2(0f, 0f), new Vector2(350f, 32f), Color.white);
         healthText.fontStyle = FontStyle.Bold;
 
-        statusText = RuntimeUIFactory.CreateText(panelRect, "PROCESS // BOOT SEQUENCE", 17,
-            new Vector2(325f, 20f), new Vector2(270f, 28f), new Color(1f, 0.72f, 0.28f));
+        statusText = RuntimeUIFactory.CreateText(ribbonRect, "가동 준비", 17,
+            new Vector2(285f, 0f), new Vector2(230f, 31f), new Color(1f, 0.75f, 0.42f));
         statusText.alignment = TextAnchor.MiddleRight;
 
-        Image healthBackground = RuntimeUIFactory.CreateImage(panelRect, "BossHealthBackground",
-            new Color(0.08f, 0.1f, 0.15f, 1f));
+        Image healthBackground = RuntimeUIFactory.CreateImage(innerPanel.rectTransform, "BossHealthBackground",
+            new Color(0.25f, 0.1f, 0.09f, 1f));
+        MiddleBossUIStyle.Rounded(healthBackground, new Color(0.25f, 0.1f, 0.09f, 1f));
+        MiddleBossUIStyle.Outline(healthBackground, new Color(0.55f, 0.27f, 0.12f, 1f), 1f);
         RectTransform barRect = healthBackground.rectTransform;
         barRect.anchorMin = barRect.anchorMax = new Vector2(0.5f, 0.5f);
-        barRect.anchoredPosition = new Vector2(0f, -18f);
-        barRect.sizeDelta = new Vector2(880f, 18f);
+        barRect.anchoredPosition = new Vector2(0f, -26f);
+        barRect.sizeDelta = new Vector2(790f, 30f);
 
         healthFill = RuntimeUIFactory.CreateImage(barRect, "BossHealthFill",
-            new Color(1f, 0.52f, 0.16f));
-        healthFill.type = Image.Type.Filled;
-        healthFill.fillMethod = Image.FillMethod.Horizontal;
-        healthFill.fillOrigin = 0;
-        RuntimeUIFactory.Stretch(healthFill.rectTransform, 2f, -2f, 2f, -2f);
+            new Color(1f, 0.42f, 0.22f));
+        MiddleBossUIStyle.Rounded(healthFill, new Color(1f, 0.42f, 0.22f));
+        MiddleBossUIStyle.HorizontalFill(healthFill, 1f, 4f);
     }
 }

@@ -12,12 +12,14 @@ public static class MiddleBossStageSetup
     private const string ScenePath = "Assets/Scenes/MiddleBoss.unity";
     private const string Stage03Path = "Assets/Scenes/Stage03.unity";
     private const string BossSpritePath = "Assets/Art/MiddleBoss/SPR_FEED6_Idle.png";
+    private const string RuinedCityPath = "Assets/Art/MiddleBoss/Environment/SPR_MiddleBoss_RuinedCity.png";
+    private const string AnimationRoot = "Assets/Art/MiddleBoss/Animation/Frames";
     private const string PlayerPrefabPath = "Assets/Prefabs/Player.prefab";
 
     [MenuItem("Tools/Middle Boss/Build F.E.E.D.-6 Stage")]
     public static void Apply()
     {
-        ConfigureBossSprite();
+        ConfigureArtAssets();
         BuildMiddleBossScene();
         UpdateBuildSettings();
         AssetDatabase.SaveAssets();
@@ -25,18 +27,29 @@ public static class MiddleBossStageSetup
         Debug.Log("[MiddleBossStageSetup] Stage03 -> MiddleBoss -> Stage04 연결 및 씬 생성 완료");
     }
 
-    private static void ConfigureBossSprite()
+    private static void ConfigureArtAssets()
     {
-        TextureImporter importer = AssetImporter.GetAtPath(BossSpritePath) as TextureImporter;
+        ConfigureSprite(BossSpritePath, 180f);
+        ConfigureSprite(RuinedCityPath, 128f);
+        foreach (string part in new[] { "Claw", "Piston", "Track" })
+        {
+            for (int i = 1; i <= 4; i++)
+                ConfigureSprite($"{AnimationRoot}/{part}/{i:00}.png", 120f);
+        }
+    }
+
+    private static void ConfigureSprite(string assetPath, float pixelsPerUnit)
+    {
+        TextureImporter importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
         if (importer == null)
         {
-            Debug.LogError($"[MiddleBossStageSetup] 보스 스프라이트를 찾을 수 없습니다: {BossSpritePath}");
+            Debug.LogError($"[MiddleBossStageSetup] 스프라이트를 찾을 수 없습니다: {assetPath}");
             return;
         }
 
         importer.textureType = TextureImporterType.Sprite;
         importer.spriteImportMode = SpriteImportMode.Single;
-        importer.spritePixelsPerUnit = 180f;
+        importer.spritePixelsPerUnit = pixelsPerUnit;
         importer.filterMode = FilterMode.Bilinear;
         importer.mipmapEnabled = false;
         importer.alphaIsTransparency = true;
@@ -49,9 +62,13 @@ public static class MiddleBossStageSetup
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         Sprite square = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
         Sprite bossSprite = AssetDatabase.LoadAssetAtPath<Sprite>(BossSpritePath);
+        Sprite ruinedCity = AssetDatabase.LoadAssetAtPath<Sprite>(RuinedCityPath);
+        Sprite[] clawFrames = LoadFrames("Claw");
+        Sprite[] pistonFrames = LoadFrames("Piston");
+        Sprite[] trackFrames = LoadFrames("Track");
 
         CreateCamera();
-        CreateEnvironment(square);
+        CreateEnvironment(square, ruinedCity);
 
         GameObject playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerPrefabPath);
         if (playerPrefab == null)
@@ -61,12 +78,7 @@ public static class MiddleBossStageSetup
         player.transform.position = new Vector3(-7.4f, -3.15f, 0f);
 
         GameObject exitGate = CreateExitGate(square);
-        GameObject boss = CreateBoss(bossSprite, square, exitGate);
-
-        CreateWorldLabel(square, new Vector3(0f, 4.75f, 0f), new Vector2(15f, 0.12f),
-            new Color(0.12f, 0.8f, 0.92f, 0.38f), "Prototype_CeilingSignal");
-        CreateWorldLabel(square, new Vector3(0f, -3.85f, 0f), new Vector2(22f, 0.18f),
-            new Color(1f, 0.53f, 0.12f, 0.7f), "Prototype_ConveyorSignal");
+        GameObject boss = CreateBoss(bossSprite, square, exitGate, clawFrames, pistonFrames, trackFrames);
 
         Selection.activeGameObject = boss;
         EditorSceneManager.SaveScene(scene, ScenePath);
@@ -84,42 +96,41 @@ public static class MiddleBossStageSetup
         camera.backgroundColor = new Color(0.015f, 0.025f, 0.055f, 1f);
     }
 
-    private static void CreateEnvironment(Sprite square)
+    private static void CreateEnvironment(Sprite square, Sprite ruinedCity)
     {
-        GameObject root = new GameObject("MiddleBossEnvironment_Prototype");
+        GameObject root = new GameObject("MiddleBossEnvironment_RuinedCity");
 
-        CreatePanel(root.transform, square, "FactoryBackdrop", new Vector3(0f, 0f, 4f),
-            new Vector2(24f, 12f), new Color(0.025f, 0.055f, 0.09f, 1f), -20);
-        CreatePanel(root.transform, square, "UpperPipeBank", new Vector3(0f, 3.8f, 2f),
-            new Vector2(21f, 1.25f), new Color(0.08f, 0.15f, 0.19f, 1f), -15);
+        CreatePanel(root.transform, ruinedCity != null ? ruinedCity : square, "RuinedCityBackdrop",
+            new Vector3(0f, 0.25f, 4f), new Vector2(24f, 12f), Color.white, -20);
 
-        for (int i = 0; i < 7; i++)
-        {
-            float x = -9f + i * 3f;
-            CreatePanel(root.transform, square, $"NutrientTank_{i + 1}",
-                new Vector3(x, 0.65f, 2f), new Vector2(1.35f, 5.5f),
-                i % 2 == 0 ? new Color(0.12f, 0.2f, 0.25f, 1f) : new Color(0.09f, 0.15f, 0.2f, 1f), -14);
-            CreatePanel(root.transform, square, $"TankGlow_{i + 1}",
-                new Vector3(x, 0.25f, 1.9f), new Vector2(0.55f, 3.7f),
-                new Color(0.72f, 0.15f, 0.8f, 0.28f), -13);
-        }
+        CreatePanel(root.transform, square, "DustHaze", new Vector3(0f, -1.3f, 2f),
+            new Vector2(24f, 3.8f), new Color(0.3f, 0.22f, 0.16f, 0.13f), -8);
 
         CreateSolid(root.transform, square, "Ground", new Vector3(0f, -4.35f, 0f),
-            new Vector2(24f, 1.2f), new Color(0.09f, 0.12f, 0.16f, 1f));
+            new Vector2(24f, 1.2f), new Color(0.16f, 0.14f, 0.13f, 1f));
         CreateSolid(root.transform, square, "LeftWall", new Vector3(-11.7f, 0f, 0f),
-            new Vector2(1f, 10f), new Color(0.08f, 0.11f, 0.15f, 1f));
+            new Vector2(1f, 10f), new Color(0.13f, 0.12f, 0.12f, 1f));
         CreateSolid(root.transform, square, "RightWall", new Vector3(11.7f, 0f, 0f),
-            new Vector2(1f, 10f), new Color(0.08f, 0.11f, 0.15f, 1f));
+            new Vector2(1f, 10f), new Color(0.13f, 0.12f, 0.12f, 1f));
+
+        GameObject platform = CreateSolid(root.transform, square, "EscapePlatform_RubbleSlab",
+            new Vector3(-1.25f, -1.55f, 0f), new Vector2(3.6f, 0.42f),
+            new Color(0.38f, 0.33f, 0.28f, 1f));
+        SpriteRenderer platformRenderer = platform.GetComponent<SpriteRenderer>();
+        platformRenderer.sortingOrder = 4;
+        CreatePanel(root.transform, square, "PlatformWarningStripe", new Vector3(-1.25f, -1.31f, -0.1f),
+            new Vector2(3.25f, 0.08f), new Color(1f, 0.6f, 0.16f, 0.85f), 5);
     }
 
-    private static GameObject CreateBoss(Sprite bossSprite, Sprite square, GameObject exitGate)
+    private static GameObject CreateBoss(Sprite bossSprite, Sprite square, GameObject exitGate,
+        Sprite[] clawFrames, Sprite[] pistonFrames, Sprite[] trackFrames)
     {
         int enemyLayer = LayerMask.NameToLayer("Enemy");
 
         GameObject boss = new GameObject("FEED6_MiddleBoss");
         boss.tag = "Enemy";
         if (enemyLayer >= 0) boss.layer = enemyLayer;
-        boss.transform.position = new Vector3(6.2f, -1.65f, 0f);
+        boss.transform.position = new Vector3(7.15f, -1.35f, 0f);
 
         Rigidbody2D body = boss.AddComponent<Rigidbody2D>();
         body.bodyType = RigidbodyType2D.Kinematic;
@@ -127,15 +138,22 @@ public static class MiddleBossStageSetup
         body.constraints = RigidbodyConstraints2D.FreezeRotation;
 
         BoxCollider2D collider = boss.AddComponent<BoxCollider2D>();
-        collider.size = new Vector2(5.65f, 3.55f);
-        collider.offset = new Vector2(0.1f, -0.15f);
+        collider.size = new Vector2(8.4f, 5.25f);
+        collider.offset = new Vector2(0.05f, -0.1f);
 
         GameObject visualObject = new GameObject("SPR_FEED6_Body", typeof(SpriteRenderer));
         visualObject.transform.SetParent(boss.transform, false);
-        visualObject.transform.localScale = Vector3.one * 0.65f;
+        visualObject.transform.localScale = Vector3.one * 1.18f;
         SpriteRenderer visual = visualObject.GetComponent<SpriteRenderer>();
         visual.sprite = bossSprite;
         visual.sortingOrder = 8;
+
+        CreateAnimatedPart(boss.transform, "AnimatedClaw", clawFrames,
+            new Vector3(-2f, 1.45f, 0f), 0.72f, 13, 4.2f, true, 0.08f, 2.2f);
+        CreateAnimatedPart(boss.transform, "AnimatedPiston", pistonFrames,
+            new Vector3(-2.55f, -0.35f, 0f), 0.68f, 12, 3.2f, true, 0.045f, 2.8f);
+        CreateAnimatedPart(boss.transform, "AnimatedTrack", trackFrames,
+            new Vector3(2.55f, -0.45f, 0f), 1.05f, 11, 5.5f, false, 0.025f, 3.2f);
 
         GameObject aim = new GameObject("BossAimTarget");
         aim.tag = "Boss";
@@ -144,7 +162,7 @@ public static class MiddleBossStageSetup
 
         Health health = boss.AddComponent<Health>();
         SerializedObject healthObject = new SerializedObject(health);
-        healthObject.FindProperty("maxHP").floatValue = 520f;
+        healthObject.FindProperty("maxHP").floatValue = 400f;
         healthObject.FindProperty("invincibleTime").floatValue = 0f;
         healthObject.FindProperty("destroyOnDeath").boolValue = false;
         healthObject.FindProperty("stopMovementOnDeath").boolValue = true;
@@ -166,6 +184,30 @@ public static class MiddleBossStageSetup
         controllerObject.FindProperty("aimTarget").objectReferenceValue = aim.transform;
         controllerObject.ApplyModifiedPropertiesWithoutUndo();
         return boss;
+    }
+
+    private static Sprite[] LoadFrames(string part)
+    {
+        Sprite[] frames = new Sprite[4];
+        for (int i = 0; i < frames.Length; i++)
+            frames[i] = AssetDatabase.LoadAssetAtPath<Sprite>($"{AnimationRoot}/{part}/{i + 1:00}.png");
+        return frames;
+    }
+
+    private static void CreateAnimatedPart(Transform parent, string objectName, Sprite[] frames,
+        Vector3 localPosition, float scale, int sortingOrder, float fps, bool pingPong,
+        float bobAmplitude, float bobSpeed)
+    {
+        GameObject part = new GameObject(objectName, typeof(SpriteRenderer), typeof(MiddleBossPartAnimator));
+        part.transform.SetParent(parent, false);
+        part.transform.localPosition = localPosition;
+        part.transform.localScale = Vector3.one * scale;
+
+        SpriteRenderer renderer = part.GetComponent<SpriteRenderer>();
+        renderer.sprite = frames != null && frames.Length > 0 ? frames[0] : null;
+        renderer.sortingOrder = sortingOrder;
+        part.GetComponent<MiddleBossPartAnimator>().Configure(renderer, frames, fps, pingPong,
+            bobAmplitude, bobSpeed);
     }
 
     private static GameObject CreateExitGate(Sprite square)
