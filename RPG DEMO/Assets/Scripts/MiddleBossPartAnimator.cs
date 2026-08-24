@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>산업용 보스의 집게, 실린더, 무한궤도 파츠를 독립 스프라이트 시트로 재생합니다.</summary>
+/// <summary>산업용 보스의 기계 파츠 또는 통합 본체 스프라이트 시트를 재생합니다.</summary>
 [DisallowMultipleComponent]
 public sealed class MiddleBossPartAnimator : MonoBehaviour
 {

@@ -42,6 +42,13 @@
 - Modifications: Edge-connected checkerboard pixels were removed into transparency; Unity import settings provide in-engine sizing.
 - Third-party trademarks or logos: None requested.
 
+## `Animation/Sheets/SPR_FEED6_MechanicalIdle_Sheet.png`
+
+- Source: Generated for this project with OpenAI's built-in image generation tool on 2026-08-24, using `SPR_FEED6_Idle_V2.png` as the approved visual reference.
+- Prompt intent: Four-frame integrated mechanical idle strip that preserves one claw and one front hose while animating claw opening, hose pressure recoil, magenta nutrient-cylinder circulation, green core pulsing, and crawler-tread indexing.
+- Modifications: Edge-connected checkerboard pixels were removed into transparency; small edge specks were removed; frames were normalized to one shared bottom-center anchor and extracted into `Animation/Frames/MechanicalIdle/`.
+- Third-party trademarks or logos: None requested.
+
 ## `Environment/SPR_MiddleBoss_RubblePlatform.png`
 
 - Source: Generated for this project with OpenAI's built-in image generation tool on 2026-08-24.

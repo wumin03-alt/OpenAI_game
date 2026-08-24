@@ -41,6 +41,8 @@ public static class MiddleBossStageSetup
             for (int i = 1; i <= 4; i++)
                 ConfigureSprite($"{AnimationRoot}/{part}/{i:00}.png", 120f);
         }
+        for (int i = 1; i <= 4; i++)
+            ConfigureSprite($"{AnimationRoot}/MechanicalIdle/{i:00}.png", 60f);
         ConfigureFrameSet("GroundClaw", 6, 128f);
         ConfigureFrameSet("Suction", 4, 128f);
         ConfigureFrameSet("FeedJet", 4, 128f);
@@ -75,6 +77,7 @@ public static class MiddleBossStageSetup
         Sprite nutrientBlock = AssetDatabase.LoadAssetAtPath<Sprite>(NutrientBlockPath);
         Sprite[] pistonFrames = LoadFrames("Piston");
         Sprite[] trackFrames = LoadFrames("Track");
+        Sprite[] mechanicalIdleFrames = LoadFrames("MechanicalIdle");
         Sprite[] groundClawFrames = LoadFrames(VfxRoot, "GroundClaw", 6);
         Sprite[] suctionFrames = LoadFrames(VfxRoot, "Suction", 4);
         Sprite[] feedJetFrames = LoadFrames(VfxRoot, "FeedJet", 4);
@@ -91,7 +94,8 @@ public static class MiddleBossStageSetup
 
         GameObject exitGate = CreateExitGate(square);
         GameObject boss = CreateBoss(bossSprite, square, exitGate, nutrientBlock,
-            groundClawFrames, suctionFrames, feedJetFrames, pistonFrames, trackFrames);
+            groundClawFrames, suctionFrames, feedJetFrames, pistonFrames, trackFrames,
+            mechanicalIdleFrames);
 
         Selection.activeGameObject = boss;
         EditorSceneManager.SaveScene(scene, ScenePath);
@@ -141,7 +145,8 @@ public static class MiddleBossStageSetup
 
     private static GameObject CreateBoss(Sprite bossSprite, Sprite square, GameObject exitGate,
         Sprite nutrientBlock, Sprite[] groundClawFrames, Sprite[] suctionFrames,
-        Sprite[] feedJetFrames, Sprite[] pistonFrames, Sprite[] trackFrames)
+        Sprite[] feedJetFrames, Sprite[] pistonFrames, Sprite[] trackFrames,
+        Sprite[] mechanicalIdleFrames)
     {
         int enemyLayer = LayerMask.NameToLayer("Enemy");
 
@@ -159,15 +164,17 @@ public static class MiddleBossStageSetup
         collider.size = new Vector2(8.4f, 5.25f);
         collider.offset = new Vector2(0.05f, -0.1f);
 
-        GameObject visualObject = new GameObject("SPR_FEED6_Body", typeof(SpriteRenderer));
+        GameObject visualObject = new GameObject("SPR_FEED6_Body",
+            typeof(SpriteRenderer), typeof(MiddleBossPartAnimator));
         visualObject.transform.SetParent(boss.transform, false);
         visualObject.transform.localScale = Vector3.one * 1.18f;
         SpriteRenderer visual = visualObject.GetComponent<SpriteRenderer>();
-        visual.sprite = bossSprite;
+        visual.sprite = mechanicalIdleFrames != null && mechanicalIdleFrames.Length > 0
+            ? mechanicalIdleFrames[0]
+            : bossSprite;
         visual.sortingOrder = 8;
-
-        CreateAnimatedPart(boss.transform, "AnimatedTrack", trackFrames,
-            new Vector3(2.35f, -1.05f, 0f), 0.9f, 11, 5.5f, false, 0.025f, 3.2f);
+        visualObject.GetComponent<MiddleBossPartAnimator>().Configure(
+            visual, mechanicalIdleFrames, 3.2f, true, 0f, 0f);
 
         GameObject aim = new GameObject("BossAimTarget");
         aim.tag = "Boss";
