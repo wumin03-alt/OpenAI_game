@@ -72,6 +72,7 @@ public sealed class MiddleBossController : MonoBehaviour
     private Health playerHealth;
     private Rigidbody2D playerBody;
     private Collider2D playerCollider;
+    private Collider2D bossCollider;
     private Coroutine brainRoutine;
     private Coroutine attackRoutine;
     private int lastPattern = -1;
@@ -89,6 +90,7 @@ public sealed class MiddleBossController : MonoBehaviour
         health = GetComponent<Health>();
         staggerGauge = GetComponent<BossStaggerGauge>();
         escapeSequence = GetComponent<DirectionSequenceEscape>();
+        bossCollider = GetComponent<Collider2D>();
         if (visual == null) visual = GetComponentInChildren<SpriteRenderer>();
         CacheBossRenderers();
         if (exitGate != null) exitGate.SetActive(false);
@@ -361,7 +363,7 @@ public sealed class MiddleBossController : MonoBehaviour
                 SetEffectFrame(segment, conveyorFrames, elapsed, 0.09f, true);
             bool playerIsOnGroundRoute = IsPlayerOnGroundRoute();
 
-            if (playerIsOnGroundRoute && Mathf.Abs(player.transform.position.x - transform.position.x) < 2f)
+            if (playerIsOnGroundRoute && IsForcedTransferImpactContact())
             {
                 ApplyForcedTransferImpact();
                 break;
@@ -376,9 +378,26 @@ public sealed class MiddleBossController : MonoBehaviour
     private void ApplyForcedTransferImpact()
     {
         CurrentPattern = "강제 이송 · 보스 충돌";
-        playerHealth.TakeDamage(forcedTransferImpactDamage);
-        if (!playerHealth.IsDead)
-            TryCapturePlayer();
+        float healthBefore = playerHealth.CurrentHP;
+        playerHealth.TakeDamage(forcedTransferImpactDamage, true);
+        bool escapeStarted = !playerHealth.IsDead && TryCapturePlayerIgnoringParry();
+        Debug.Log(
+            $"[MiddleBoss] FORCED TRANSFER IMPACT // HP -{healthBefore - playerHealth.CurrentHP:0.#} // ESCAPE QTE {(escapeStarted ? "START" : "SKIP")}",
+            this);
+    }
+
+    private bool IsForcedTransferImpactContact()
+    {
+        if (playerCollider == null || bossCollider == null)
+            return Mathf.Abs(player.transform.position.x - transform.position.x) < 2f;
+
+        Bounds playerBounds = playerCollider.bounds;
+        Bounds bossBounds = bossCollider.bounds;
+        bool approachesFromLeft = playerBounds.center.x <= bossBounds.center.x;
+        bool verticalOverlap = playerBounds.max.y >= bossBounds.min.y - 0.15f &&
+                               playerBounds.min.y <= bossBounds.max.y + 0.15f;
+        float horizontalGap = bossBounds.min.x - playerBounds.max.x;
+        return approachesFromLeft && verticalOverlap && horizontalGap <= 0.2f;
     }
 
     private IEnumerator ForceFeedPattern()
@@ -570,7 +589,18 @@ public sealed class MiddleBossController : MonoBehaviour
 
     private bool TryCapturePlayer()
     {
-        if (player == null || playerHealth == null || escapeSequence.IsActive || player.IsParrying)
+        return TryCapturePlayerInternal(false);
+    }
+
+    private bool TryCapturePlayerIgnoringParry()
+    {
+        return TryCapturePlayerInternal(true);
+    }
+
+    private bool TryCapturePlayerInternal(bool ignoreParry)
+    {
+        if (player == null || playerHealth == null || escapeSequence.IsActive ||
+            (!ignoreParry && player.IsParrying))
             return false;
 
         player.transform.position = transform.position + new Vector3(-2.25f, 0.65f, 0f);

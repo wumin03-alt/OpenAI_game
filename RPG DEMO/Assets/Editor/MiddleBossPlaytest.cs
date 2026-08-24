@@ -159,8 +159,22 @@ public static class MiddleBossPlaytest
 
         MethodInfo forcedImpactMethod = typeof(MiddleBossController).GetMethod(
             "ApplyForcedTransferImpact", BindingFlags.Instance | BindingFlags.NonPublic);
-        Require(forcedImpactMethod != null, "강제 이송 충돌 피해 진입점을 찾지 못했습니다.");
+        MethodInfo forcedContactMethod = typeof(MiddleBossController).GetMethod(
+            "IsForcedTransferImpactContact", BindingFlags.Instance | BindingFlags.NonPublic);
+        Collider2D forcedBossCollider = boss.GetComponent<Collider2D>();
+        Collider2D forcedPlayerCollider = player.GetComponent<Collider2D>();
+        Rigidbody2D forcedPlayerBody = player.GetComponent<Rigidbody2D>();
+        Require(forcedImpactMethod != null && forcedContactMethod != null &&
+                forcedBossCollider != null && forcedPlayerCollider != null && forcedPlayerBody != null,
+            "강제 이송 충돌 피해 또는 실제 접촉 판정 진입점을 찾지 못했습니다.");
         if (failure != null) return;
+
+        Vector2 playerPositionBeforeImpactTest = forcedPlayerBody.position;
+        float contactShift = forcedBossCollider.bounds.min.x - forcedPlayerCollider.bounds.max.x;
+        forcedPlayerBody.position += Vector2.right * contactShift;
+        Physics2D.SyncTransforms();
+        Require((bool)forcedContactMethod.Invoke(boss, null),
+            "강제 이송으로 보스 표면에 닿았을 때 실제 충돌로 판정되지 않았습니다.");
 
         float hpBeforeImpact = playerHealth.CurrentHP;
         forcedImpactMethod.Invoke(boss, null);
@@ -170,6 +184,9 @@ public static class MiddleBossPlaytest
             "강제 이송 충돌 후 기존 포획 QTE가 이어지지 않았습니다.");
         escape.Cancel(true);
         Require(player.enabled, "강제 이송 충돌 QTE 종료 후 플레이어 입력이 복구되지 않았습니다.");
+        forcedPlayerBody.position = playerPositionBeforeImpactTest;
+        forcedPlayerBody.linearVelocity = Vector2.zero;
+        Physics2D.SyncTransforms();
 
         MethodInfo captureMethod = typeof(MiddleBossController).GetMethod(
             "TryCapturePlayer", BindingFlags.Instance | BindingFlags.NonPublic);
