@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Game.Core;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -105,14 +106,35 @@ public static class MiddleBossPlaytest
         if (failure != null) return;
 
         BossStaggerGauge gauge = boss.GetComponent<BossStaggerGauge>();
+        BossParryMiniGameBridge parryBridge = boss.GetComponent<BossParryMiniGameBridge>();
+        ParryGroggyMiniGame parryMiniGame = boss.GetComponent<ParryGroggyMiniGame>();
         DirectionSequenceEscape escape = boss.GetComponent<DirectionSequenceEscape>();
         Health playerHealth = player.GetComponent<Health>();
-        Require(gauge != null && escape != null && playerHealth != null,
-            "중간보스 공용 그로기/QTE/플레이어 Health 연결이 누락됐습니다.");
+        Require(gauge != null && parryBridge != null && parryMiniGame != null
+                && escape != null && playerHealth != null,
+            "중간보스 공용 그로기/패링 미니게임/QTE/플레이어 Health 연결이 누락됐습니다.");
         if (failure != null) return;
 
         Require(escape.SequenceLength == 4 && Mathf.Approximately(escape.TimeLimit, 5f),
             "QTE가 방향키 4개/제한시간 5초로 설정되지 않았습니다.");
+
+        GameSession session = GameSession.Instance;
+        if (session == null)
+            session = new GameObject("RunItemSession_Playtest").AddComponent<GameSession>();
+        session.ApplyToPlayer(playerHealth);
+        session.AcquireItem(new RunItemOffer(RunItemType.AttackBoost, 1), playerHealth);
+        session.AcquireItem(new RunItemOffer(RunItemType.AttackBoost, 1), playerHealth);
+        session.AcquireItem(new RunItemOffer(RunItemType.GroggyDamageBoost, 1), playerHealth);
+        session.AcquireItem(new RunItemOffer(RunItemType.ParryTimeBoost, 1), playerHealth);
+        float maxBeforeItem = playerHealth.MaxHP;
+        session.AcquireItem(new RunItemOffer(RunItemType.MaxHealthBoost, 20), playerHealth);
+        Require(Mathf.Approximately(session.AttackDamageMultiplier, 1.3f)
+                && Mathf.Approximately(session.GroggyDamagePerSuccess, 44f)
+                && Mathf.Approximately(session.ParryMiniGameDuration, 4f),
+            "공격/그로기/미니게임 아이템의 합산 수치가 계약과 다릅니다.");
+        Require(Mathf.Approximately(playerHealth.MaxHP, maxBeforeItem + 20f),
+            "최대 체력 아이템이 플레이어 최대 체력을 20 증가시키지 않았습니다.");
+
         MethodInfo captureMethod = typeof(MiddleBossController).GetMethod(
             "TryCapturePlayer", BindingFlags.Instance | BindingFlags.NonPublic);
         Require(captureMethod != null, "중간보스 포획 진입점을 찾지 못했습니다.");
@@ -131,6 +153,11 @@ public static class MiddleBossPlaytest
         Require(!player.enabled, "QTE 중 플레이어 입력이 잠기지 않았습니다.");
         escape.Cancel(true);
         Require(player.enabled, "QTE 성공 후 플레이어 입력이 복구되지 않았습니다.");
+
+        gauge.ApplyGroggyDamage(44f);
+        Require(Mathf.Approximately(gauge.CurrentGroggy, 56f) && gauge.RemainingSegments == 2,
+            "아이템 합산 그로기 피해가 연속 게이지에 반영되지 않았습니다.");
+        gauge.ResetGauge();
 
         gauge.RegisterParry();
         Require(gauge.RemainingSegments == 2, "첫 패링 후 그로기 게이지가 1/3 감소하지 않았습니다.");
@@ -153,7 +180,10 @@ public static class MiddleBossPlaytest
 
         BossStaggerGauge gauge = boss.GetComponent<BossStaggerGauge>();
         BossStaggerHUD hud = boss.GetComponent<BossStaggerHUD>();
-        Require(gauge != null && hud != null, "최종보스에 공용 그로기 게이지/HUD가 런타임 연결되지 않았습니다.");
+        BossParryMiniGameBridge parryBridge = boss.GetComponent<BossParryMiniGameBridge>();
+        ParryGroggyMiniGame parryMiniGame = boss.GetComponent<ParryGroggyMiniGame>();
+        Require(gauge != null && hud != null && parryBridge != null && parryMiniGame != null,
+            "최종보스에 공용 그로기 게이지/HUD/패링 미니게임이 런타임 연결되지 않았습니다.");
         if (failure != null) return;
 
         gauge.RegisterParry();
@@ -234,7 +264,7 @@ public static class MiddleBossPlaytest
 
         if (passed && failure == null)
         {
-            Debug.Log("[MiddleBossPlaytest] PASS: scene order, QTE lock/release, middle/final boss 3-hit 10-second stagger verified.");
+            Debug.Log("[MiddleBossPlaytest] PASS: scene order, QTE lock/release, parry mini-game bridge, additive groggy damage, and 10-second stagger verified.");
             EditorApplication.Exit(0);
         }
         else

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -35,15 +36,17 @@ public class Health : MonoBehaviour
 
     // ── 외부에서 읽는 값 ──
     public float MaxHP => maxHP;
+    public float BaseMaxHP => baseMaxHP;
     public float CurrentHP { get; private set; }
     public float Normalized => maxHP <= 0f ? 0f : Mathf.Clamp01(CurrentHP / maxHP);
     public bool IsDead { get; private set; }
     public bool IsInvincible => invincibleLeft > 0f;
 
     // ── Inspector에서 연결 가능한 이벤트 ──
-    public UnityEvent onDamaged;
-    public UnityEvent onParrySuccess;
-    public UnityEvent onDeath;
+    public UnityEvent onDamaged = new UnityEvent();
+    public UnityEvent onParrySuccess = new UnityEvent();
+    public UnityEvent onDeath = new UnityEvent();
+    public event Action<float, float> HealthChanged;
 
     private float invincibleLeft;
     private float flashTimer;
@@ -52,9 +55,12 @@ public class Health : MonoBehaviour
     private Color[] baseColors;
     private PlayerController player;   // 패링 판정용 (없으면 null)
     private Rigidbody2D rb;
+    private float baseMaxHP;
 
     private void Awake()
     {
+        EnsureUnityEvents();
+        baseMaxHP = maxHP;
         CurrentHP = maxHP;
 
         renderers = GetComponentsInChildren<SpriteRenderer>();
@@ -95,6 +101,7 @@ public class Health : MonoBehaviour
         // 3) 실제 감소
         CurrentHP = Mathf.Max(0f, CurrentHP - amount);
         Debug.Log($"[{name}] -{amount}  →  HP {CurrentHP}/{maxHP}");
+        HealthChanged?.Invoke(CurrentHP, maxHP);
         onDamaged?.Invoke();
 
         if (CurrentHP <= 0f) { Die(); return; }
@@ -108,21 +115,56 @@ public class Health : MonoBehaviour
 
     public void Heal(float amount)
     {
-        if (IsDead) return;
+        if (IsDead || amount <= 0f) return;
+        float previous = CurrentHP;
         CurrentHP = Mathf.Min(maxHP, CurrentHP + amount);
+        if (!Mathf.Approximately(previous, CurrentHP))
+            HealthChanged?.Invoke(CurrentHP, maxHP);
     }
 
     /// <summary>보스 페이즈 전환 등에서 강제로 HP를 세팅할 때 사용</summary>
     public void SetHP(float value)
     {
         CurrentHP = Mathf.Clamp(value, 0f, maxHP);
+        HealthChanged?.Invoke(CurrentHP, maxHP);
+    }
+
+    /// <summary>런 전체 최대 체력 보너스와 저장된 현재 체력을 새 씬의 플레이어에 적용합니다.</summary>
+    public void ApplyRunState(float maxHPBonus, float savedCurrentHP)
+    {
+        maxHP = Mathf.Max(1f, baseMaxHP + Mathf.Max(0f, maxHPBonus));
+        CurrentHP = savedCurrentHP < 0f ? maxHP : Mathf.Clamp(savedCurrentHP, 0f, maxHP);
+        HealthChanged?.Invoke(CurrentHP, maxHP);
+    }
+
+    /// <summary>런타임 생성 오브젝트가 체력과 사망 후 파괴 여부를 지정할 때 사용합니다.</summary>
+    public void ConfigureRuntime(float maximumHP, bool shouldDestroyOnDeath)
+    {
+        EnsureUnityEvents();
+        baseMaxHP = Mathf.Max(1f, maximumHP);
+        maxHP = baseMaxHP;
+        CurrentHP = maxHP;
+        destroyOnDeath = shouldDestroyOnDeath;
+        HealthChanged?.Invoke(CurrentHP, maxHP);
+    }
+
+    /// <summary>
+    /// 프리팹이 아닌 AddComponent로 생성된 Health도 Inspector 기반 Health와 같은 이벤트 계약을 갖게 합니다.
+    /// </summary>
+    private void EnsureUnityEvents()
+    {
+        if (onDamaged == null) onDamaged = new UnityEvent();
+        if (onParrySuccess == null) onParrySuccess = new UnityEvent();
+        if (onDeath == null) onDeath = new UnityEvent();
     }
 
     /// <summary>스테이지 스폰 변형용으로 최대 체력을 비율만큼 조정합니다.</summary>
     public void ApplyMaxHPMultiplier(float multiplier)
     {
         maxHP *= Mathf.Max(0.01f, multiplier);
+        baseMaxHP = maxHP;
         CurrentHP = maxHP;
+        HealthChanged?.Invoke(CurrentHP, maxHP);
     }
 
     // ───────────────────────── 사망 처리 ─────────────────────────

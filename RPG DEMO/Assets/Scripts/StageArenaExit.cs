@@ -1,4 +1,5 @@
 using System.Collections;
+using Game.Core;
 using Game.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -20,22 +21,41 @@ public sealed class StageArenaExit : MonoBehaviour
     public bool IsUnlocked { get; private set; }
 
     private bool isTransitioning;
+    private bool rewardRequested;
 
     private void Awake()
     {
         SetGateVisual(false);
+        if (waveController != null)
+            waveController.OnStageCleared += BeginStageReward;
     }
 
     private void Start()
     {
         if (waveController != null && waveController.IsCleared)
-            Unlock();
+            BeginStageReward();
     }
 
     private void Update()
     {
         if (!IsUnlocked && waveController != null && waveController.IsCleared)
+            BeginStageReward();
+    }
+
+    private void BeginStageReward()
+    {
+        if (rewardRequested || IsUnlocked) return;
+        rewardRequested = true;
+
+        string sceneName = SceneManager.GetActiveScene().name;
+        if (GameSession.Instance != null && GameSession.Instance.IsStageRewardResolved(sceneName))
+        {
             Unlock();
+            return;
+        }
+
+        Vector3 chestPosition = transform.position + new Vector3(-2.2f, 0.7f, 0f);
+        StageRewardChest.Spawn(chestPosition, Unlock);
     }
 
     public void Unlock()
@@ -67,5 +87,11 @@ public sealed class StageArenaExit : MonoBehaviour
     {
         if (gateRenderer != null)
             gateRenderer.color = unlocked ? unlockedColor : lockedColor;
+    }
+
+    private void OnDestroy()
+    {
+        if (waveController != null)
+            waveController.OnStageCleared -= BeginStageReward;
     }
 }

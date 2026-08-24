@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>F.E.E.D.-6가 발사하는 모든 영양 블록. 패링 시 보스 그로기 게이지를 한 칸 소모합니다.</summary>
+/// <summary>F.E.E.D.-6가 발사하는 영양 블록. 패링 성공은 공용 미니게임 브리지로 전달됩니다.</summary>
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public sealed class NutrientBlockProjectile : MonoBehaviour
 {
@@ -39,7 +39,6 @@ public sealed class NutrientBlockProjectile : MonoBehaviour
 
         if (parried)
         {
-            staggerGauge?.RegisterParry();
             SpriteRenderer renderer = GetComponent<SpriteRenderer>();
             if (renderer != null) renderer.color = new Color(0.22f, 1f, 0.66f, 1f);
         }

@@ -36,12 +36,24 @@ public class DamageZone : MonoBehaviour
     private readonly Dictionary<Health, float> lastHitTime = new Dictionary<Health, float>();
     private readonly Collider2D[] overlapBuffer = new Collider2D[16];
     private Collider2D zoneCollider;
+    private float baseDamage;
 
     /// <summary>보스 페이즈에 따라 데미지를 바꿀 때 사용</summary>
-    public void SetDamage(float value) => damage = value;
+    public void SetDamage(float value)
+    {
+        baseDamage = Mathf.Max(0f, value);
+        damage = baseDamage;
+    }
+
+    public void ApplyDamageMultiplier(float multiplier)
+    {
+        if (baseDamage <= 0f) baseDamage = damage;
+        damage = baseDamage * Mathf.Max(0f, multiplier);
+    }
 
     private void Awake()
     {
+        baseDamage = damage;
         zoneCollider = GetComponent<Collider2D>();
     }
 
