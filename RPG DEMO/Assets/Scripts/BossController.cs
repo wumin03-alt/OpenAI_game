@@ -100,9 +100,8 @@ public class BossController : MonoBehaviour
     [Tooltip("Descend 후 근접 기회를 주기 위한 추가 경직 시간")]
     [SerializeField] private float descendSettleTime = 0.8f;
 
-    [Header("── 경직 (패링 성공 시) ──")]
+    [Header("── 그로기 (패링 3회 누적) ──")]
     [SerializeField] private Color staggerColor = new Color(0.6f, 0.8f, 1f);
-    [SerializeField] private float parryStaggerTime = 1.15f;
     [Tooltip("Phase 2에서 패링 1회가 적응 강도를 낮추는 비율")]
     [Range(0.05f, 0.5f)]
     [SerializeField] private float disruptionPerParry = 0.22f;
@@ -189,6 +188,7 @@ public class BossController : MonoBehaviour
     private float repositionChanceCurrent;  // 런타임에 조절되는 재배치 확률
     private PlayerCombatTracker tracker;
     private AdaptiveBossVisual adaptiveVisual;
+    private BossStaggerGauge staggerGauge;
 
     // 패턴 가중치 — 11단계에서 이 테이블만 교체합니다
     private readonly Dictionary<BossAttack, int> weights = new Dictionary<BossAttack, int>();
@@ -200,6 +200,10 @@ public class BossController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
+        staggerGauge = GetComponent<BossStaggerGauge>();
+        if (staggerGauge == null) staggerGauge = gameObject.AddComponent<BossStaggerGauge>();
+        if (GetComponent<BossStaggerHUD>() == null) gameObject.AddComponent<BossStaggerHUD>();
+        staggerGauge.StaggerStarted += HandleGaugeStaggerStarted;
 
         if (visual == null)
         {
@@ -257,6 +261,7 @@ public class BossController : MonoBehaviour
     private void OnDestroy()
     {
         if (tracker != null) tracker.ParrySucceeded -= OnPlayerParrySucceeded;
+        if (staggerGauge != null) staggerGauge.StaggerStarted -= HandleGaugeStaggerStarted;
     }
 
     private void Update()
@@ -917,7 +922,7 @@ public class BossController : MonoBehaviour
     {
         if (State == BossState.Dead) return;
 
-        Stagger(parryStaggerTime);
+        staggerGauge?.RegisterParry();
         if (adaptiveVisual != null) adaptiveVisual.PulseDisruption();
 
         if (Phase < 2) return;
@@ -925,6 +930,11 @@ public class BossController : MonoBehaviour
         adaptationDisruption = Mathf.Clamp01(adaptationDisruption + disruptionPerParry);
         ApplyPhaseWeights();
         Debug.Log($"[Boss] ADAPTATION DISRUPTED → strength {AdaptationStrength * 100f:F0}%");
+    }
+
+    private void HandleGaugeStaggerStarted(float duration)
+    {
+        Stagger(duration);
     }
 
     // ───────────────── 코루틴 / 표시 정리 헬퍼 ─────────────────
