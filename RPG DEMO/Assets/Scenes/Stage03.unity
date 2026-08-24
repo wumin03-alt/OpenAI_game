@@ -2188,6 +2188,7 @@ MonoBehaviour:
   defenseTarget: {fileID: 3110000004}
   defenseDuration: 36
   stageCanvas: {fileID: 423002318}
+  defenseHudFont: {fileID: 11400000, guid: 70695baa547641548907010ea1096365, type: 2}
   waves:
   - spawns:
     - enemyType: 0
