@@ -11,7 +11,7 @@ public static class MiddleBossStageSetup
 {
     private const string ScenePath = "Assets/Scenes/MiddleBoss.unity";
     private const string Stage03Path = "Assets/Scenes/Stage03.unity";
-    private const string BossSpritePath = "Assets/Art/MiddleBoss/SPR_FEED6_Idle_V2.png";
+    private const string BossSpritePath = "Assets/Art/MiddleBoss/SPR_FEED6_Idle_V3_HQ.png";
     private const string RuinedCityPath = "Assets/Art/MiddleBoss/Environment/SPR_MiddleBoss_RuinedCity.png";
     private const string PlatformSpritePath = "Assets/Art/MiddleBoss/Environment/SPR_MiddleBoss_RubblePlatform.png";
     private const string AnimationRoot = "Assets/Art/MiddleBoss/Animation/Frames";
@@ -42,7 +42,7 @@ public static class MiddleBossStageSetup
                 ConfigureSprite($"{AnimationRoot}/{part}/{i:00}.png", 120f);
         }
         for (int i = 1; i <= 4; i++)
-            ConfigureSprite($"{AnimationRoot}/MechanicalIdle/{i:00}.png", 60f);
+            ConfigureSprite($"{AnimationRoot}/MechanicalIdleHQ/{i:00}.png", 180f);
         ConfigureFrameSet("GroundClaw", 6, 128f);
         ConfigureFrameSet("Suction", 4, 128f);
         ConfigureFrameSet("FeedJet", 4, 128f);
@@ -77,7 +77,7 @@ public static class MiddleBossStageSetup
         Sprite nutrientBlock = AssetDatabase.LoadAssetAtPath<Sprite>(NutrientBlockPath);
         Sprite[] pistonFrames = LoadFrames("Piston");
         Sprite[] trackFrames = LoadFrames("Track");
-        Sprite[] mechanicalIdleFrames = LoadFrames("MechanicalIdle");
+        Sprite[] mechanicalIdleFrames = LoadFrames("MechanicalIdleHQ");
         Sprite[] groundClawFrames = LoadFrames(VfxRoot, "GroundClaw", 6);
         Sprite[] suctionFrames = LoadFrames(VfxRoot, "Suction", 4);
         Sprite[] feedJetFrames = LoadFrames(VfxRoot, "FeedJet", 4);

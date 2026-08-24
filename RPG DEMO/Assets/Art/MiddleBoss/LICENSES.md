@@ -49,6 +49,20 @@
 - Modifications: Edge-connected checkerboard pixels were removed into transparency; small edge specks were removed; frames were normalized to one shared bottom-center anchor and extracted into `Animation/Frames/MechanicalIdle/`.
 - Third-party trademarks or logos: None requested.
 
+## `SPR_FEED6_Idle_V3_HQ.png`
+
+- Source: Edited from `SPR_FEED6_Idle_V2.png` with OpenAI's built-in image generation tool on 2026-08-24.
+- Prompt intent: Preserve the exact F.E.E.D.-6 design, pose, canvas placement, and silhouette while improving antialiasing, material detail, seams, and small mechanical lights.
+- Modifications: Edge-connected near-white background pixels were removed into transparency without rescaling the 1536x1024 canvas.
+- Third-party trademarks or logos: None requested.
+
+## `Animation/Sheets/SPR_FEED6_MechanicalIdle_HQ_Sheet.png`
+
+- Source: Derived from `SPR_FEED6_Idle_V3_HQ.png` on 2026-08-24.
+- Prompt intent: Four-frame high-resolution mechanical idle preserving the master sprite's exact scale and bottom anchor.
+- Modifications: Deterministic per-frame claw status lights, front-hose recoil and pressure glow, magenta-cylinder fluid pulses, green-core arcs, and crawler status motion; extracted into `Animation/Frames/MechanicalIdleHQ/` at 1536x1024 per frame.
+- Third-party trademarks or logos: None requested.
+
 ## `Environment/SPR_MiddleBoss_RubblePlatform.png`
 
 - Source: Generated for this project with OpenAI's built-in image generation tool on 2026-08-24.
