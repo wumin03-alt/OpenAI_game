@@ -36,6 +36,8 @@ public class StageExit : MonoBehaviour
 
     private bool triggered;
     private bool stageCleared;
+    private bool rewardResolved;
+    private bool rewardRequested;
     private float nextEnemyCheckTime;
 
     private void Start()
@@ -44,7 +46,7 @@ public class StageExit : MonoBehaviour
 
         stageCleared = !requireAllEnemiesDead;
         if (stageCleared)
-            ShowClearGuide();
+            BeginStageReward();
         else
             CheckForStageClear();
     }
@@ -63,8 +65,30 @@ public class StageExit : MonoBehaviour
         if (GameObject.FindGameObjectWithTag("Enemy") != null) return;
 
         stageCleared = true;
-        ShowClearGuide();
+        BeginStageReward();
         Debug.Log("[StageExit] 스테이지 클리어. 출구가 열렸습니다.");
+    }
+
+    private void BeginStageReward()
+    {
+        if (rewardRequested) return;
+        rewardRequested = true;
+
+        string sceneName = SceneManager.GetActiveScene().name;
+        if (GameSession.Instance != null && GameSession.Instance.IsStageRewardResolved(sceneName))
+        {
+            HandleRewardResolved();
+            return;
+        }
+
+        Vector3 chestPosition = transform.position + new Vector3(-2.2f, 0.7f, 0f);
+        StageRewardChest.Spawn(chestPosition, HandleRewardResolved);
+    }
+
+    private void HandleRewardResolved()
+    {
+        rewardResolved = true;
+        ShowClearGuide();
     }
 
     private void ShowClearGuide()
@@ -102,6 +126,13 @@ public class StageExit : MonoBehaviour
         if (requireAllEnemiesDead && !stageCleared)
         {
             Debug.Log("[StageExit] 남은 적이 있습니다.");
+            if (blockedMessage != null) blockedMessage.SetActive(true);
+            return;
+        }
+
+        if (!rewardResolved)
+        {
+            Debug.Log("[StageExit] 보물상자를 열고 보상 아이템을 선택해야 합니다.");
             if (blockedMessage != null) blockedMessage.SetActive(true);
             return;
         }

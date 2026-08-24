@@ -2,7 +2,7 @@ using Game.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>중간보스와 최종보스가 공유하는 3칸 그로기 HUD입니다.</summary>
+/// <summary>중간보스와 최종보스가 공유하는 그로기 HUD입니다.</summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BossStaggerGauge))]
 public sealed class BossStaggerHUD : MonoBehaviour
@@ -67,8 +67,8 @@ public sealed class BossStaggerHUD : MonoBehaviour
         label.alignment = TextAnchor.MiddleLeft;
         label.fontStyle = FontStyle.Bold;
 
-        timer = RuntimeUIFactory.CreateText(panelRect, "패링  3 / 3", 17,
-            new Vector2(125f, 20f), new Vector2(150f, 28f), new Color(0.42f, 1f, 0.72f));
+        timer = RuntimeUIFactory.CreateText(panelRect, "GROGGY 100%", 17,
+            new Vector2(150f, 20f), new Vector2(190f, 28f), new Color(0.34f, 1f, 0.7f));
         timer.alignment = TextAnchor.MiddleRight;
         timer.fontStyle = FontStyle.Bold;
 
@@ -100,7 +100,7 @@ public sealed class BossStaggerHUD : MonoBehaviour
 
         if (!gauge.IsStaggered)
         {
-            timer.text = $"패링  {remaining} / {gauge.ParriesRequired}";
+            timer.text = $"GROGGY  {Mathf.CeilToInt(normalized * 100f)}%";
             timer.color = new Color(0.34f, 1f, 0.7f);
         }
     }

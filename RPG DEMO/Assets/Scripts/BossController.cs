@@ -203,6 +203,7 @@ public class BossController : MonoBehaviour
         staggerGauge = GetComponent<BossStaggerGauge>();
         if (staggerGauge == null) staggerGauge = gameObject.AddComponent<BossStaggerGauge>();
         if (GetComponent<BossStaggerHUD>() == null) gameObject.AddComponent<BossStaggerHUD>();
+        if (GetComponent<BossParryMiniGameBridge>() == null) gameObject.AddComponent<BossParryMiniGameBridge>();
         staggerGauge.StaggerStarted += HandleGaugeStaggerStarted;
 
         if (visual == null)
@@ -922,7 +923,6 @@ public class BossController : MonoBehaviour
     {
         if (State == BossState.Dead) return;
 
-        staggerGauge?.RegisterParry();
         if (adaptiveVisual != null) adaptiveVisual.PulseDisruption();
 
         if (Phase < 2) return;
