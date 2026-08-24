@@ -977,11 +977,14 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d9ae508704e8e5e49ac65f2533468681, type: 3}
   arenaMinX: -10
   arenaMaxX: 10
-  groundY: -3.65
+  groundY: -3.75
   patternCooldown: 1.55
   captureFailureDamage: 36
   nutrientBlockDamage: 9
   nutrientBlockSpeed: 7.2
+  suctionTickDamage: 6
+  suctionTickInterval: 0.65
+  conveyorCarrySpeed: 5.2
 --- !u!114 &1486097950
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1125,7 +1128,7 @@ Transform:
   m_GameObject: {fileID: 1486097948}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.05, y: -0.52, z: 0}
+  m_LocalPosition: {x: 7.05, y: -0.78, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1824,7 +1827,7 @@ Transform:
   m_GameObject: {fileID: 2127246656}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.25, y: -1.31, z: 0}
+  m_LocalPosition: {x: -1.25, y: -1.62, z: 0}
   m_LocalScale: {x: 23.125, y: 1.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

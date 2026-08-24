@@ -135,7 +135,7 @@ public static class MiddleBossStageSetup
             "EscapePlatform_RubbleVisual", new Vector3(-1.25f, -2.02f, 0f),
             new Vector2(4.35f, 1.65f), Color.white, 5);
         GameObject platform = CreateSolid(root.transform, square, "EscapePlatform_RubbleSlab",
-            new Vector3(-1.25f, -1.31f, 0f), new Vector2(3.7f, 0.28f), Color.clear);
+            new Vector3(-1.25f, -1.62f, 0f), new Vector2(3.7f, 0.28f), Color.clear);
         platform.GetComponent<SpriteRenderer>().sortingOrder = 4;
     }
 
@@ -148,7 +148,7 @@ public static class MiddleBossStageSetup
         GameObject boss = new GameObject("FEED6_MiddleBoss");
         boss.tag = "Enemy";
         if (enemyLayer >= 0) boss.layer = enemyLayer;
-        boss.transform.position = new Vector3(7.05f, -0.52f, 0f);
+        boss.transform.position = new Vector3(7.05f, -0.78f, 0f);
 
         Rigidbody2D body = boss.AddComponent<Rigidbody2D>();
         body.bodyType = RigidbodyType2D.Kinematic;
@@ -197,6 +197,10 @@ public static class MiddleBossStageSetup
         controllerObject.FindProperty("nutrientBlockSprite").objectReferenceValue = nutrientBlock;
         controllerObject.FindProperty("exitGate").objectReferenceValue = exitGate;
         controllerObject.FindProperty("aimTarget").objectReferenceValue = aim.transform;
+        controllerObject.FindProperty("groundY").floatValue = -3.75f;
+        controllerObject.FindProperty("suctionTickDamage").floatValue = 6f;
+        controllerObject.FindProperty("suctionTickInterval").floatValue = 0.65f;
+        controllerObject.FindProperty("conveyorCarrySpeed").floatValue = 5.2f;
         SetSpriteArray(controllerObject.FindProperty("groundClawFrames"), groundClawFrames);
         SetSpriteArray(controllerObject.FindProperty("suctionFrames"), suctionFrames);
         SetSpriteArray(controllerObject.FindProperty("feedJetFrames"), feedJetFrames);

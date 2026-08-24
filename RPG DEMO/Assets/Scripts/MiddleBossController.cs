@@ -9,6 +9,7 @@ using UnityEngine.UI;
 /// 공용 플레이어 계약은 변경하지 않고 기존 Health/PlayerController를 사용합니다.
 /// </summary>
 [RequireComponent(typeof(Health), typeof(BossStaggerGauge), typeof(DirectionSequenceEscape))]
+[DefaultExecutionOrder(200)]
 public sealed class MiddleBossController : MonoBehaviour
 {
     [Header("Scene references")]
@@ -28,18 +29,23 @@ public sealed class MiddleBossController : MonoBehaviour
     [Header("Arena")]
     [SerializeField] private float arenaMinX = -10f;
     [SerializeField] private float arenaMaxX = 10f;
-    [SerializeField] private float groundY = -3.65f;
+    [SerializeField] private float groundY = -3.75f;
 
     [Header("Combat")]
     [SerializeField, Min(0.1f)] private float patternCooldown = 1.55f;
     [SerializeField, Min(1f)] private float captureFailureDamage = 36f;
     [SerializeField, Min(1f)] private float nutrientBlockDamage = 9f;
     [SerializeField, Min(1f)] private float nutrientBlockSpeed = 7.2f;
+    [SerializeField, Min(0.1f)] private float suctionTickDamage = 6f;
+    [SerializeField, Min(0.1f)] private float suctionTickInterval = 0.65f;
+    [SerializeField, Min(0.1f)] private float conveyorCarrySpeed = 5.2f;
 
     public int Phase { get; private set; } = 1;
     public string CurrentPattern { get; private set; } = "BOOT SEQUENCE";
 
     private readonly List<GameObject> attackVisuals = new List<GameObject>();
+    private readonly Dictionary<SpriteRenderer, Color> bossBaseColors =
+        new Dictionary<SpriteRenderer, Color>();
     private Health health;
     private BossStaggerGauge staggerGauge;
     private DirectionSequenceEscape escapeSequence;
@@ -50,13 +56,13 @@ public sealed class MiddleBossController : MonoBehaviour
     private Coroutine attackRoutine;
     private int lastPattern = -1;
     private bool dead;
+    private bool conveyorActive;
 
     private Canvas hudCanvas;
     private Image healthFill;
     private Text healthText;
     private Text phaseText;
     private Text statusText;
-    private Color baseVisualColor = Color.white;
 
     private void Awake()
     {
@@ -64,7 +70,7 @@ public sealed class MiddleBossController : MonoBehaviour
         staggerGauge = GetComponent<BossStaggerGauge>();
         escapeSequence = GetComponent<DirectionSequenceEscape>();
         if (visual == null) visual = GetComponentInChildren<SpriteRenderer>();
-        if (visual != null) baseVisualColor = visual.color;
+        CacheBossRenderers();
         if (exitGate != null) exitGate.SetActive(false);
 
         if (GetComponent<BossStaggerHUD>() == null)
@@ -121,7 +127,7 @@ public sealed class MiddleBossController : MonoBehaviour
                 phaseText.text = "2페이즈 · 직접 재활용";
                 phaseText.color = new Color(1f, 0.25f, 0.48f);
             }
-            if (visual != null) visual.color = new Color(1f, 0.76f, 0.78f, 1f);
+            SetBossTint(new Color(1f, 0.76f, 0.78f, 1f));
             Debug.Log("[MiddleBoss] Phase 2 - 생명체 직접 재활용 승인", this);
         }
 
@@ -135,6 +141,16 @@ public sealed class MiddleBossController : MonoBehaviour
 
         if (statusText != null && !staggerGauge.IsStaggered && !escapeSequence.IsActive && !dead)
             statusText.text = $"패턴 · {CurrentPattern}";
+    }
+
+    private void FixedUpdate()
+    {
+        if (!conveyorActive || playerBody == null || !CanAttack() || !IsPlayerOnGroundRoute())
+            return;
+
+        Vector2 velocity = playerBody.linearVelocity;
+        velocity.x = Mathf.Max(velocity.x, conveyorCarrySpeed);
+        playerBody.linearVelocity = velocity;
     }
 
     private IEnumerator BrainLoop()
@@ -211,12 +227,13 @@ public sealed class MiddleBossController : MonoBehaviour
 
         float time = 1.35f;
         float elapsed = 0f;
+        float nextDamageAt = 0.25f;
         while (time > 0f && CanAttack())
         {
             time -= Time.deltaTime;
             elapsed += Time.deltaTime;
             SetEffectFrame(field, suctionFrames, elapsed, 0.11f, true);
-            bool playerIsOnGroundRoute = player.transform.position.y < groundY + 1.7f;
+            bool playerIsOnGroundRoute = IsPlayerOnGroundRoute();
             if (playerBody != null && playerIsOnGroundRoute)
             {
                 float targetVelocity = Mathf.Sign(transform.position.x - player.transform.position.x) * 5.5f;
@@ -224,10 +241,16 @@ public sealed class MiddleBossController : MonoBehaviour
                 velocity.x = Mathf.MoveTowards(velocity.x, targetVelocity, 12f * Time.deltaTime);
                 playerBody.linearVelocity = velocity;
             }
+
+            if (playerIsOnGroundRoute && elapsed >= nextDamageAt)
+            {
+                playerHealth.TakeDamage(suctionTickDamage);
+                nextDamageAt += suctionTickInterval;
+            }
             yield return null;
         }
 
-        if (CanAttack() && player.transform.position.y < groundY + 1.7f &&
+        if (CanAttack() && IsPlayerOnGroundRoute() &&
             Mathf.Abs(player.transform.position.x - transform.position.x) < 1.9f)
             playerHealth.TakeDamage(10f);
         DestroyAttackVisual(field);
@@ -296,7 +319,14 @@ public sealed class MiddleBossController : MonoBehaviour
                 new Vector2(x, groundY + 0.12f), new Vector2(3.25f, 0.78f),
                 conveyorFrames, 10));
         yield return WaitInterruptible(0.85f);
+        if (!CanAttack())
+        {
+            foreach (GameObject segment in beltSegments)
+                DestroyAttackVisual(segment);
+            yield break;
+        }
 
+        conveyorActive = true;
         float time = 1.8f;
         float elapsed = 0f;
         while (time > 0f && CanAttack())
@@ -305,13 +335,7 @@ public sealed class MiddleBossController : MonoBehaviour
             elapsed += Time.deltaTime;
             foreach (GameObject segment in beltSegments)
                 SetEffectFrame(segment, conveyorFrames, elapsed, 0.09f, true);
-            bool playerIsOnGroundRoute = player.transform.position.y < groundY + 1.7f;
-            if (playerBody != null && playerIsOnGroundRoute)
-            {
-                Vector2 velocity = playerBody.linearVelocity;
-                velocity.x = Mathf.MoveTowards(velocity.x, 7f, 14f * Time.deltaTime);
-                playerBody.linearVelocity = velocity;
-            }
+            bool playerIsOnGroundRoute = IsPlayerOnGroundRoute();
 
             if (playerIsOnGroundRoute && Mathf.Abs(player.transform.position.x - transform.position.x) < 2f)
             {
@@ -320,6 +344,7 @@ public sealed class MiddleBossController : MonoBehaviour
             }
             yield return null;
         }
+        conveyorActive = false;
         foreach (GameObject segment in beltSegments)
             DestroyAttackVisual(segment);
     }
@@ -360,10 +385,10 @@ public sealed class MiddleBossController : MonoBehaviour
     {
         CurrentPattern = "과부하 압축 배급";
         GameObject leftPress = CreateWorldSprite("LeftPress",
-            new Vector2(arenaMinX + 0.8f, groundY + 2.1f), new Vector2(2.5f, 5.5f),
+            new Vector2(arenaMinX + 0.8f, groundY + 0.72f), new Vector2(2.5f, 1.65f),
             pressFrames, 18);
         GameObject rightPress = CreateWorldSprite("RightPress",
-            new Vector2(arenaMaxX - 0.8f, groundY + 2.1f), new Vector2(2.5f, 5.5f),
+            new Vector2(arenaMaxX - 0.8f, groundY + 0.72f), new Vector2(2.5f, 1.65f),
             pressFrames, 18);
         SpriteRenderer rightRenderer = rightPress.GetComponent<SpriteRenderer>();
         if (rightRenderer != null) rightRenderer.flipX = true;
@@ -383,7 +408,8 @@ public sealed class MiddleBossController : MonoBehaviour
             yield return null;
         }
 
-        if (CanAttack() && player.transform.position.x > leftPress.transform.position.x - 0.8f &&
+        if (CanAttack() && IsPlayerOnGroundRoute(1.35f) &&
+            player.transform.position.x > leftPress.transform.position.x - 0.8f &&
             player.transform.position.x < rightPress.transform.position.x + 0.8f)
             playerHealth.TakeDamage(18f);
 
@@ -463,9 +489,10 @@ public sealed class MiddleBossController : MonoBehaviour
             attackRoutine = null;
         }
         escapeSequence.Cancel(true);
+        conveyorActive = false;
         CleanupAttackVisuals();
         CurrentPattern = $"GROGGY {duration:0}s";
-        if (visual != null) visual.color = new Color(0.55f, 0.25f, 1f, 1f);
+        SetBossTint(new Color(0.55f, 0.25f, 1f, 1f));
         if (statusText != null)
         {
             statusText.text = "CORE OVERLOAD // 10초간 공격 가능";
@@ -476,9 +503,8 @@ public sealed class MiddleBossController : MonoBehaviour
     private void HandleStaggerEnded()
     {
         if (dead) return;
-        if (visual != null) visual.color = Phase == 1
-            ? baseVisualColor
-            : new Color(1f, 0.76f, 0.78f, 1f);
+        if (Phase == 1) RestoreBossTint();
+        else SetBossTint(new Color(1f, 0.76f, 0.78f, 1f));
         CurrentPattern = "PROCESS RESUMED";
     }
 
@@ -490,11 +516,12 @@ public sealed class MiddleBossController : MonoBehaviour
         if (brainRoutine != null) StopCoroutine(brainRoutine);
         if (attackRoutine != null) StopCoroutine(attackRoutine);
         escapeSequence.Cancel(true);
+        conveyorActive = false;
         CleanupAttackVisuals();
 
         gameObject.tag = "Untagged";
         if (aimTarget != null) aimTarget.gameObject.tag = "Untagged";
-        if (visual != null) visual.color = new Color(0.24f, 0.3f, 0.34f, 1f);
+        SetBossTint(new Color(0.24f, 0.3f, 0.34f, 1f));
         foreach (Collider2D bossCollider in GetComponentsInChildren<Collider2D>())
             bossCollider.enabled = false;
         if (exitGate != null) exitGate.SetActive(true);
@@ -526,6 +553,32 @@ public sealed class MiddleBossController : MonoBehaviour
     {
         return !dead && !staggerGauge.IsStaggered && !escapeSequence.IsActive &&
                playerHealth != null && !playerHealth.IsDead;
+    }
+
+    private bool IsPlayerOnGroundRoute(float height = 1.7f)
+    {
+        if (player == null) return false;
+        float playerY = playerBody != null ? playerBody.position.y : player.transform.position.y;
+        return playerY < groundY + height;
+    }
+
+    private void CacheBossRenderers()
+    {
+        bossBaseColors.Clear();
+        foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>(true))
+            bossBaseColors[renderer] = renderer.color;
+    }
+
+    private void SetBossTint(Color color)
+    {
+        foreach (SpriteRenderer renderer in bossBaseColors.Keys)
+            if (renderer != null) renderer.color = color;
+    }
+
+    private void RestoreBossTint()
+    {
+        foreach (KeyValuePair<SpriteRenderer, Color> entry in bossBaseColors)
+            if (entry.Key != null) entry.Key.color = entry.Value;
     }
 
     private GameObject CreateWorldRect(string objectName, Vector2 position, Vector2 scale,
