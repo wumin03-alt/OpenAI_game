@@ -45,6 +45,7 @@ public sealed class StageArenaWaveController : MonoBehaviour
     [SerializeField] private Health defenseTarget;
     [SerializeField, Min(1f)] private float defenseDuration;
     [SerializeField] private Canvas stageCanvas;
+    [SerializeField] private TMP_FontAsset defenseHudFont;
     [Header("── 스피드런 스테이지 (선택) ──")]
     [SerializeField] private bool speedrunMode;
     [SerializeField, Min(1f)] private float speedrunTimeLimit = 60f;
@@ -559,7 +560,9 @@ public sealed class StageArenaWaveController : MonoBehaviour
         textObject.transform.SetParent(failureRoot.transform, false);
         failureText = textObject.GetComponent<TextMeshProUGUI>();
         TMP_Text template = FindFirstObjectByType<TMP_Text>();
-        failureText.font = template != null ? template.font : TMP_Settings.defaultFontAsset;
+        failureText.font = defenseHudFont != null
+            ? defenseHudFont
+            : template != null ? template.font : TMP_Settings.defaultFontAsset;
         failureText.fontSize = 34f;
         failureText.fontStyle = FontStyles.Bold;
         failureText.alignment = TextAlignmentOptions.Center;
