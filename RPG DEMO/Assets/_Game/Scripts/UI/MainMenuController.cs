@@ -44,28 +44,47 @@ namespace Game.UI
                 background.preserveAspect = false;
             }
 
-            Image shade = RuntimeUIFactory.CreateImage(canvas.transform, "Shade",
-                new Color(0f, 0f, 0f, 0.35f));
-            RuntimeUIFactory.Stretch(shade.rectTransform);
+            MainMenuBackdropAnimator backdropAnimator = canvas.gameObject.AddComponent<MainMenuBackdropAnimator>();
+            backdropAnimator.Build(canvas.transform);
 
-            mainPanel = new GameObject("MainPanel", typeof(RectTransform));
+            Image shade = RuntimeUIFactory.CreateImage(canvas.transform, "Shade",
+                new Color(0f, 0.01f, 0.035f, 0.16f));
+            RuntimeUIFactory.Stretch(shade.rectTransform);
+            shade.raycastTarget = false;
+
+            mainPanel = new GameObject("MainPanel", typeof(RectTransform), typeof(CanvasGroup));
             mainPanel.transform.SetParent(canvas.transform, false);
             RuntimeUIFactory.Stretch(mainPanel.GetComponent<RectTransform>());
 
-            RuntimeUIFactory.CreateText(mainPanel.transform, "RPG DEMO", 72,
-                new Vector2(0f, 280f), new Vector2(800f, 110f), Color.white);
-            RuntimeUIFactory.CreateText(mainPanel.transform, "BEGIN YOUR JOURNEY", 24,
-                new Vector2(0f, 210f), new Vector2(700f, 50f), new Color(0.55f, 0.75f, 1f));
+            Image commandPlate = RuntimeUIFactory.CreateImage(mainPanel.transform, "CommandPlate",
+                new Color(0.018f, 0.04f, 0.085f, 0.76f));
+            RectTransform plateRect = commandPlate.rectTransform;
+            plateRect.anchorMin = plateRect.anchorMax = new Vector2(0.5f, 0.5f);
+            plateRect.anchoredPosition = new Vector2(-650f, 30f);
+            plateRect.sizeDelta = new Vector2(440f, 650f);
+            Outline plateOutline = commandPlate.gameObject.AddComponent<Outline>();
+            plateOutline.effectColor = new Color(0.08f, 0.85f, 1f, 0.48f);
+            plateOutline.effectDistance = new Vector2(2f, -2f);
+            commandPlate.raycastTarget = false;
 
-            RuntimeUIFactory.CreateButton(mainPanel.transform, "PLAY", new Vector2(0f, 60f),
-                new Vector2(380f, 72f), Play);
-            RuntimeUIFactory.CreateButton(mainPanel.transform, "SETTINGS", new Vector2(0f, -35f),
-                new Vector2(380f, 72f), ShowSettings);
-            RuntimeUIFactory.CreateButton(mainPanel.transform, "QUIT", new Vector2(0f, -130f),
-                new Vector2(380f, 72f), Quit);
+            Text title = RuntimeUIFactory.CreateText(mainPanel.transform, "RPG DEMO", 68,
+                new Vector2(-650f, 285f), new Vector2(520f, 110f), new Color(0.9f, 0.97f, 1f));
+            title.fontStyle = FontStyle.Bold;
+            RuntimeUIFactory.CreateText(mainPanel.transform, "AI REBELLION // ADAPTIVE COMBAT", 21,
+                new Vector2(-650f, 218f), new Vector2(500f, 50f), new Color(0.18f, 0.9f, 1f));
+            RuntimeUIFactory.CreateText(mainPanel.transform, "SYSTEM ACCESS GRANTED", 15,
+                new Vector2(-650f, 174f), new Vector2(430f, 34f), new Color(1f, 0.24f, 0.48f, 0.88f));
+
+            RuntimeUIFactory.CreateButton(mainPanel.transform, "PLAY", new Vector2(-650f, 60f),
+                new Vector2(340f, 72f), Play);
+            RuntimeUIFactory.CreateButton(mainPanel.transform, "SETTINGS", new Vector2(-650f, -35f),
+                new Vector2(340f, 72f), ShowSettings);
+            RuntimeUIFactory.CreateButton(mainPanel.transform, "QUIT", new Vector2(-650f, -130f),
+                new Vector2(340f, 72f), Quit);
 
             BuildSettingsPanel(canvas.transform);
             ShowMainPanel();
+            backdropAnimator.BindMenu(mainPanel.GetComponent<CanvasGroup>());
         }
 
         private void BuildSettingsPanel(Transform canvas)
