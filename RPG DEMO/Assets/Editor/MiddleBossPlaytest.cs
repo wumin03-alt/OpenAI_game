@@ -276,10 +276,14 @@ public static class MiddleBossPlaytest
             "OnTriggerEnter2D", BindingFlags.Instance | BindingFlags.NonPublic);
         Collider2D playerCollider = player.GetComponent<Collider2D>();
         Collider2D bossCollider = boss.GetComponent<Collider2D>();
-        Require(parryState != null && trigger != null && playerCollider != null && bossCollider != null,
+        Health bossHealth = boss.GetComponent<Health>();
+        BossStaggerHUD hud = boss.GetComponent<BossStaggerHUD>();
+        Require(parryState != null && trigger != null && playerCollider != null
+                && bossCollider != null && bossHealth != null && hud != null,
             "영양 블록 반사 테스트 진입점 또는 충돌체가 누락됐습니다.");
         if (failure != null) return;
 
+        float healthBeforeReflection = bossHealth.CurrentHP;
         for (int hit = 0; hit < 2; hit++)
         {
             GameObject block = new GameObject($"NutrientBlockReflectionTest_{hit + 1}");
@@ -306,6 +310,12 @@ public static class MiddleBossPlaytest
             float expected = hit == 0 ? gauge.MaxGroggy * 0.5f : 0f;
             Require(Mathf.Approximately(gauge.CurrentGroggy, expected),
                 $"반사 영양 블록 {hit + 1}회 명중 후 그로기 게이지가 50%씩 감소하지 않았습니다.");
+            Require(Mathf.Approximately(
+                    bossHealth.CurrentHP,
+                    healthBeforeReflection - projectile.ReflectedBossDamage * (hit + 1)),
+                $"반사 영양 블록 {hit + 1}회 명중 후 보스 HP 피해가 적용되지 않았습니다.");
+            ValidateGroggyHudFill(hud, hit == 0 ? 0.5f : 0f);
+            if (failure != null) return;
         }
     }
 
@@ -319,18 +329,38 @@ public static class MiddleBossPlaytest
             "track", BindingFlags.Instance | BindingFlags.NonPublic);
         FieldInfo fillField = typeof(BossStaggerHUD).GetField(
             "fill", BindingFlags.Instance | BindingFlags.NonPublic);
+        FieldInfo trailField = typeof(BossStaggerHUD).GetField(
+            "damageTrail", BindingFlags.Instance | BindingFlags.NonPublic);
         Image track = trackField?.GetValue(hud) as Image;
         Image fill = fillField?.GetValue(hud) as Image;
+        Image damageTrail = trailField?.GetValue(hud) as Image;
 
-        Require(track != null && fill != null,
+        Require(track != null && fill != null && damageTrail != null,
             "보스 HP 아래의 연속형 그로기 HUD가 생성되지 않았습니다.");
         if (failure != null) return;
 
         Require(Mathf.Approximately(track.rectTransform.sizeDelta.x, expectedWidth)
                 && Mathf.Approximately(track.rectTransform.sizeDelta.y, 14f)
                 && Mathf.Approximately(track.rectTransform.anchoredPosition.y, expectedY)
-                && fill.type == Image.Type.Filled,
+                && fill.type == Image.Type.Simple
+                && Mathf.Approximately(fill.rectTransform.anchorMax.x, 1f),
             "그로기 HUD가 보스 HP 아래의 얇은 연속형 게이지 규격과 일치하지 않습니다.");
+    }
+
+    private static void ValidateGroggyHudFill(BossStaggerHUD hud, float expectedNormalized)
+    {
+        Require(hud != null, "그로기 HUD를 찾지 못했습니다.");
+        if (failure != null) return;
+
+        FieldInfo fillField = typeof(BossStaggerHUD).GetField(
+            "fill", BindingFlags.Instance | BindingFlags.NonPublic);
+        Image fill = fillField?.GetValue(hud) as Image;
+        Require(fill != null, "그로기 HUD의 실제 감소 바를 찾지 못했습니다.");
+        if (failure != null) return;
+
+        float visibleNormalized = fill.enabled ? fill.rectTransform.anchorMax.x : 0f;
+        Require(Mathf.Approximately(visibleNormalized, expectedNormalized),
+            $"그로기 HUD 표시량({visibleNormalized:0.##})이 실제 게이지({expectedNormalized:0.##})와 다릅니다.");
     }
 
     private static void DestroyReflectedCargo(object cargoFlight, MethodInfo destroyVisual,
@@ -372,6 +402,8 @@ public static class MiddleBossPlaytest
         Require(gauge.IsStaggered, "최종보스 세 번째 패링 후 그로기가 시작되지 않았습니다.");
         Require(boss.State == BossController.BossState.Staggered,
             "최종보스 AI가 공용 그로기 상태를 구독하지 않았습니다.");
+        ValidateGroggyHudFill(hud, 0f);
+        if (failure != null) return;
 
         Time.timeScale = 20f;
         state = TestState.FinalBossWaitingForRecovery;
@@ -398,6 +430,9 @@ public static class MiddleBossPlaytest
             if (gauge == null || gauge.IsStaggered) return;
             Require(Mathf.Approximately(gauge.CurrentGroggy, gauge.MaxGroggy),
                 "중간보스 10초 그로기 종료 후 게이지가 완전히 재충전되지 않았습니다.");
+            BossStaggerHUD hud = UnityEngine.Object.FindAnyObjectByType<MiddleBossController>()
+                ?.GetComponent<BossStaggerHUD>();
+            ValidateGroggyHudFill(hud, 1f);
             Time.timeScale = 1f;
             state = TestState.MiddleBossLeaving;
             stateStartedAt = EditorApplication.timeSinceStartup;
@@ -410,6 +445,9 @@ public static class MiddleBossPlaytest
             if (gauge == null || gauge.IsStaggered) return;
             Require(Mathf.Approximately(gauge.CurrentGroggy, gauge.MaxGroggy),
                 "최종보스 10초 그로기 종료 후 게이지가 완전히 재충전되지 않았습니다.");
+            BossStaggerHUD hud = UnityEngine.Object.FindAnyObjectByType<BossController>()
+                ?.GetComponent<BossStaggerHUD>();
+            ValidateGroggyHudFill(hud, 1f);
             Time.timeScale = 1f;
             state = TestState.FinalBossLeaving;
             stateStartedAt = EditorApplication.timeSinceStartup;

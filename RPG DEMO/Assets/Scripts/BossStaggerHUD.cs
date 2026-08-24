@@ -11,14 +11,24 @@ public sealed class BossStaggerHUD : MonoBehaviour
     private static readonly Color BorderColor = new Color(0.55f, 0.58f, 0.61f, 0.9f);
     private static readonly Color FullColor = new Color(1f, 0.84f, 0.22f, 1f);
     private static readonly Color LowColor = new Color(1f, 0.38f, 0.12f, 1f);
+    private static readonly Color DamageTrailColor = new Color(1f, 0.42f, 0.1f, 0.95f);
     private static readonly Color GroggyColor = new Color(0.78f, 0.32f, 1f, 1f);
+    private const float DamageTrailHold = 0.12f;
+    private const float DamageTrailSpeed = 1.8f;
+    private const float PulseDuration = 0.18f;
 
     private BossStaggerGauge gauge;
     private Canvas canvas;
     private Image track;
+    private Image damageTrail;
     private Image fill;
     private Image glint;
     private Text timer;
+    private float targetNormalized = 1f;
+    private float trailNormalized = 1f;
+    private float trailHoldRemaining;
+    private float pulseRemaining;
+    private bool hasGaugeValue;
 
     private void Start()
     {
@@ -44,8 +54,11 @@ public sealed class BossStaggerHUD : MonoBehaviour
 
     private void Update()
     {
-        if (gauge == null || timer == null || !gauge.IsStaggered) return;
-        timer.text = $"GROGGY  {gauge.StaggerTimeRemaining:0.0}s";
+        if (gauge != null && timer != null && gauge.IsStaggered)
+            timer.text = $"GROGGY  {gauge.StaggerTimeRemaining:0.0}s";
+
+        UpdateDamageTrail();
+        UpdateDamagePulse();
     }
 
     private void BuildHud()
@@ -69,20 +82,23 @@ public sealed class BossStaggerHUD : MonoBehaviour
         MiddleBossUIStyle.Outline(track, BorderColor, 1f);
         track.raycastTarget = false;
 
+        damageTrail = RuntimeUIFactory.CreateImage(track.rectTransform, "GroggyDamageTrail",
+            DamageTrailColor);
+        damageTrail.type = Image.Type.Simple;
+        damageTrail.raycastTarget = false;
+
         fill = RuntimeUIFactory.CreateImage(track.rectTransform, "GroggyFill", FullColor);
-        fill.type = Image.Type.Filled;
-        fill.fillMethod = Image.FillMethod.Horizontal;
-        fill.fillOrigin = 0;
+        fill.type = Image.Type.Simple;
         fill.raycastTarget = false;
-        RuntimeUIFactory.Stretch(fill.rectTransform, 3f, -3f, 3f, -3f);
 
         glint = RuntimeUIFactory.CreateImage(track.rectTransform, "GroggyHighlight",
             new Color(1f, 0.96f, 0.58f, 0.78f));
-        glint.type = Image.Type.Filled;
-        glint.fillMethod = Image.FillMethod.Horizontal;
-        glint.fillOrigin = 0;
+        glint.type = Image.Type.Simple;
         glint.raycastTarget = false;
-        RuntimeUIFactory.Stretch(glint.rectTransform, 5f, -5f, 8f, -3f);
+
+        SetBarFill(damageTrail, 1f, 3f, 3f, 3f, -3f);
+        SetBarFill(fill, 1f, 3f, 3f, 3f, -3f);
+        SetBarFill(glint, 1f, 5f, 5f, 8f, -3f);
 
         timer = RuntimeUIFactory.CreateText(canvas.transform, string.Empty, 15,
             new Vector2(0f, centerY - 20f), new Vector2(280f, 24f), GroggyColor);
@@ -103,11 +119,32 @@ public sealed class BossStaggerHUD : MonoBehaviour
 
     private void HandleGaugeChanged(float normalized)
     {
-        if (fill == null || glint == null) return;
+        if (fill == null || glint == null || damageTrail == null) return;
 
         float clamped = Mathf.Clamp01(normalized);
-        fill.fillAmount = clamped;
-        glint.fillAmount = clamped;
+        float previous = targetNormalized;
+        targetNormalized = clamped;
+
+        if (!hasGaugeValue)
+        {
+            hasGaugeValue = true;
+            trailNormalized = clamped;
+        }
+        else if (clamped < previous)
+        {
+            trailNormalized = Mathf.Max(trailNormalized, previous);
+            trailHoldRemaining = DamageTrailHold;
+            pulseRemaining = PulseDuration;
+        }
+        else
+        {
+            trailNormalized = clamped;
+            trailHoldRemaining = 0f;
+        }
+
+        SetBarFill(fill, clamped, 3f, 3f, 3f, -3f);
+        SetBarFill(glint, clamped, 5f, 5f, 8f, -3f);
+        SetBarFill(damageTrail, trailNormalized, 3f, 3f, 3f, -3f);
         fill.color = Color.Lerp(LowColor, FullColor, clamped);
 
         if (!gauge.IsStaggered)
@@ -129,5 +166,50 @@ public sealed class BossStaggerHUD : MonoBehaviour
     {
         timer.gameObject.SetActive(false);
         HandleGaugeChanged(gauge.Normalized);
+    }
+
+    private void UpdateDamageTrail()
+    {
+        if (damageTrail == null || trailNormalized <= targetNormalized) return;
+
+        if (trailHoldRemaining > 0f)
+        {
+            trailHoldRemaining -= Time.deltaTime;
+            return;
+        }
+
+        trailNormalized = Mathf.MoveTowards(
+            trailNormalized, targetNormalized, DamageTrailSpeed * Time.deltaTime);
+        SetBarFill(damageTrail, trailNormalized, 3f, 3f, 3f, -3f);
+    }
+
+    private void UpdateDamagePulse()
+    {
+        if (track == null) return;
+
+        if (pulseRemaining <= 0f)
+        {
+            track.rectTransform.localScale = Vector3.one;
+            return;
+        }
+
+        pulseRemaining -= Time.deltaTime;
+        float strength = Mathf.Clamp01(pulseRemaining / PulseDuration);
+        track.rectTransform.localScale = new Vector3(
+            1f + 0.008f * strength, 1f + 0.28f * strength, 1f);
+    }
+
+    private static void SetBarFill(Image image, float normalized,
+        float left, float right, float bottom, float top)
+    {
+        if (image == null) return;
+
+        float value = Mathf.Clamp01(normalized);
+        RectTransform rect = image.rectTransform;
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = new Vector2(Mathf.Max(0.001f, value), 1f);
+        rect.offsetMin = new Vector2(left, bottom);
+        rect.offsetMax = new Vector2(-right, top);
+        image.enabled = value > 0.001f;
     }
 }

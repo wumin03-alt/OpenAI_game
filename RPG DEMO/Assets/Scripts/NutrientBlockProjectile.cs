@@ -7,6 +7,7 @@ public sealed class NutrientBlockProjectile : MonoBehaviour
     [SerializeField] private float lifeTime = 6f;
     [SerializeField, Min(1f)] private float reflectedSpeedMultiplier = 1.35f;
     [SerializeField, Range(0.1f, 1f)] private float reflectedGroggyRatio = 0.5f;
+    [SerializeField, Min(0f)] private float reflectedBossDamage = 20f;
 
     private BossStaggerGauge staggerGauge;
     private BossParryMiniGameBridge parryMiniGameBridge;
@@ -16,6 +17,7 @@ public sealed class NutrientBlockProjectile : MonoBehaviour
     private bool completed;
 
     public bool IsReflected => reflected;
+    public float ReflectedBossDamage => reflectedBossDamage;
 
     public void Initialize(BossStaggerGauge gauge, Vector2 direction, float speed, float attackDamage)
     {
@@ -40,9 +42,7 @@ public sealed class NutrientBlockProjectile : MonoBehaviour
             if (hitGauge == null || hitGauge != staggerGauge) return;
 
             completed = true;
-            float reflectedDamage = staggerGauge.MaxGroggy * reflectedGroggyRatio;
-            staggerGauge.ApplyGroggyDamage(reflectedDamage);
-            Debug.Log($"[NutrientBlock] REFLECT HIT // GROGGY -{reflectedDamage:0.#}", this);
+            ApplyReflectedHit();
             Destroy(gameObject);
             return;
         }
@@ -91,5 +91,30 @@ public sealed class NutrientBlockProjectile : MonoBehaviour
         if (renderer != null) renderer.color = new Color(0.22f, 1f, 0.66f, 1f);
 
         Debug.Log("[NutrientBlock] PARRIED // RETURN TO SENDER", this);
+    }
+
+    private void ApplyReflectedHit()
+    {
+        if (staggerGauge == null) return;
+
+        float groggyBefore = staggerGauge.CurrentGroggy;
+        Health bossHealth = staggerGauge.GetComponent<Health>();
+        float healthBefore = bossHealth != null ? bossHealth.CurrentHP : 0f;
+
+        if (bossHealth != null && !bossHealth.IsDead && reflectedBossDamage > 0f)
+            bossHealth.TakeDamage(reflectedBossDamage, true);
+
+        float healthDamage = bossHealth != null
+            ? Mathf.Max(0f, healthBefore - bossHealth.CurrentHP)
+            : 0f;
+        float groggyLostFromHealth = Mathf.Max(0f, groggyBefore - staggerGauge.CurrentGroggy);
+        float desiredGroggyDamage = staggerGauge.MaxGroggy * reflectedGroggyRatio;
+        float additionalGroggyDamage = Mathf.Max(0f, desiredGroggyDamage - groggyLostFromHealth);
+        staggerGauge.ApplyGroggyDamage(additionalGroggyDamage);
+
+        float actualGroggyDamage = Mathf.Max(0f, groggyBefore - staggerGauge.CurrentGroggy);
+        Debug.Log(
+            $"[NutrientBlock] REFLECT HIT // BOSS HP -{healthDamage:0.#} // GROGGY -{actualGroggyDamage:0.#}",
+            this);
     }
 }
