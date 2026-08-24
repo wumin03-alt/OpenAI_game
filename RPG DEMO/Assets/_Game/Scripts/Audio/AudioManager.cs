@@ -192,13 +192,15 @@ namespace Game.Audio
         private static bool IsNormalStage(string sceneName)
         {
             if (!TryGetStageNumber(sceneName, out int stageNumber)) return false;
-            return stageNumber >= 1 && stageNumber <= 9 && stageNumber != 5;
+            // 실제 런 순서의 일반 전투 씬은 Stage01~03, Stage05~07이다.
+            // 중간보스는 번호형 Stage가 아니라 별도 MiddleBoss 씬이므로 Stage05도 일반 BGM을 쓴다.
+            return stageNumber >= 1 && stageNumber <= 9;
         }
 
         private static bool IsMidBossStage(string sceneName)
         {
-            return TryGetStageNumber(sceneName, out int stageNumber)
-                   && stageNumber == 5;
+            return string.Equals(sceneName, "MiddleBoss", System.StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(sceneName, "MidBoss", System.StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsFinalBossStage(string sceneName)
