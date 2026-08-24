@@ -1291,7 +1291,7 @@ GameObject:
   - component: {fileID: 1486419391}
   - component: {fileID: 1486419390}
   m_Layer: 0
-  m_Name: MiddleBossExit_ToStage04
+  m_Name: MiddleBossExit_ToStage05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1309,13 +1309,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca0f54da0948ab946a624cf98e9f910b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageExit
-  nextSceneName: Stage04
+  nextSceneName: Stage05
   delay: 0.35
   requireAllEnemiesDead: 0
   enterMessage: {fileID: 0}
   blockedMessage: {fileID: 0}
   clearGuideMessage: "F.E.E.D.-6 \uC815\uC9C0 \uC644\uB8CC // \uC6B0\uCE21 \uCD9C\uAD6C\uB85C
-    Stage04\uC5D0 \uC9C4\uC785\uD558\uC138\uC694."
+    Stage05\uC5D0 \uC9C4\uC785\uD558\uC138\uC694."
   enemyCheckInterval: 0.25
 --- !u!61 &1486419391
 BoxCollider2D:

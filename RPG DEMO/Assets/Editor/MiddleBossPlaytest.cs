@@ -60,11 +60,25 @@ public static class MiddleBossPlaytest
     {
         string[] paths = EditorBuildSettings.scenes.Where(scene => scene.enabled)
             .Select(scene => scene.path).ToArray();
-        int stage03 = Array.IndexOf(paths, "Assets/Scenes/Stage03.unity");
-        int middle = Array.IndexOf(paths, MiddleBossScene);
-        int stage04 = Array.IndexOf(paths, "Assets/Scenes/Stage04.unity");
-        Require(stage03 >= 0 && middle == stage03 + 1 && stage04 == middle + 1,
-            "Build Settings 순서가 Stage03 -> MiddleBoss -> Stage04가 아닙니다.");
+        string[] expectedFlow =
+        {
+            "Assets/Scenes/Stage03.unity",
+            MiddleBossScene,
+            "Assets/Scenes/Stage05.unity",
+            "Assets/Scenes/Stage06.unity",
+            "Assets/Scenes/Stage07.unity",
+            FinalBossScene
+        };
+
+        int startIndex = Array.IndexOf(paths, expectedFlow[0]);
+        bool isContiguous = startIndex >= 0 &&
+                            startIndex + expectedFlow.Length <= paths.Length &&
+                            expectedFlow.SequenceEqual(paths.Skip(startIndex).Take(expectedFlow.Length));
+        bool removedScenesAbsent = Array.IndexOf(paths, "Assets/Scenes/Stage04.unity") < 0 &&
+                                   Array.IndexOf(paths, "Assets/Scenes/Stage08.unity") < 0;
+
+        Require(isContiguous && removedScenesAbsent,
+            "Build Settings 순서가 Stage03 -> MiddleBoss -> Stage05 -> Stage06 -> Stage07 -> BossArena가 아니거나 삭제된 Stage04/Stage08이 남아 있습니다.");
     }
 
     private static void HandlePlayModeChanged(PlayModeStateChange change)
@@ -135,18 +149,39 @@ public static class MiddleBossPlaytest
         Require(Mathf.Approximately(playerHealth.MaxHP, maxBeforeItem + 20f),
             "최대 체력 아이템이 플레이어 최대 체력을 20 증가시키지 않았습니다.");
 
-        MethodInfo captureMethod = typeof(MiddleBossController).GetMethod(
-            "TryCapturePlayer", BindingFlags.Instance | BindingFlags.NonPublic);
-        Require(captureMethod != null, "중간보스 포획 진입점을 찾지 못했습니다.");
+        ValidateCompressionDodgeGeometry(boss, player);
         if (failure != null) return;
 
+        MethodInfo forcedImpactMethod = typeof(MiddleBossController).GetMethod(
+            "ApplyForcedTransferImpact", BindingFlags.Instance | BindingFlags.NonPublic);
+        Require(forcedImpactMethod != null, "강제 이송 충돌 피해 진입점을 찾지 못했습니다.");
+        if (failure != null) return;
+
+        float hpBeforeImpact = playerHealth.CurrentHP;
+        forcedImpactMethod.Invoke(boss, null);
+        Require(playerHealth.CurrentHP <= hpBeforeImpact - 11.9f,
+            "강제 이송으로 보스와 충돌했을 때 12 피해가 적용되지 않았습니다.");
+        Require(escape.IsActive && !player.enabled,
+            "강제 이송 충돌 후 기존 포획 QTE가 이어지지 않았습니다.");
+        escape.Cancel(true);
+        Require(player.enabled, "강제 이송 충돌 QTE 종료 후 플레이어 입력이 복구되지 않았습니다.");
+
+        MethodInfo captureMethod = typeof(MiddleBossController).GetMethod(
+            "TryCapturePlayer", BindingFlags.Instance | BindingFlags.NonPublic);
+        FieldInfo captureDamageField = typeof(MiddleBossController).GetField(
+            "captureFailureDamage", BindingFlags.Instance | BindingFlags.NonPublic);
+        Require(captureMethod != null && captureDamageField != null,
+            "중간보스 포획 진입점 또는 실패 피해 설정을 찾지 못했습니다.");
+        if (failure != null) return;
+
+        float expectedCaptureDamage = (float)captureDamageField.GetValue(boss);
         float hpBeforeFailure = playerHealth.CurrentHP;
         bool captured = (bool)captureMethod.Invoke(boss, null);
         Require(captured && escape.IsActive && !player.enabled,
             "중간보스 포획 시 QTE와 플레이어 입력 잠금이 시작되지 않았습니다.");
         escape.Cancel(false);
-        Require(playerHealth.CurrentHP <= hpBeforeFailure - 41.9f,
-            "QTE 실패 시 큰 데미지(42)가 적용되지 않았습니다.");
+        Require(playerHealth.CurrentHP <= hpBeforeFailure - expectedCaptureDamage + 0.1f,
+            $"QTE 실패 시 설정된 큰 데미지({expectedCaptureDamage:0})가 적용되지 않았습니다.");
         Require(player.enabled, "QTE 실패 처리 후 플레이어 입력이 복구되지 않았습니다.");
 
         Require(escape.BeginEscape(player, playerHealth, null, null), "QTE 시작에 실패했습니다.");
@@ -170,6 +205,67 @@ public static class MiddleBossPlaytest
         Time.timeScale = 20f;
         state = TestState.MiddleBossWaitingForRecovery;
         stateStartedAt = EditorApplication.timeSinceStartup;
+    }
+
+    private static void ValidateCompressionDodgeGeometry(MiddleBossController boss,
+        PlayerController player)
+    {
+        MethodInfo createCargo = typeof(MiddleBossController).GetMethod(
+            "CreateCompressionCargo", BindingFlags.Instance | BindingFlags.NonPublic);
+        MethodInfo overlapsPlayer = typeof(MiddleBossController).GetMethod(
+            "IsCargoOverlappingPlayer", BindingFlags.Instance | BindingFlags.NonPublic);
+        MethodInfo destroyVisual = typeof(MiddleBossController).GetMethod(
+            "DestroyAttackVisual", BindingFlags.Instance | BindingFlags.NonPublic);
+        MethodInfo setCrouchVisual = typeof(PlayerController).GetMethod(
+            "SetCrouchVisual", BindingFlags.Instance | BindingFlags.NonPublic);
+        Collider2D playerCollider = player.GetComponent<Collider2D>();
+        Rigidbody2D playerBody = player.GetComponent<Rigidbody2D>();
+
+        Require(createCargo != null && overlapsPlayer != null && destroyVisual != null
+                && setCrouchVisual != null && playerCollider != null && playerBody != null,
+            "교차 압축물의 점프/엎드리기 판정 테스트 진입점이 누락됐습니다.");
+        if (failure != null) return;
+
+        Vector2 originalPosition = playerBody.position;
+        float groundLevel = playerCollider.bounds.min.y;
+
+        object upperCargo = createCargo.Invoke(boss, new object[]
+        {
+            new Vector2(originalPosition.x, groundLevel + 1.15f), 1f, 1, 90
+        });
+        Physics2D.SyncTransforms();
+        bool standingHitsUpper = (bool)overlapsPlayer.Invoke(boss, new[] { upperCargo });
+        setCrouchVisual.Invoke(player, new object[] { true });
+        Physics2D.SyncTransforms();
+        bool crouchingHitsUpper = (bool)overlapsPlayer.Invoke(boss, new[] { upperCargo });
+        setCrouchVisual.Invoke(player, new object[] { false });
+        DestroyReflectedCargo(upperCargo, destroyVisual, boss);
+
+        object lowerCargo = createCargo.Invoke(boss, new object[]
+        {
+            new Vector2(originalPosition.x, groundLevel + 0.45f), 1f, 0, 91
+        });
+        Physics2D.SyncTransforms();
+        bool groundedHitsLower = (bool)overlapsPlayer.Invoke(boss, new[] { lowerCargo });
+        playerBody.position = originalPosition + Vector2.up * 1.8f;
+        Physics2D.SyncTransforms();
+        bool jumpingHitsLower = (bool)overlapsPlayer.Invoke(boss, new[] { lowerCargo });
+        playerBody.position = originalPosition;
+        Physics2D.SyncTransforms();
+        DestroyReflectedCargo(lowerCargo, destroyVisual, boss);
+
+        Require(standingHitsUpper && !crouchingHitsUpper,
+            "상·중단 압축물이 서 있는 플레이어는 맞히고 엎드린 플레이어는 통과하지 못했습니다.");
+        Require(groundedHitsLower && !jumpingHitsLower,
+            "하단 압축물이 지상 플레이어는 맞히고 점프한 플레이어는 통과하지 못했습니다.");
+    }
+
+    private static void DestroyReflectedCargo(object cargoFlight, MethodInfo destroyVisual,
+        MiddleBossController boss)
+    {
+        GameObject visual = cargoFlight?.GetType().GetProperty("Visual")
+            ?.GetValue(cargoFlight) as GameObject;
+        if (visual != null) destroyVisual.Invoke(boss, new object[] { visual });
     }
 
     private static void BeginFinalBossAssertions()
