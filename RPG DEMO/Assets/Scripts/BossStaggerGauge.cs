@@ -3,8 +3,8 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 보스 종류와 무관하게 패링 누적과 긴 그로기 시간을 관리합니다.
-/// 패링 세 번으로 게이지가 소진되며, 그로기 종료 후 다시 충전됩니다.
+/// 보스 종류와 무관하게 연속형 그로기 게이지와 긴 그로기 시간을 관리합니다.
+/// 보스가 실제로 잃은 HP와 패링/특수 반사 피해가 게이지를 함께 소진합니다.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class BossStaggerGauge : MonoBehaviour
@@ -12,6 +12,7 @@ public sealed class BossStaggerGauge : MonoBehaviour
     [SerializeField, Min(1)] private int parriesRequired = 3;
     [SerializeField, Min(0.1f)] private float staggerDuration = 10f;
     [SerializeField, Min(1f)] private float maxGroggy = 100f;
+    [SerializeField, Min(0f)] private float groggyDamagePerHealthDamage = 1f;
 
     public event Action<float> GaugeChanged;
     public event Action<float> StaggerStarted;
@@ -23,12 +24,15 @@ public sealed class BossStaggerGauge : MonoBehaviour
         Mathf.CeilToInt(Normalized * parriesRequired - 0.0001f), 0, parriesRequired);
     public float CurrentGroggy { get; private set; }
     public float MaxGroggy => maxGroggy;
+    public float GroggyDamagePerHealthDamage => groggyDamagePerHealthDamage;
     public float Normalized => IsStaggered ? 0f : Mathf.Clamp01(CurrentGroggy / maxGroggy);
     public bool IsStaggered { get; private set; }
     public float StaggerDuration => staggerDuration;
     public float StaggerTimeRemaining { get; private set; }
 
     private Coroutine staggerRoutine;
+    private Health trackedHealth;
+    private float lastKnownHealth;
 
     private void Awake()
     {
@@ -37,7 +41,20 @@ public sealed class BossStaggerGauge : MonoBehaviour
 
     private void Start()
     {
+        trackedHealth = GetComponent<Health>();
+        if (trackedHealth != null)
+        {
+            lastKnownHealth = trackedHealth.CurrentHP;
+            trackedHealth.HealthChanged += HandleHealthChanged;
+        }
+
         GaugeChanged?.Invoke(Normalized);
+    }
+
+    private void OnDestroy()
+    {
+        if (trackedHealth != null)
+            trackedHealth.HealthChanged -= HandleHealthChanged;
     }
 
     public void Configure(int requiredParries, float duration)
@@ -66,6 +83,15 @@ public sealed class BossStaggerGauge : MonoBehaviour
         if (staggerRoutine != null) StopCoroutine(staggerRoutine);
         staggerRoutine = StartCoroutine(StaggerRoutine());
         return true;
+    }
+
+    private void HandleHealthChanged(float currentHealth, float maxHealth)
+    {
+        float healthDamage = Mathf.Max(0f, lastKnownHealth - currentHealth);
+        lastKnownHealth = currentHealth;
+
+        if (healthDamage <= 0f || groggyDamagePerHealthDamage <= 0f) return;
+        ApplyGroggyDamage(healthDamage * groggyDamagePerHealthDamage);
     }
 
     public void ResetGauge()

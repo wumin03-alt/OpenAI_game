@@ -100,7 +100,7 @@ public class BossController : MonoBehaviour
     [Tooltip("Descend 후 근접 기회를 주기 위한 추가 경직 시간")]
     [SerializeField] private float descendSettleTime = 0.8f;
 
-    [Header("── 그로기 (패링 3회 누적) ──")]
+    [Header("── 그로기 (공격 피해 + 패링 누적) ──")]
     [SerializeField] private Color staggerColor = new Color(0.6f, 0.8f, 1f);
     [Tooltip("Phase 2에서 패링 1회가 적응 강도를 낮추는 비율")]
     [Range(0.05f, 0.5f)]

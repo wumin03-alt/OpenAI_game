@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>배치 모드에서도 실제 Play Mode로 중간보스와 최종보스 그로기를 검증합니다.</summary>
 public static class MiddleBossPlaytest
@@ -123,10 +124,13 @@ public static class MiddleBossPlaytest
         BossParryMiniGameBridge parryBridge = boss.GetComponent<BossParryMiniGameBridge>();
         ParryGroggyMiniGame parryMiniGame = boss.GetComponent<ParryGroggyMiniGame>();
         DirectionSequenceEscape escape = boss.GetComponent<DirectionSequenceEscape>();
+        Health bossHealth = boss.GetComponent<Health>();
         Health playerHealth = player.GetComponent<Health>();
         Require(gauge != null && parryBridge != null && parryMiniGame != null
-                && escape != null && playerHealth != null,
+                && escape != null && bossHealth != null && playerHealth != null,
             "중간보스 공용 그로기/패링 미니게임/QTE/플레이어 Health 연결이 누락됐습니다.");
+        if (failure != null) return;
+        ValidateGroggyHudLayout(boss.GetComponent<BossStaggerHUD>(), 790f, -131f);
         if (failure != null) return;
 
         Require(escape.SequenceLength == 4 && Mathf.Approximately(escape.TimeLimit, 5f),
@@ -194,13 +198,16 @@ public static class MiddleBossPlaytest
             "아이템 합산 그로기 피해가 연속 게이지에 반영되지 않았습니다.");
         gauge.ResetGauge();
 
-        gauge.RegisterParry();
-        Require(gauge.RemainingSegments == 2, "첫 패링 후 그로기 게이지가 1/3 감소하지 않았습니다.");
-        gauge.RegisterParry();
-        Require(gauge.RemainingSegments == 1, "두 번째 패링 후 그로기 게이지가 2/3 감소하지 않았습니다.");
-        gauge.RegisterParry();
+        float bossHealthBeforeAttack = bossHealth.CurrentHP;
+        bossHealth.TakeDamage(10f, true);
+        Require(Mathf.Approximately(bossHealth.CurrentHP, bossHealthBeforeAttack - 10f)
+                && Mathf.Approximately(gauge.CurrentGroggy, 90f),
+            "플레이어 공격 피해와 같은 시점에 보스 그로기 게이지가 감소하지 않았습니다.");
+        gauge.ResetGauge();
+
+        ValidateNutrientBlockReflection(boss, player, gauge, parryMiniGame);
         Require(gauge.IsStaggered && Mathf.Approximately(gauge.StaggerDuration, 10f),
-            "세 번째 패링 후 10초 그로기가 시작되지 않았습니다.");
+            "반사된 영양 블록 두 발로 10초 그로기가 시작되지 않았습니다.");
 
         Time.timeScale = 20f;
         state = TestState.MiddleBossWaitingForRecovery;
@@ -260,6 +267,72 @@ public static class MiddleBossPlaytest
             "하단 압축물이 지상 플레이어는 맞히고 점프한 플레이어는 통과하지 못했습니다.");
     }
 
+    private static void ValidateNutrientBlockReflection(MiddleBossController boss,
+        PlayerController player, BossStaggerGauge gauge, ParryGroggyMiniGame miniGame)
+    {
+        FieldInfo parryState = typeof(PlayerController).GetField(
+            "<IsParrying>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
+        MethodInfo trigger = typeof(NutrientBlockProjectile).GetMethod(
+            "OnTriggerEnter2D", BindingFlags.Instance | BindingFlags.NonPublic);
+        Collider2D playerCollider = player.GetComponent<Collider2D>();
+        Collider2D bossCollider = boss.GetComponent<Collider2D>();
+        Require(parryState != null && trigger != null && playerCollider != null && bossCollider != null,
+            "영양 블록 반사 테스트 진입점 또는 충돌체가 누락됐습니다.");
+        if (failure != null) return;
+
+        for (int hit = 0; hit < 2; hit++)
+        {
+            GameObject block = new GameObject($"NutrientBlockReflectionTest_{hit + 1}");
+            Rigidbody2D body = block.AddComponent<Rigidbody2D>();
+            body.gravityScale = 0f;
+            BoxCollider2D collider = block.AddComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            NutrientBlockProjectile projectile = block.AddComponent<NutrientBlockProjectile>();
+            projectile.Initialize(gauge, Vector2.left, 7.2f, 9f);
+
+            parryState.SetValue(player, true);
+            trigger.Invoke(projectile, new object[] { playerCollider });
+            parryState.SetValue(player, false);
+
+            Require(projectile.IsReflected && !miniGame.IsActive,
+                "영양 블록 패링 시 미니게임 없이 보스 방향으로 반사되지 않았습니다.");
+            if (failure != null)
+            {
+                UnityEngine.Object.Destroy(block);
+                return;
+            }
+
+            trigger.Invoke(projectile, new object[] { bossCollider });
+            float expected = hit == 0 ? gauge.MaxGroggy * 0.5f : 0f;
+            Require(Mathf.Approximately(gauge.CurrentGroggy, expected),
+                $"반사 영양 블록 {hit + 1}회 명중 후 그로기 게이지가 50%씩 감소하지 않았습니다.");
+        }
+    }
+
+    private static void ValidateGroggyHudLayout(BossStaggerHUD hud,
+        float expectedWidth, float expectedY)
+    {
+        Require(hud != null, "보스 HP 아래의 연속형 그로기 HUD가 생성되지 않았습니다.");
+        if (failure != null) return;
+
+        FieldInfo trackField = typeof(BossStaggerHUD).GetField(
+            "track", BindingFlags.Instance | BindingFlags.NonPublic);
+        FieldInfo fillField = typeof(BossStaggerHUD).GetField(
+            "fill", BindingFlags.Instance | BindingFlags.NonPublic);
+        Image track = trackField?.GetValue(hud) as Image;
+        Image fill = fillField?.GetValue(hud) as Image;
+
+        Require(track != null && fill != null,
+            "보스 HP 아래의 연속형 그로기 HUD가 생성되지 않았습니다.");
+        if (failure != null) return;
+
+        Require(Mathf.Approximately(track.rectTransform.sizeDelta.x, expectedWidth)
+                && Mathf.Approximately(track.rectTransform.sizeDelta.y, 14f)
+                && Mathf.Approximately(track.rectTransform.anchoredPosition.y, expectedY)
+                && fill.type == Image.Type.Filled,
+            "그로기 HUD가 보스 HP 아래의 얇은 연속형 게이지 규격과 일치하지 않습니다.");
+    }
+
     private static void DestroyReflectedCargo(object cargoFlight, MethodInfo destroyVisual,
         MiddleBossController boss)
     {
@@ -278,9 +351,20 @@ public static class MiddleBossPlaytest
         BossStaggerHUD hud = boss.GetComponent<BossStaggerHUD>();
         BossParryMiniGameBridge parryBridge = boss.GetComponent<BossParryMiniGameBridge>();
         ParryGroggyMiniGame parryMiniGame = boss.GetComponent<ParryGroggyMiniGame>();
-        Require(gauge != null && hud != null && parryBridge != null && parryMiniGame != null,
+        Health bossHealth = boss.GetComponent<Health>();
+        Require(gauge != null && hud != null && parryBridge != null && parryMiniGame != null
+                && bossHealth != null,
             "최종보스에 공용 그로기 게이지/HUD/패링 미니게임이 런타임 연결되지 않았습니다.");
         if (failure != null) return;
+        ValidateGroggyHudLayout(hud, 940f, -68f);
+        if (failure != null) return;
+
+        float bossHealthBeforeAttack = bossHealth.CurrentHP;
+        bossHealth.TakeDamage(10f, true);
+        Require(Mathf.Approximately(bossHealth.CurrentHP, bossHealthBeforeAttack - 10f)
+                && Mathf.Approximately(gauge.CurrentGroggy, 90f),
+            "최종보스 공격 피해가 그로기 게이지에 함께 반영되지 않았습니다.");
+        gauge.ResetGauge();
 
         gauge.RegisterParry();
         gauge.RegisterParry();
@@ -312,8 +396,8 @@ public static class MiddleBossPlaytest
             BossStaggerGauge gauge = UnityEngine.Object.FindAnyObjectByType<MiddleBossController>()
                 ?.GetComponent<BossStaggerGauge>();
             if (gauge == null || gauge.IsStaggered) return;
-            Require(gauge.RemainingSegments == 3,
-                "중간보스 10초 그로기 종료 후 게이지가 3칸으로 재충전되지 않았습니다.");
+            Require(Mathf.Approximately(gauge.CurrentGroggy, gauge.MaxGroggy),
+                "중간보스 10초 그로기 종료 후 게이지가 완전히 재충전되지 않았습니다.");
             Time.timeScale = 1f;
             state = TestState.MiddleBossLeaving;
             stateStartedAt = EditorApplication.timeSinceStartup;
@@ -324,8 +408,8 @@ public static class MiddleBossPlaytest
             BossStaggerGauge gauge = UnityEngine.Object.FindAnyObjectByType<BossController>()
                 ?.GetComponent<BossStaggerGauge>();
             if (gauge == null || gauge.IsStaggered) return;
-            Require(gauge.RemainingSegments == 3,
-                "최종보스 10초 그로기 종료 후 게이지가 3칸으로 재충전되지 않았습니다.");
+            Require(Mathf.Approximately(gauge.CurrentGroggy, gauge.MaxGroggy),
+                "최종보스 10초 그로기 종료 후 게이지가 완전히 재충전되지 않았습니다.");
             Time.timeScale = 1f;
             state = TestState.FinalBossLeaving;
             stateStartedAt = EditorApplication.timeSinceStartup;
@@ -360,7 +444,7 @@ public static class MiddleBossPlaytest
 
         if (passed && failure == null)
         {
-            Debug.Log("[MiddleBossPlaytest] PASS: scene order, QTE lock/release, parry mini-game bridge, additive groggy damage, and 10-second stagger verified.");
+            Debug.Log("[MiddleBossPlaytest] PASS: boss attack-linked groggy, nutrient-block reflection without mini-game, QTE, and 10-second stagger verified.");
             EditorApplication.Exit(0);
         }
         else

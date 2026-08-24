@@ -2,19 +2,22 @@ using Game.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>중간보스와 최종보스가 공유하는 그로기 HUD입니다.</summary>
+/// <summary>보스 HP 바 아래에 표시되는 연속형 그로기 HUD입니다.</summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BossStaggerGauge))]
 public sealed class BossStaggerHUD : MonoBehaviour
 {
-    private static readonly Color FullColor = new Color(0.2f, 0.88f, 0.72f, 1f);
-    private static readonly Color EmptyColor = new Color(0.31f, 0.2f, 0.16f, 1f);
+    private static readonly Color TrackColor = new Color(0.035f, 0.045f, 0.065f, 0.98f);
+    private static readonly Color BorderColor = new Color(0.55f, 0.58f, 0.61f, 0.9f);
+    private static readonly Color FullColor = new Color(1f, 0.84f, 0.22f, 1f);
+    private static readonly Color LowColor = new Color(1f, 0.38f, 0.12f, 1f);
     private static readonly Color GroggyColor = new Color(0.78f, 0.32f, 1f, 1f);
 
     private BossStaggerGauge gauge;
     private Canvas canvas;
-    private Image[] segments;
-    private Text label;
+    private Image track;
+    private Image fill;
+    private Image glint;
     private Text timer;
 
     private void Start()
@@ -41,82 +44,90 @@ public sealed class BossStaggerHUD : MonoBehaviour
 
     private void Update()
     {
-        if (gauge == null || timer == null) return;
-
-        if (gauge.IsStaggered)
-            timer.text = $"그로기  {gauge.StaggerTimeRemaining:0.0}초";
+        if (gauge == null || timer == null || !gauge.IsStaggered) return;
+        timer.text = $"GROGGY  {gauge.StaggerTimeRemaining:0.0}s";
     }
 
     private void BuildHud()
     {
+        bool middleBossLayout = GetComponent<MiddleBossController>() != null;
+        float barWidth = middleBossLayout ? 790f : 940f;
+        float centerY = middleBossLayout ? -131f : -68f;
+
         canvas = RuntimeUIFactory.CreateCanvas("BossStaggerCanvas", null, 225);
 
-        Image panel = RuntimeUIFactory.CreateImage(canvas.transform, "StaggerCharm",
-            new Color(0.2f, 0.08f, 0.07f, 0.95f));
-        MiddleBossUIStyle.Rounded(panel, new Color(0.2f, 0.08f, 0.07f, 0.95f));
-        MiddleBossUIStyle.Outline(panel, new Color(1f, 0.72f, 0.24f, 0.92f), 2f);
-        MiddleBossUIStyle.Shadow(panel, new Color(0f, 0f, 0f, 0.7f), 5f);
-        RectTransform panelRect = panel.rectTransform;
-        panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 1f);
-        panelRect.pivot = new Vector2(0.5f, 1f);
-        panelRect.anchoredPosition = new Vector2(0f, -132f);
-        panelRect.sizeDelta = new Vector2(430f, 76f);
+        Image shadow = RuntimeUIFactory.CreateImage(canvas.transform, "GroggyShadow",
+            new Color(0f, 0f, 0f, 0.72f));
+        SetTopCenter(shadow.rectTransform, new Vector2(0f, centerY - 2f),
+            new Vector2(barWidth + 8f, 20f));
+        MiddleBossUIStyle.Rounded(shadow, shadow.color);
 
-        label = RuntimeUIFactory.CreateText(panelRect, "코어 그로기", 18,
-            new Vector2(-125f, 20f), new Vector2(150f, 28f), new Color(1f, 0.86f, 0.5f));
-        label.alignment = TextAnchor.MiddleLeft;
-        label.fontStyle = FontStyle.Bold;
+        track = RuntimeUIFactory.CreateImage(canvas.transform, "GroggyTrack", TrackColor);
+        SetTopCenter(track.rectTransform, new Vector2(0f, centerY),
+            new Vector2(barWidth, 14f));
+        MiddleBossUIStyle.Rounded(track, TrackColor);
+        MiddleBossUIStyle.Outline(track, BorderColor, 1f);
+        track.raycastTarget = false;
 
-        timer = RuntimeUIFactory.CreateText(panelRect, "GROGGY 100%", 17,
-            new Vector2(150f, 20f), new Vector2(190f, 28f), new Color(0.34f, 1f, 0.7f));
-        timer.alignment = TextAnchor.MiddleRight;
+        fill = RuntimeUIFactory.CreateImage(track.rectTransform, "GroggyFill", FullColor);
+        fill.type = Image.Type.Filled;
+        fill.fillMethod = Image.FillMethod.Horizontal;
+        fill.fillOrigin = 0;
+        fill.raycastTarget = false;
+        RuntimeUIFactory.Stretch(fill.rectTransform, 3f, -3f, 3f, -3f);
+
+        glint = RuntimeUIFactory.CreateImage(track.rectTransform, "GroggyHighlight",
+            new Color(1f, 0.96f, 0.58f, 0.78f));
+        glint.type = Image.Type.Filled;
+        glint.fillMethod = Image.FillMethod.Horizontal;
+        glint.fillOrigin = 0;
+        glint.raycastTarget = false;
+        RuntimeUIFactory.Stretch(glint.rectTransform, 5f, -5f, 8f, -3f);
+
+        timer = RuntimeUIFactory.CreateText(canvas.transform, string.Empty, 15,
+            new Vector2(0f, centerY - 20f), new Vector2(280f, 24f), GroggyColor);
+        RectTransform timerRect = timer.rectTransform;
+        timerRect.anchorMin = timerRect.anchorMax = new Vector2(0.5f, 1f);
+        timerRect.pivot = new Vector2(0.5f, 0.5f);
         timer.fontStyle = FontStyle.Bold;
+        timer.gameObject.SetActive(false);
+    }
 
-        segments = new Image[gauge.ParriesRequired];
-        float totalWidth = 370f;
-        float gap = 12f;
-        float width = (totalWidth - gap * (segments.Length - 1)) / segments.Length;
-        float startX = -totalWidth * 0.5f + width * 0.5f;
-        for (int i = 0; i < segments.Length; i++)
-        {
-            Image segment = RuntimeUIFactory.CreateImage(panelRect, $"Segment_{i + 1}", FullColor);
-            RectTransform rect = segment.rectTransform;
-            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = new Vector2(startX + i * (width + gap), -17f);
-            rect.sizeDelta = new Vector2(width, 22f);
-            MiddleBossUIStyle.Rounded(segment, FullColor);
-            MiddleBossUIStyle.Outline(segment, new Color(1f, 0.86f, 0.46f, 0.7f), 1f);
-            segments[i] = segment;
-        }
+    private static void SetTopCenter(RectTransform rect, Vector2 position, Vector2 size)
+    {
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
     }
 
     private void HandleGaugeChanged(float normalized)
     {
-        if (segments == null) return;
+        if (fill == null || glint == null) return;
 
-        int remaining = gauge.RemainingSegments;
-        for (int i = 0; i < segments.Length; i++)
-            segments[i].color = i < remaining ? FullColor : EmptyColor;
+        float clamped = Mathf.Clamp01(normalized);
+        fill.fillAmount = clamped;
+        glint.fillAmount = clamped;
+        fill.color = Color.Lerp(LowColor, FullColor, clamped);
 
         if (!gauge.IsStaggered)
         {
-            timer.text = $"GROGGY  {Mathf.CeilToInt(normalized * 100f)}%";
-            timer.color = new Color(0.34f, 1f, 0.7f);
+            track.color = TrackColor;
+            timer.gameObject.SetActive(false);
         }
     }
 
     private void HandleStaggerStarted(float duration)
     {
-        label.text = "코어 과부하";
-        label.color = GroggyColor;
+        track.color = new Color(0.16f, 0.055f, 0.22f, 0.98f);
         timer.color = GroggyColor;
-        foreach (Image segment in segments) segment.color = GroggyColor;
+        timer.text = $"GROGGY  {duration:0.0}s";
+        timer.gameObject.SetActive(true);
     }
 
     private void HandleStaggerEnded()
     {
-        label.text = "코어 그로기";
-        label.color = new Color(1f, 0.86f, 0.5f);
+        timer.gameObject.SetActive(false);
         HandleGaugeChanged(gauge.Normalized);
     }
 }
