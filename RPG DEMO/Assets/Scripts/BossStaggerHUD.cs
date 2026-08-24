@@ -165,7 +165,13 @@ public sealed class BossStaggerHUD : MonoBehaviour
     private void HandleStaggerEnded()
     {
         timer.gameObject.SetActive(false);
-        HandleGaugeChanged(gauge.Normalized);
+
+        // 종료 프레임에 피해 잔상 애니메이션을 거치지 않고 즉시 완충 상태로 맞춥니다.
+        targetNormalized = 1f;
+        trailNormalized = 1f;
+        trailHoldRemaining = 0f;
+        pulseRemaining = 0f;
+        HandleGaugeChanged(1f);
     }
 
     private void UpdateDamageTrail()

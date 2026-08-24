@@ -201,8 +201,10 @@ public static class MiddleBossPlaytest
         float bossHealthBeforeAttack = bossHealth.CurrentHP;
         bossHealth.TakeDamage(10f, true);
         Require(Mathf.Approximately(bossHealth.CurrentHP, bossHealthBeforeAttack - 10f)
-                && Mathf.Approximately(gauge.CurrentGroggy, 90f),
-            "플레이어 공격 피해와 같은 시점에 보스 그로기 게이지가 감소하지 않았습니다.");
+                && Mathf.Approximately(gauge.CurrentGroggy,
+                    gauge.MaxGroggy - gauge.NormalHitGroggyDamage)
+                && gauge.NormalHitsRequired == 50,
+            "일반 공격 그로기가 적중당 고정값으로 감소하거나 50회 조건을 만족하지 않았습니다.");
         gauge.ResetGauge();
 
         ValidateNutrientBlockReflection(boss, player, gauge, parryMiniGame);
