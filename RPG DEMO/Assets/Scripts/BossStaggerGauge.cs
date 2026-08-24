@@ -11,20 +11,28 @@ public sealed class BossStaggerGauge : MonoBehaviour
 {
     [SerializeField, Min(1)] private int parriesRequired = 3;
     [SerializeField, Min(0.1f)] private float staggerDuration = 10f;
+    [SerializeField, Min(1f)] private float maxGroggy = 100f;
 
     public event Action<float> GaugeChanged;
     public event Action<float> StaggerStarted;
     public event Action StaggerEnded;
 
     public int ParriesRequired => parriesRequired;
-    public int RegisteredParries { get; private set; }
-    public int RemainingSegments => Mathf.Max(0, parriesRequired - RegisteredParries);
-    public float Normalized => IsStaggered ? 0f : Mathf.Clamp01((float)RemainingSegments / parriesRequired);
+    public int RegisteredParries => Mathf.Clamp(parriesRequired - RemainingSegments, 0, parriesRequired);
+    public int RemainingSegments => Mathf.Clamp(Mathf.CeilToInt(Normalized * parriesRequired), 0, parriesRequired);
+    public float CurrentGroggy { get; private set; }
+    public float MaxGroggy => maxGroggy;
+    public float Normalized => IsStaggered ? 0f : Mathf.Clamp01(CurrentGroggy / maxGroggy);
     public bool IsStaggered { get; private set; }
     public float StaggerDuration => staggerDuration;
     public float StaggerTimeRemaining { get; private set; }
 
     private Coroutine staggerRoutine;
+
+    private void Awake()
+    {
+        CurrentGroggy = maxGroggy;
+    }
 
     private void Start()
     {
@@ -41,12 +49,18 @@ public sealed class BossStaggerGauge : MonoBehaviour
     /// <summary>패링 한 번을 등록합니다. 이미 그로기 중이면 입력을 소비하지 않습니다.</summary>
     public bool RegisterParry()
     {
-        if (IsStaggered) return false;
+        return ApplyGroggyDamage(maxGroggy / Mathf.Max(1, parriesRequired));
+    }
 
-        RegisteredParries = Mathf.Min(parriesRequired, RegisteredParries + 1);
+    public bool ApplyGroggyDamage(float amount)
+    {
+        if (IsStaggered || amount <= 0f) return false;
+
+        CurrentGroggy = Mathf.Max(0f, CurrentGroggy - amount);
         GaugeChanged?.Invoke(Normalized);
+        Debug.Log($"[BossStaggerGauge] GROGGY -{amount:0.#} → {CurrentGroggy:0.#}/{maxGroggy:0.#}", this);
 
-        if (RegisteredParries < parriesRequired) return true;
+        if (CurrentGroggy > 0.01f) return true;
 
         if (staggerRoutine != null) StopCoroutine(staggerRoutine);
         staggerRoutine = StartCoroutine(StaggerRoutine());
@@ -63,7 +77,7 @@ public sealed class BossStaggerGauge : MonoBehaviour
 
         IsStaggered = false;
         StaggerTimeRemaining = 0f;
-        RegisteredParries = 0;
+        CurrentGroggy = maxGroggy;
         GaugeChanged?.Invoke(Normalized);
     }
 
@@ -82,7 +96,7 @@ public sealed class BossStaggerGauge : MonoBehaviour
 
         StaggerTimeRemaining = 0f;
         IsStaggered = false;
-        RegisteredParries = 0;
+        CurrentGroggy = maxGroggy;
         staggerRoutine = null;
         GaugeChanged?.Invoke(Normalized);
         StaggerEnded?.Invoke();

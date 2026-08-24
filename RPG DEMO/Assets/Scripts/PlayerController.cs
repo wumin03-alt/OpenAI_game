@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Game.Audio;
+using Game.Core;
 using UnityEngine;
 
 /// <summary>
@@ -629,6 +630,10 @@ public class PlayerController : MonoBehaviour
             meleeHitbox.transform.localPosition = p;
 
             meleeHitbox.SetActive(true);
+            float multiplier = GameSession.Instance != null
+                ? GameSession.Instance.AttackDamageMultiplier
+                : 1f;
+            meleeDamageZone?.ApplyDamageMultiplier(multiplier);
             Physics2D.SyncTransforms();
             meleeDamageZone?.HitCurrentOverlaps();
         }
@@ -696,7 +701,14 @@ public class PlayerController : MonoBehaviour
             GameObject go = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
             activeBullet = go;
             Projectile p = go.GetComponent<Projectile>();
-            if (p != null) p.Launch(shootDir);
+            if (p != null)
+            {
+                float multiplier = GameSession.Instance != null
+                    ? GameSession.Instance.AttackDamageMultiplier
+                    : 1f;
+                p.ApplyDamageMultiplier(multiplier);
+                p.Launch(shootDir);
+            }
             AudioManager.Instance?.PlayPlayerRangedShot();
         }
 

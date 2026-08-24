@@ -35,9 +35,11 @@ public class Projectile : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 moveDir = Vector2.right;
     private bool launched;
+    private float baseDamage;
 
     private void Awake()
     {
+        baseDamage = damage;
         rb = GetComponent<Rigidbody2D>();
     }
 
@@ -88,9 +90,16 @@ public class Projectile : MonoBehaviour
     /// <summary>보스 페이즈에 따라 값을 바꿀 때 사용</summary>
     public void Configure(float newDamage, float newSpeed)
     {
-        damage = newDamage;
+        baseDamage = Mathf.Max(0f, newDamage);
+        damage = baseDamage;
         speed = newSpeed;
         if (launched) rb.linearVelocity = moveDir * speed;
+    }
+
+    public void ApplyDamageMultiplier(float multiplier)
+    {
+        if (baseDamage <= 0f) baseDamage = damage;
+        damage = baseDamage * Mathf.Max(0f, multiplier);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

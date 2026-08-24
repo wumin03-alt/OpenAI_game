@@ -179,7 +179,7 @@ public static class MiddleBossStageSetup
         renderer.sortingOrder = 6;
         BoxCollider2D collider = gate.GetComponent<BoxCollider2D>();
         collider.isTrigger = true;
-        collider.size = square != null ? square.bounds.size : Vector2.one;
+        collider.size = square != null ? (Vector2)square.bounds.size : Vector2.one;
 
         StageExit exit = gate.AddComponent<StageExit>();
         SerializedObject exitObject = new SerializedObject(exit);
@@ -231,7 +231,7 @@ public static class MiddleBossStageSetup
         int groundLayer = LayerMask.NameToLayer("Ground");
         if (groundLayer >= 0) solid.layer = groundLayer;
         BoxCollider2D collider = solid.AddComponent<BoxCollider2D>();
-        collider.size = sprite != null ? sprite.bounds.size : Vector2.one;
+        collider.size = sprite != null ? (Vector2)sprite.bounds.size : Vector2.one;
         return solid;
     }
 
@@ -250,7 +250,7 @@ public static class MiddleBossStageSetup
 
     private static void SetWorldSize(Transform target, Sprite sprite, Vector2 worldSize)
     {
-        Vector2 nativeSize = sprite != null ? sprite.bounds.size : Vector2.one;
+        Vector2 nativeSize = sprite != null ? (Vector2)sprite.bounds.size : Vector2.one;
         target.localScale = new Vector3(
             worldSize.x / Mathf.Max(nativeSize.x, 0.001f),
             worldSize.y / Mathf.Max(nativeSize.y, 0.001f),

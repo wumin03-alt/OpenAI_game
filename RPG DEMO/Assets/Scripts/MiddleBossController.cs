@@ -61,6 +61,8 @@ public sealed class MiddleBossController : MonoBehaviour
 
         if (GetComponent<BossStaggerHUD>() == null)
             gameObject.AddComponent<BossStaggerHUD>();
+        if (GetComponent<BossParryMiniGameBridge>() == null)
+            gameObject.AddComponent<BossParryMiniGameBridge>();
 
         health.onDeath.AddListener(HandleDeath);
         staggerGauge.StaggerStarted += HandleStaggerStarted;
@@ -344,10 +346,10 @@ public sealed class MiddleBossController : MonoBehaviour
         body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         BoxCollider2D collider = block.AddComponent<BoxCollider2D>();
         collider.isTrigger = true;
-        collider.size = attackSprite != null ? attackSprite.bounds.size : Vector2.one;
+        collider.size = attackSprite != null ? (Vector2)attackSprite.bounds.size : Vector2.one;
 
         Vector2 direction = player != null
-            ? (player.transform.position + Vector3.up * 0.6f - block.transform.position).normalized
+            ? (Vector2)(player.transform.position + Vector3.up * 0.6f - block.transform.position).normalized
             : Vector2.left;
         NutrientBlockProjectile projectile = block.AddComponent<NutrientBlockProjectile>();
         projectile.Initialize(staggerGauge, direction, speed, nutrientBlockDamage);
@@ -476,7 +478,7 @@ public sealed class MiddleBossController : MonoBehaviour
 
     private static void SetWorldSize(Transform target, Sprite sprite, Vector2 worldSize)
     {
-        Vector2 nativeSize = sprite != null ? sprite.bounds.size : Vector2.one;
+        Vector2 nativeSize = sprite != null ? (Vector2)sprite.bounds.size : Vector2.one;
         target.localScale = new Vector3(
             worldSize.x / Mathf.Max(nativeSize.x, 0.001f),
             worldSize.y / Mathf.Max(nativeSize.y, 0.001f),

@@ -1,4 +1,5 @@
 using Game.Audio;
+using Game.Core;
 using Game.Save;
 using Game.SceneManagement;
 using UnityEngine;
@@ -98,6 +99,7 @@ namespace Game.UI
         private void Play()
         {
             Time.timeScale = 1f;
+            GameSession.Instance?.ResetRun();
             if (SceneLoader.Instance != null)
                 SceneLoader.Instance.LoadScene(FirstStageScene);
             else
