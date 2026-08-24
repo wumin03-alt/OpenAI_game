@@ -27,7 +27,7 @@ public static class MiddleBossStageSetup
         UpdateBuildSettings();
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("[MiddleBossStageSetup] Stage03 -> MiddleBoss -> Stage04 연결 및 씬 생성 완료");
+        Debug.Log("[MiddleBossStageSetup] Stage03 -> MiddleBoss -> Stage05 연결 및 씬 생성 완료");
     }
 
     private static void ConfigureArtAssets()
@@ -261,7 +261,7 @@ public static class MiddleBossStageSetup
 
     private static GameObject CreateExitGate(Sprite square)
     {
-        GameObject gate = new GameObject("MiddleBossExit_ToStage04", typeof(SpriteRenderer), typeof(BoxCollider2D));
+        GameObject gate = new GameObject("MiddleBossExit_ToStage05", typeof(SpriteRenderer), typeof(BoxCollider2D));
         gate.transform.position = new Vector3(10.25f, -1.55f, 0f);
         SpriteRenderer renderer = gate.GetComponent<SpriteRenderer>();
         renderer.sprite = square;
@@ -274,10 +274,10 @@ public static class MiddleBossStageSetup
 
         StageExit exit = gate.AddComponent<StageExit>();
         SerializedObject exitObject = new SerializedObject(exit);
-        exitObject.FindProperty("nextSceneName").stringValue = "Stage04";
+        exitObject.FindProperty("nextSceneName").stringValue = "Stage05";
         exitObject.FindProperty("delay").floatValue = 0.35f;
         exitObject.FindProperty("requireAllEnemiesDead").boolValue = false;
-        exitObject.FindProperty("clearGuideMessage").stringValue = "F.E.E.D.-6 정지 완료 // 우측 출구로 Stage04에 진입하세요.";
+        exitObject.FindProperty("clearGuideMessage").stringValue = "F.E.E.D.-6 정지 완료 // 우측 출구로 Stage05에 진입하세요.";
         exitObject.ApplyModifiedPropertiesWithoutUndo();
         gate.SetActive(false);
         return gate;

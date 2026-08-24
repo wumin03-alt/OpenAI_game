@@ -60,11 +60,25 @@ public static class MiddleBossPlaytest
     {
         string[] paths = EditorBuildSettings.scenes.Where(scene => scene.enabled)
             .Select(scene => scene.path).ToArray();
-        int stage03 = Array.IndexOf(paths, "Assets/Scenes/Stage03.unity");
-        int middle = Array.IndexOf(paths, MiddleBossScene);
-        int stage04 = Array.IndexOf(paths, "Assets/Scenes/Stage04.unity");
-        Require(stage03 >= 0 && middle == stage03 + 1 && stage04 == middle + 1,
-            "Build Settings 순서가 Stage03 -> MiddleBoss -> Stage04가 아닙니다.");
+        string[] expectedFlow =
+        {
+            "Assets/Scenes/Stage03.unity",
+            MiddleBossScene,
+            "Assets/Scenes/Stage05.unity",
+            "Assets/Scenes/Stage06.unity",
+            "Assets/Scenes/Stage07.unity",
+            FinalBossScene
+        };
+
+        int startIndex = Array.IndexOf(paths, expectedFlow[0]);
+        bool isContiguous = startIndex >= 0 &&
+                            startIndex + expectedFlow.Length <= paths.Length &&
+                            expectedFlow.SequenceEqual(paths.Skip(startIndex).Take(expectedFlow.Length));
+        bool removedScenesAbsent = Array.IndexOf(paths, "Assets/Scenes/Stage04.unity") < 0 &&
+                                   Array.IndexOf(paths, "Assets/Scenes/Stage08.unity") < 0;
+
+        Require(isContiguous && removedScenesAbsent,
+            "Build Settings 순서가 Stage03 -> MiddleBoss -> Stage05 -> Stage06 -> Stage07 -> BossArena가 아니거나 삭제된 Stage04/Stage08이 남아 있습니다.");
     }
 
     private static void HandlePlayModeChanged(PlayModeStateChange change)
