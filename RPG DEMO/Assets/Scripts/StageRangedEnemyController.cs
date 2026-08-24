@@ -131,6 +131,7 @@ public sealed class StageRangedEnemyController : MonoBehaviour
         Vector3 origin = firePoint.position;
         Vector2 direction = (Vector2)(player.position - origin);
         Projectile projectile = Instantiate(projectilePrefab, origin, Quaternion.identity);
+        StageRangedProjectileArt.Apply(projectile);
         projectile.Launch(direction);
     }
 
