@@ -174,32 +174,47 @@ public sealed class DirectionSequenceEscape : MonoBehaviour
 
         canvas = RuntimeUIFactory.CreateCanvas("DirectionEscapeCanvas", null, 320);
         panel = RuntimeUIFactory.CreateImage(canvas.transform, "DirectionEscapePanel",
-            new Color(0.02f, 0.04f, 0.08f, 0.95f));
+            new Color(0.29f, 0.11f, 0.08f, 0.98f));
+        MiddleBossUIStyle.Rounded(panel, new Color(0.29f, 0.11f, 0.08f, 0.98f));
+        MiddleBossUIStyle.Outline(panel, new Color(1f, 0.72f, 0.2f, 1f), 4f);
+        MiddleBossUIStyle.Shadow(panel, new Color(0f, 0f, 0f, 0.78f), 8f);
         RectTransform panelRect = panel.rectTransform;
         panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.68f);
-        panelRect.sizeDelta = new Vector2(760f, 250f);
+        panelRect.sizeDelta = new Vector2(650f, 245f);
 
-        Outline outline = panel.gameObject.AddComponent<Outline>();
-        outline.effectColor = new Color(1f, 0.67f, 0.16f, 0.95f);
-        outline.effectDistance = new Vector2(3f, -3f);
+        Image parchment = RuntimeUIFactory.CreateImage(panelRect, "ParchmentInlay",
+            new Color(1f, 0.88f, 0.59f, 0.98f));
+        MiddleBossUIStyle.Rounded(parchment, new Color(1f, 0.88f, 0.59f, 0.98f));
+        RuntimeUIFactory.Stretch(parchment.rectTransform, 8f, -8f, 8f, -8f);
 
-        Text header = RuntimeUIFactory.CreateText(panelRect,
-            "포획 해제 // 5초 안에 방향키를 순서대로 입력", 30,
-            new Vector2(0f, 88f), new Vector2(710f, 48f), Color.white);
+        Image headerRibbon = RuntimeUIFactory.CreateImage(parchment.rectTransform, "HeaderRibbon",
+            new Color(0.47f, 0.16f, 0.12f, 1f));
+        MiddleBossUIStyle.Rounded(headerRibbon, new Color(0.47f, 0.16f, 0.12f, 1f));
+        RectTransform ribbonRect = headerRibbon.rectTransform;
+        ribbonRect.anchorMin = ribbonRect.anchorMax = new Vector2(0.5f, 1f);
+        ribbonRect.pivot = new Vector2(0.5f, 1f);
+        ribbonRect.anchoredPosition = new Vector2(0f, -8f);
+        ribbonRect.sizeDelta = new Vector2(600f, 48f);
+
+        Text header = RuntimeUIFactory.CreateText(ribbonRect,
+            "포획 탈출!  5초 안에 순서대로 입력", 25,
+            Vector2.zero, new Vector2(570f, 42f), Color.white);
         header.fontStyle = FontStyle.Bold;
 
         directionCards = new Image[Mathf.Max(1, sequenceLength)];
         directionTexts = new Text[directionCards.Length];
-        float spacing = 126f;
+        float spacing = 112f;
         float start = -(directionCards.Length - 1) * spacing * 0.5f;
         for (int i = 0; i < directionCards.Length; i++)
         {
-            Image card = RuntimeUIFactory.CreateImage(panelRect, $"Direction_{i + 1}",
-                new Color(0.09f, 0.16f, 0.24f, 1f));
+            Image card = RuntimeUIFactory.CreateImage(parchment.rectTransform, $"Direction_{i + 1}",
+                new Color(0.36f, 0.2f, 0.16f, 1f));
+            MiddleBossUIStyle.Rounded(card, new Color(0.36f, 0.2f, 0.16f, 1f));
+            MiddleBossUIStyle.Outline(card, new Color(1f, 0.66f, 0.18f, 0.9f), 2f);
             RectTransform rect = card.rectTransform;
             rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = new Vector2(start + i * spacing, 20f);
-            rect.sizeDelta = new Vector2(94f, 74f);
+            rect.anchoredPosition = new Vector2(start + i * spacing, 18f);
+            rect.sizeDelta = new Vector2(82f, 82f);
             directionCards[i] = card;
 
             Text arrow = RuntimeUIFactory.CreateText(rect, "?", 48, Vector2.zero,
@@ -209,24 +224,23 @@ public sealed class DirectionSequenceEscape : MonoBehaviour
             directionTexts[i] = arrow;
         }
 
-        Image timerBackground = RuntimeUIFactory.CreateImage(panelRect, "TimerBackground",
-            new Color(0.07f, 0.1f, 0.16f, 1f));
+        Image timerBackground = RuntimeUIFactory.CreateImage(parchment.rectTransform, "TimerBackground",
+            new Color(0.33f, 0.16f, 0.12f, 1f));
+        MiddleBossUIStyle.Rounded(timerBackground, new Color(0.33f, 0.16f, 0.12f, 1f));
         RectTransform timerRect = timerBackground.rectTransform;
         timerRect.anchorMin = timerRect.anchorMax = new Vector2(0.5f, 0.5f);
-        timerRect.anchoredPosition = new Vector2(0f, -51f);
-        timerRect.sizeDelta = new Vector2(620f, 18f);
+        timerRect.anchoredPosition = new Vector2(0f, -49f);
+        timerRect.sizeDelta = new Vector2(545f, 22f);
 
         countdownFill = RuntimeUIFactory.CreateImage(timerRect, "TimerFill",
             new Color(1f, 0.7f, 0.2f, 1f));
-        countdownFill.type = Image.Type.Filled;
-        countdownFill.fillMethod = Image.FillMethod.Horizontal;
-        countdownFill.fillOrigin = 0;
-        RuntimeUIFactory.Stretch(countdownFill.rectTransform, 2f, -2f, 2f, -2f);
+        MiddleBossUIStyle.Rounded(countdownFill, new Color(1f, 0.7f, 0.2f, 1f));
+        MiddleBossUIStyle.HorizontalFill(countdownFill, 1f, 3f);
 
-        countdownText = RuntimeUIFactory.CreateText(panelRect, "5.0", 21,
-            new Vector2(0f, -78f), new Vector2(120f, 30f), Color.white);
-        feedbackText = RuntimeUIFactory.CreateText(panelRect, string.Empty, 20,
-            new Vector2(0f, -104f), new Vector2(650f, 30f), Color.white);
+        countdownText = RuntimeUIFactory.CreateText(parchment.rectTransform, "5.0초", 20,
+            new Vector2(-245f, -78f), new Vector2(100f, 30f), new Color(0.34f, 0.13f, 0.09f));
+        feedbackText = RuntimeUIFactory.CreateText(parchment.rectTransform, string.Empty, 19,
+            new Vector2(35f, -78f), new Vector2(430f, 30f), new Color(0.34f, 0.13f, 0.09f));
 
         panel.gameObject.SetActive(false);
     }
@@ -239,11 +253,12 @@ public sealed class DirectionSequenceEscape : MonoBehaviour
         {
             int keyIndex = Array.IndexOf(directionKeys, sequence[i]);
             directionTexts[i].text = keyIndex >= 0 ? directionGlyphs[keyIndex] : "?";
-            directionCards[i].color = i < progress
-                ? new Color(0.16f, 0.78f, 0.48f, 1f)
+            Color cardColor = i < progress
+                ? new Color(0.16f, 0.72f, 0.45f, 1f)
                 : i == progress
-                    ? new Color(1f, 0.52f, 0.12f, 1f)
-                    : new Color(0.09f, 0.16f, 0.24f, 1f);
+                    ? new Color(1f, 0.47f, 0.1f, 1f)
+                    : new Color(0.36f, 0.2f, 0.16f, 1f);
+            directionCards[i].color = cardColor;
         }
     }
 
@@ -251,10 +266,10 @@ public sealed class DirectionSequenceEscape : MonoBehaviour
     {
         if (countdownFill == null) return;
         float normalized = Mathf.Clamp01(TimeRemaining / timeLimit);
-        countdownFill.fillAmount = normalized;
+        MiddleBossUIStyle.HorizontalFill(countdownFill, normalized, 3f);
         countdownFill.color = Color.Lerp(new Color(1f, 0.18f, 0.3f),
             new Color(1f, 0.72f, 0.2f), normalized);
-        countdownText.text = $"{Mathf.Max(0f, TimeRemaining):0.0}s";
+        countdownText.text = $"{Mathf.Max(0f, TimeRemaining):0.0}초";
     }
 
     private void OnDestroy()

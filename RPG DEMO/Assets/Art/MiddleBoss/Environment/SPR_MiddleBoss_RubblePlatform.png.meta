@@ -1,0 +1,377 @@
+fileFormatVersion: 2
+guid: 0c1d7287f85a8a24d8d58f4f3b347a5b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4332858886414880338
+    second: SPR_MiddleBoss_RubblePlatform_0
+  - first:
+      213: -5267793903070751746
+    second: SPR_MiddleBoss_RubblePlatform_1
+  - first:
+      213: 565335134380099808
+    second: SPR_MiddleBoss_RubblePlatform_2
+  - first:
+      213: 5585403740485808026
+    second: SPR_MiddleBoss_RubblePlatform_3
+  - first:
+      213: -1491869104123565623
+    second: SPR_MiddleBoss_RubblePlatform_4
+  - first:
+      213: 27338727972517727
+    second: SPR_MiddleBoss_RubblePlatform_5
+  - first:
+      213: -8935147725775983128
+    second: SPR_MiddleBoss_RubblePlatform_6
+  - first:
+      213: -6712841297553999777
+    second: SPR_MiddleBoss_RubblePlatform_7
+  - first:
+      213: -8491070064445127328
+    second: SPR_MiddleBoss_RubblePlatform_8
+  - first:
+      213: 4597189630915725139
+    second: SPR_MiddleBoss_RubblePlatform_9
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_0
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 146
+        width: 2016
+        height: 520
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25e47a26338612c30800000000000000
+      internalID: 4332858886414880338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_1
+      rect:
+        serializedVersion: 2
+        x: 308
+        y: 644
+        width: 173
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef3df79ea5905e6b0800000000000000
+      internalID: -5267793903070751746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_2
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 602
+        width: 201
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e806c73f4978d700800000000000000
+      internalID: 565335134380099808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_3
+      rect:
+        serializedVersion: 2
+        x: 1217
+        y: 618
+        width: 53
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9f6bc6fb17538d40800000000000000
+      internalID: 5585403740485808026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_4
+      rect:
+        serializedVersion: 2
+        x: 1330
+        y: 642
+        width: 83
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c9a55d34f0db4be0800000000000000
+      internalID: -1491869104123565623
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_5
+      rect:
+        serializedVersion: 2
+        x: 1487
+        y: 648
+        width: 106
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f57b961ad60216000800000000000000
+      internalID: 27338727972517727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_6
+      rect:
+        serializedVersion: 2
+        x: 1666
+        y: 642
+        width: 68
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8edab7ddb7afff380800000000000000
+      internalID: -8935147725775983128
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_7
+      rect:
+        serializedVersion: 2
+        x: 1861
+        y: 661
+        width: 38
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f58b8b1f76237d2a0800000000000000
+      internalID: -6712841297553999777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_8
+      rect:
+        serializedVersion: 2
+        x: 1311
+        y: 645
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0658bc593c8a92a80800000000000000
+      internalID: -8491070064445127328
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_MiddleBoss_RubblePlatform_9
+      rect:
+        serializedVersion: 2
+        x: 1031
+        y: 170
+        width: 30
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35747d3cc9f7ccf30800000000000000
+      internalID: 4597189630915725139
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SPR_MiddleBoss_RubblePlatform_0: 4332858886414880338
+      SPR_MiddleBoss_RubblePlatform_1: -5267793903070751746
+      SPR_MiddleBoss_RubblePlatform_2: 565335134380099808
+      SPR_MiddleBoss_RubblePlatform_3: 5585403740485808026
+      SPR_MiddleBoss_RubblePlatform_4: -1491869104123565623
+      SPR_MiddleBoss_RubblePlatform_5: 27338727972517727
+      SPR_MiddleBoss_RubblePlatform_6: -8935147725775983128
+      SPR_MiddleBoss_RubblePlatform_7: -6712841297553999777
+      SPR_MiddleBoss_RubblePlatform_8: -8491070064445127328
+      SPR_MiddleBoss_RubblePlatform_9: 4597189630915725139
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
