@@ -122,7 +122,7 @@ public class Health : MonoBehaviour
     public void ApplyMaxHPMultiplier(float multiplier)
     {
         maxHP *= Mathf.Max(0.01f, multiplier);
-        CurrentHP = Mathf.Min(CurrentHP, maxHP);
+        CurrentHP = maxHP;
     }
 
     // ───────────────────────── 사망 처리 ─────────────────────────
