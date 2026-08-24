@@ -27,6 +27,15 @@ EditorBuildSettings:
     path: Assets/Scenes/Stage05.unity
     guid: e4a53f7c916b4d0eab2f9e6c4d8a7b31
   - enabled: 1
+    path: Assets/Scenes/Stage06.unity
+    guid: 3721cd4c0126a4f4190f491bf4ee21d9
+  - enabled: 1
+    path: Assets/Scenes/Stage07.unity
+    guid: 5b50c1ef10df96c4f9c9f8e624cfeafa
+  - enabled: 1
+    path: Assets/Scenes/Stage08.unity
+    guid: f8359d270f9a4790b2f8c8dcc821d3d5
+  - enabled: 1
     path: Assets/Scenes/BossArena.unity
     guid: c1986fa685a602f4394164db045de2c7
   m_configObjects:
