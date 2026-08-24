@@ -12,6 +12,21 @@ using UnityEngine.UI;
 [DefaultExecutionOrder(200)]
 public sealed class MiddleBossController : MonoBehaviour
 {
+    private sealed class CompressionCargoFlight
+    {
+        public GameObject Visual { get; }
+        public Collider2D Hitbox { get; }
+        public float Direction { get; }
+        public bool PlayerContactResolved { get; set; }
+
+        public CompressionCargoFlight(GameObject visual, Collider2D hitbox, float direction)
+        {
+            Visual = visual;
+            Hitbox = hitbox;
+            Direction = direction;
+        }
+    }
+
     [Header("Scene references")]
     [SerializeField] private SpriteRenderer visual;
     [SerializeField] private Sprite attackSprite;
@@ -39,6 +54,10 @@ public sealed class MiddleBossController : MonoBehaviour
     [SerializeField, Min(0.1f)] private float suctionTickDamage = 6f;
     [SerializeField, Min(0.1f)] private float suctionTickInterval = 0.65f;
     [SerializeField, Min(0.1f)] private float conveyorCarrySpeed = 5.2f;
+    [SerializeField, Min(1f)] private float forcedTransferImpactDamage = 12f;
+    [SerializeField, Min(1f)] private float compressionCargoDamage = 14f;
+    [SerializeField, Min(0.1f)] private float compressionCargoSpeed = 11.5f;
+    [SerializeField, Min(1)] private int compressionCargoPerSide = 3;
 
     public int Phase { get; private set; } = 1;
     public string CurrentPattern { get; private set; } = "BOOT SEQUENCE";
@@ -52,6 +71,7 @@ public sealed class MiddleBossController : MonoBehaviour
     private PlayerController player;
     private Health playerHealth;
     private Rigidbody2D playerBody;
+    private Collider2D playerCollider;
     private Coroutine brainRoutine;
     private Coroutine attackRoutine;
     private int lastPattern = -1;
@@ -91,6 +111,7 @@ public sealed class MiddleBossController : MonoBehaviour
             player = playerObject.GetComponent<PlayerController>();
             playerHealth = playerObject.GetComponent<Health>();
             playerBody = playerObject.GetComponent<Rigidbody2D>();
+            playerCollider = playerObject.GetComponent<Collider2D>();
         }
 
         BuildHud();
@@ -341,7 +362,7 @@ public sealed class MiddleBossController : MonoBehaviour
 
             if (playerIsOnGroundRoute && Mathf.Abs(player.transform.position.x - transform.position.x) < 2f)
             {
-                TryCapturePlayer();
+                ApplyForcedTransferImpact();
                 break;
             }
             yield return null;
@@ -349,6 +370,14 @@ public sealed class MiddleBossController : MonoBehaviour
         conveyorActive = false;
         foreach (GameObject segment in beltSegments)
             DestroyAttackVisual(segment);
+    }
+
+    private void ApplyForcedTransferImpact()
+    {
+        CurrentPattern = "강제 이송 · 보스 충돌";
+        playerHealth.TakeDamage(forcedTransferImpactDamage);
+        if (!playerHealth.IsDead)
+            TryCapturePlayer();
     }
 
     private IEnumerator ForceFeedPattern()
@@ -385,39 +414,131 @@ public sealed class MiddleBossController : MonoBehaviour
 
     private IEnumerator CompressionDistributionPattern()
     {
-        CurrentPattern = "과부하 압축 배급";
-        GameObject leftPress = CreateWorldSprite("LeftPress",
-            new Vector2(arenaMinX + 0.8f, groundY + 0.72f), new Vector2(2.5f, 1.65f),
-            pressFrames, 18);
-        GameObject rightPress = CreateWorldSprite("RightPress",
-            new Vector2(arenaMaxX - 0.8f, groundY + 0.72f), new Vector2(2.5f, 1.65f),
-            pressFrames, 18);
-        SpriteRenderer rightRenderer = rightPress.GetComponent<SpriteRenderer>();
-        if (rightRenderer != null) rightRenderer.flipX = true;
-        yield return WaitInterruptible(0.9f);
+        CurrentPattern = "교차 압축물 배급";
 
-        float moveTime = 0.85f;
-        float elapsed = 0f;
-        while (moveTime > 0f && CanAttack())
+        int crouchLane = Random.Range(1, 3);
+        bool jumpVolleyFirst = Random.value < 0.5f;
+        int firstLane = jumpVolleyFirst ? 0 : crouchLane;
+        int secondLane = jumpVolleyFirst ? crouchLane : 0;
+
+        yield return RunCompressionCargoVolley(firstLane, 0);
+        if (!CanAttack()) yield break;
+
+        yield return WaitInterruptible(0.42f);
+        if (!CanAttack()) yield break;
+
+        yield return RunCompressionCargoVolley(secondLane, 1);
+        if (CanAttack()) CurrentPattern = "교차 압축물 배급 완료";
+    }
+
+    private IEnumerator RunCompressionCargoVolley(int lane, int volleyIndex)
+    {
+        bool requiresJump = lane == 0;
+        float laneY = GetCompressionLaneY(lane);
+        Color warningColor = requiresJump
+            ? new Color(1f, 0.68f, 0.18f, 0.9f)
+            : new Color(1f, 0.24f, 0.48f, 0.9f);
+        CurrentPattern = requiresJump
+            ? $"교차 압축물 {volleyIndex + 1}/2 · 점프"
+            : $"교차 압축물 {volleyIndex + 1}/2 · 엎드리기";
+
+        GameObject leftWarning = CreateWorldRect($"CompressionWarningLeft_{volleyIndex}",
+            new Vector2(arenaMinX + 2.25f, laneY), new Vector2(4.5f, 0.16f),
+            warningColor, 17);
+        GameObject rightWarning = CreateWorldRect($"CompressionWarningRight_{volleyIndex}",
+            new Vector2(arenaMaxX - 2.25f, laneY), new Vector2(4.5f, 0.16f),
+            warningColor, 17);
+        yield return WaitInterruptible(0.72f);
+        DestroyAttackVisual(leftWarning);
+        DestroyAttackVisual(rightWarning);
+        if (!CanAttack()) yield break;
+
+        List<CompressionCargoFlight> flights = new List<CompressionCargoFlight>();
+        const float cargoSpacing = 1.28f;
+        const float stackSpacing = 0.56f;
+        int cargoCount = Mathf.Max(1, compressionCargoPerSide);
+        for (int i = 0; i < cargoCount; i++)
         {
-            moveTime -= Time.deltaTime;
-            elapsed += Time.deltaTime;
-            SetEffectFrame(leftPress, pressFrames, elapsed, 0.12f, true);
-            SetEffectFrame(rightPress, pressFrames, elapsed, 0.12f, true);
-            float step = 5.8f * Time.deltaTime;
-            leftPress.transform.position += Vector3.right * step;
-            rightPress.transform.position += Vector3.left * step;
+            float horizontalOffset = requiresJump ? i * cargoSpacing : 0f;
+            float verticalOffset = requiresJump ? 0f : i * stackSpacing;
+            flights.Add(CreateCompressionCargo(
+                new Vector2(arenaMinX - 0.8f - horizontalOffset, laneY + verticalOffset),
+                1f, lane, i));
+            flights.Add(CreateCompressionCargo(
+                new Vector2(arenaMaxX + 0.8f + horizontalOffset, laneY + verticalOffset),
+                -1f, lane, i));
+        }
+
+        float trailingDistance = requiresJump ? (cargoCount - 1) * cargoSpacing : 0f;
+        float travelDistance = arenaMaxX - arenaMinX + 3.2f + trailingDistance;
+        float remaining = travelDistance / Mathf.Max(0.1f, compressionCargoSpeed);
+        float elapsed = 0f;
+        while (remaining > 0f && CanAttack())
+        {
+            float delta = Time.deltaTime;
+            remaining -= delta;
+            elapsed += delta;
+
+            foreach (CompressionCargoFlight flight in flights)
+            {
+                if (flight.Visual == null) continue;
+                flight.Visual.transform.position += Vector3.right *
+                    (flight.Direction * compressionCargoSpeed * delta);
+                SetEffectFrame(flight.Visual, pressFrames, elapsed, 0.1f, true);
+
+                if (!flight.PlayerContactResolved && IsCargoOverlappingPlayer(flight))
+                {
+                    flight.PlayerContactResolved = true;
+                    playerHealth.TakeDamage(compressionCargoDamage);
+                }
+            }
             yield return null;
         }
 
-        if (CanAttack() && IsPlayerOnGroundRoute(1.35f) &&
-            player.transform.position.x > leftPress.transform.position.x - 0.8f &&
-            player.transform.position.x < rightPress.transform.position.x + 0.8f)
-            playerHealth.TakeDamage(18f);
+        foreach (CompressionCargoFlight flight in flights)
+            DestroyAttackVisual(flight.Visual);
+    }
 
-        DestroyAttackVisual(leftPress);
-        DestroyAttackVisual(rightPress);
-        yield return NutritionBlockPattern(true);
+    private CompressionCargoFlight CreateCompressionCargo(Vector2 position, float direction,
+        int lane, int index)
+    {
+        Vector2 size = lane == 0 ? new Vector2(1.16f, 0.72f) : new Vector2(1.18f, 0.48f);
+        GameObject cargo = CreateWorldSprite(
+            $"CompressionCargo_{(direction > 0f ? "L" : "R")}_{lane}_{index}",
+            position, size, pressFrames, 20);
+        SpriteRenderer renderer = cargo.GetComponent<SpriteRenderer>();
+        if (renderer != null)
+        {
+            renderer.flipX = direction < 0f;
+            renderer.color = direction > 0f
+                ? new Color(0.72f, 0.95f, 1f, 1f)
+                : new Color(1f, 0.7f, 0.86f, 1f);
+        }
+
+        Sprite hitboxSprite = renderer != null ? renderer.sprite : attackSprite;
+        BoxCollider2D hitbox = cargo.AddComponent<BoxCollider2D>();
+        hitbox.isTrigger = true;
+        hitbox.size = hitboxSprite != null ? (Vector2)hitboxSprite.bounds.size : Vector2.one;
+        return new CompressionCargoFlight(cargo, hitbox, direction);
+    }
+
+    private float GetCompressionLaneY(int lane)
+    {
+        switch (lane)
+        {
+            case 0: return groundY + 0.45f;
+            case 1: return groundY + 1.15f;
+            default: return groundY + 1.55f;
+        }
+    }
+
+    private bool IsCargoOverlappingPlayer(CompressionCargoFlight flight)
+    {
+        if (flight?.Hitbox == null || player == null) return false;
+        if (playerCollider != null) return flight.Hitbox.bounds.Intersects(playerCollider.bounds);
+
+        Vector2 delta = flight.Visual.transform.position - player.transform.position;
+        return Mathf.Abs(delta.x) <= 0.72f && Mathf.Abs(delta.y) <= 0.72f;
     }
 
     private void FireNutrientBlock(float speed)

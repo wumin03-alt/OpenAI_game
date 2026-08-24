@@ -19,7 +19,8 @@ public sealed class BossStaggerGauge : MonoBehaviour
 
     public int ParriesRequired => parriesRequired;
     public int RegisteredParries => Mathf.Clamp(parriesRequired - RemainingSegments, 0, parriesRequired);
-    public int RemainingSegments => Mathf.Clamp(Mathf.CeilToInt(Normalized * parriesRequired), 0, parriesRequired);
+    public int RemainingSegments => Mathf.Clamp(
+        Mathf.CeilToInt(Normalized * parriesRequired - 0.0001f), 0, parriesRequired);
     public float CurrentGroggy { get; private set; }
     public float MaxGroggy => maxGroggy;
     public float Normalized => IsStaggered ? 0f : Mathf.Clamp01(CurrentGroggy / maxGroggy);
