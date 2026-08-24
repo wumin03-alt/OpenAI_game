@@ -17,6 +17,7 @@ public static class MiddleBossPlaytest
         None,
         MiddleBossEntering,
         MiddleBossWaitingForRecovery,
+        MiddleBossWaitingForAttackResume,
         MiddleBossLeaving,
         FinalBossEntering,
         FinalBossWaitingForRecovery,
@@ -427,14 +428,25 @@ public static class MiddleBossPlaytest
 
         if (state == TestState.MiddleBossWaitingForRecovery)
         {
-            BossStaggerGauge gauge = UnityEngine.Object.FindAnyObjectByType<MiddleBossController>()
-                ?.GetComponent<BossStaggerGauge>();
+            MiddleBossController boss = UnityEngine.Object.FindAnyObjectByType<MiddleBossController>();
+            BossStaggerGauge gauge = boss?.GetComponent<BossStaggerGauge>();
             if (gauge == null || gauge.IsStaggered) return;
             Require(Mathf.Approximately(gauge.CurrentGroggy, gauge.MaxGroggy),
                 "중간보스 10초 그로기 종료 후 게이지가 완전히 재충전되지 않았습니다.");
-            BossStaggerHUD hud = UnityEngine.Object.FindAnyObjectByType<MiddleBossController>()
-                ?.GetComponent<BossStaggerHUD>();
+            BossStaggerHUD hud = boss.GetComponent<BossStaggerHUD>();
             ValidateGroggyHudFill(hud, 1f);
+            if (failure != null) return;
+
+            state = TestState.MiddleBossWaitingForAttackResume;
+            stateStartedAt = EditorApplication.timeSinceStartup;
+        }
+        else if (state == TestState.MiddleBossWaitingForAttackResume)
+        {
+            MiddleBossController boss = UnityEngine.Object.FindAnyObjectByType<MiddleBossController>();
+            if (boss == null || boss.CurrentPattern == "PROCESS RESUMED") return;
+
+            Require(!boss.CurrentPattern.StartsWith("GROGGY", StringComparison.Ordinal),
+                "중간보스가 그로기 종료 후 다음 공격 패턴을 시작하지 않았습니다.");
             Time.timeScale = 1f;
             state = TestState.MiddleBossLeaving;
             stateStartedAt = EditorApplication.timeSinceStartup;

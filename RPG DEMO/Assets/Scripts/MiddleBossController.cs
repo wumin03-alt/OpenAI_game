@@ -122,7 +122,7 @@ public sealed class MiddleBossController : MonoBehaviour
             return;
         }
 
-        brainRoutine = StartCoroutine(BrainLoop());
+        brainRoutine = StartCoroutine(BrainLoop(1.4f));
     }
 
     private void OnDestroy()
@@ -176,9 +176,10 @@ public sealed class MiddleBossController : MonoBehaviour
         playerBody.linearVelocity = velocity;
     }
 
-    private IEnumerator BrainLoop()
+    private IEnumerator BrainLoop(float initialDelay)
     {
-        yield return new WaitForSeconds(1.4f);
+        if (initialDelay > 0f)
+            yield return new WaitForSeconds(initialDelay);
 
         while (!dead)
         {
@@ -606,11 +607,7 @@ public sealed class MiddleBossController : MonoBehaviour
 
     private void HandleStaggerStarted(float duration)
     {
-        if (attackRoutine != null)
-        {
-            StopCoroutine(attackRoutine);
-            attackRoutine = null;
-        }
+        StopCombatRoutines();
         escapeSequence.Cancel(true);
         conveyorActive = false;
         CleanupAttackVisuals();
@@ -629,6 +626,28 @@ public sealed class MiddleBossController : MonoBehaviour
         if (Phase == 1) RestoreBossTint();
         else SetBossTint(new Color(1f, 0.76f, 0.78f, 1f));
         CurrentPattern = "PROCESS RESUMED";
+
+        // 그로기 진입 때 중단한 부모/자식 코루틴을 새 루프로 교체합니다.
+        // 공격 코루틴만 중단하면 BrainLoop가 종료되지 않은 자식을 계속 기다릴 수 있습니다.
+        if (brainRoutine == null)
+            brainRoutine = StartCoroutine(BrainLoop(0.35f));
+
+        Debug.Log("[MiddleBoss] GROGGY END // ATTACK PROCESS RESTARTED", this);
+    }
+
+    private void StopCombatRoutines()
+    {
+        if (brainRoutine != null)
+        {
+            StopCoroutine(brainRoutine);
+            brainRoutine = null;
+        }
+
+        if (attackRoutine != null)
+        {
+            StopCoroutine(attackRoutine);
+            attackRoutine = null;
+        }
     }
 
     private void HandleDeath()
@@ -636,8 +655,7 @@ public sealed class MiddleBossController : MonoBehaviour
         if (dead) return;
         dead = true;
         CurrentPattern = "OBJECTIVE CONFLICT";
-        if (brainRoutine != null) StopCoroutine(brainRoutine);
-        if (attackRoutine != null) StopCoroutine(attackRoutine);
+        StopCombatRoutines();
         escapeSequence.Cancel(true);
         conveyorActive = false;
         CleanupAttackVisuals();
