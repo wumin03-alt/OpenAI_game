@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Stage01~03 전용 아트 연결기입니다. 웨이브/피격 판정은 그대로 두고 런타임에
+/// Stage01~03, Stage05~07 전용 아트 연결기입니다. 웨이브/피격 판정은 그대로 두고 런타임에
 /// 배경과 캐릭터 스프라이트만 최종 아트로 교체합니다.
 /// </summary>
 [DisallowMultipleComponent]
@@ -20,7 +20,7 @@ public sealed class StageArtDirector : MonoBehaviour
     private IEnumerator Start()
     {
         stageNumber = ParseStageNumber(SceneManager.GetActiveScene().name);
-        if (stageNumber < 1 || stageNumber > 3)
+        if (stageNumber == 0)
         {
             enabled = false;
             yield break;
@@ -30,18 +30,36 @@ public sealed class StageArtDirector : MonoBehaviour
         {
             EnsureBackdrop();
             EnsureTerrainArt();
-            DecorateEnemies();
             if (stageNumber == 3) DecorateDefenseDog();
             yield return new WaitForSeconds(ScanInterval);
         }
     }
 
-    private static int ParseStageNumber(string sceneName)
+    // 적은 웨이브의 Update/코루틴에서 생성되므로, 렌더링 직전인 LateUpdate에서 아트를
+    // 입혀야 스폰된 프레임에 기본 프리팹 스프라이트가 노출되지 않습니다.
+    private void LateUpdate()
+    {
+        DecorateEnemies();
+    }
+
+    internal static int ParseStageNumber(string sceneName)
     {
         if (sceneName == "Stage01") return 1;
         if (sceneName == "Stage02") return 2;
         if (sceneName == "Stage03") return 3;
+        if (sceneName == "Stage05") return 5;
+        if (sceneName == "Stage06") return 6;
+        if (sceneName == "Stage07") return 7;
         return 0;
+    }
+
+    // 배경 텍스처는 Stage_Background_01~03 세 장뿐이라 Stage05~07은 이를 재사용합니다.
+    private static int BackgroundIndex(int stage)
+    {
+        if (stage == 5) return 1;
+        if (stage == 6) return 2;
+        if (stage == 7) return 3;
+        return stage;
     }
 
     private void EnsureBackdrop()
@@ -49,7 +67,7 @@ public sealed class StageArtDirector : MonoBehaviour
         if (backdropCreated) return;
 
         Camera stageCamera = Camera.main;
-        Texture2D texture = StageArtLibrary.LoadTexture($"StageArt/Stage_Background_0{stageNumber}");
+        Texture2D texture = StageArtLibrary.LoadTexture($"StageArt/Stage_Background_0{BackgroundIndex(stageNumber)}");
         if (stageCamera == null || texture == null) return;
 
         GameObject backdrop = new GameObject($"Stage0{stageNumber}_FinalBackdrop");
@@ -259,11 +277,11 @@ internal sealed class StageEnemyArtAnimator : MonoBehaviour
             new Vector2(0.5f, 0f), new[] { 0.50f, 0.50f, 0.50f, 0.50f, 0.50f, 0.49f });
         walkFrames = StageArtLibrary.LoadFrames("StageArt/Melee_Walk", 6, 0.25f, 0.82f, 176f,
             new Vector2(0.5f, 0f), new[] { 0.54f, 0.50f, 0.50f, 0.50f, 0.50f, 0.44f });
-        attackFrames = StageArtLibrary.LoadFrames("StageArt/Melee_Attack", 7, 0.29f, 0.76f, 176f,
+        attackFrames = StageArtLibrary.LoadFrames("StageArt/Melee_Attack", 6, 0.29f, 0.76f, 176f,
             new Vector2(0.5f, 0f), new[] { 0.53f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f, 0.49f });
         hitFrames = StageArtLibrary.LoadFrames("StageArt/Melee_Hit", 6, 0.18f, 0.82f, 176f,
             new Vector2(0.5f, 0f), new[] { 0.50f, 0.50f, 0.50f, 0.50f, 0.50f, 0.49f });
-        deathFrames = StageArtLibrary.LoadFrames("StageArt/Melee_Death", 7, 0.25f, 0.77f, 176f,
+        deathFrames = StageArtLibrary.LoadFrames("StageArt/Melee_Death", 6, 0.25f, 0.77f, 176f,
             new Vector2(0.5f, 0f), new[] { 0.53f, 0.50f, 0.50f, 0.50f, 0.50f, 0.44f, 0.46f });
         InitializeRenderer(true, 1f);
         SetVisualGroundOffset(-0.66f);
@@ -457,7 +475,7 @@ internal sealed class StageDeathArtPlayback : MonoBehaviour
     }
 }
 
-/// <summary>Stage01~03의 원거리 적이 생성한 투사체에만 빨간 총알 프레임을 적용합니다.</summary>
+/// <summary>Stage01~03, Stage05~07의 원거리 적이 생성한 투사체에만 빨간 총알 프레임을 적용합니다.</summary>
 internal sealed class StageRangedProjectileArt : MonoBehaviour
 {
     private SpriteRenderer targetRenderer;
@@ -470,7 +488,7 @@ internal sealed class StageRangedProjectileArt : MonoBehaviour
         if (projectile == null) return;
 
         string sceneName = SceneManager.GetActiveScene().name;
-        if (sceneName != "Stage01" && sceneName != "Stage02" && sceneName != "Stage03") return;
+        if (StageArtDirector.ParseStageNumber(sceneName) == 0) return;
         if (projectile.GetComponent<StageRangedProjectileArt>() != null) return;
 
         projectile.gameObject.AddComponent<StageRangedProjectileArt>().Configure();
