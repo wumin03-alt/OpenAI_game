@@ -16,8 +16,16 @@
 |---:|---|---|
 | 0 | `Assets/_Game/Scenes/Bootstrap.unity` | 공용 시스템 설치 |
 | 1 | `Assets/_Game/Scenes/MainMenu.unity` | 시작/설정 메뉴 |
-| 2 | `Assets/Scenes/Stage01.unity` | 일반 스테이지 |
-| 3 | `Assets/Scenes/BossArena.unity` | 학습형 보스 스테이지 |
+| 2 | `Assets/_Game/Scenes/Story.unity` | 5컷 자동 스토리 도입 |
+| 3 | `Assets/Scenes/Tutorial.unity` | 기본 전투 조작 안내 |
+| 4 | `Assets/Scenes/Stage01.unity` | 일반 스테이지 시작 |
+| 5 | `Assets/Scenes/Stage02.unity` | 일반 스테이지 |
+| 6 | `Assets/Scenes/Stage03.unity` | 일반 스테이지 |
+| 7 | `Assets/Scenes/MiddleBoss.unity` | 중간 보스 스테이지 |
+| 8 | `Assets/Scenes/Stage05.unity` | 일반 스테이지 |
+| 9 | `Assets/Scenes/Stage06.unity` | 일반 스테이지 |
+| 10 | `Assets/Scenes/Stage07.unity` | 일반 스테이지 |
+| 11 | `Assets/Scenes/BossArena.unity` | 학습형 보스 스테이지 |
 
 새 씬은 씬 담당자가 제작하고 공통 시스템 담당자가 Build Settings 및 전환 경로를 검토한다.
 
