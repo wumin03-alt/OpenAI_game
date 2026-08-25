@@ -11,7 +11,7 @@ namespace Game.UI
     /// <summary>MainMenu 씬의 시작 화면을 구성하고 버튼 입력을 처리합니다.</summary>
     public sealed class MainMenuController : MonoBehaviour
     {
-        private const string FirstStageScene = "Stage01";
+        private const string OpeningStoryScene = "Story";
 
         private GameObject mainPanel;
         private GameObject settingsPanel;
@@ -120,9 +120,9 @@ namespace Game.UI
             Time.timeScale = 1f;
             GameSession.Instance?.ResetRun();
             if (SceneLoader.Instance != null)
-                SceneLoader.Instance.LoadScene(FirstStageScene);
+                SceneLoader.Instance.LoadScene(OpeningStoryScene);
             else
-                SceneManager.LoadScene(FirstStageScene);
+                SceneManager.LoadScene(OpeningStoryScene);
         }
 
         private void ShowSettings()
