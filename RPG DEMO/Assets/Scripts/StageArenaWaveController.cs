@@ -661,6 +661,10 @@ public sealed class StageArenaWaveController : MonoBehaviour
             if (defenseMode && defenseTarget != null)
                 controller.SetTarget(defenseTarget.transform);
         }
+
+        StageRangedEnemyController rangedController = enemy.GetComponent<StageRangedEnemyController>();
+        if (defenseMode && defenseTarget != null && rangedController != null)
+            rangedController.SetTarget(defenseTarget.transform);
     }
 
     private static SpawnDefinition Spawn(EnemyType enemyType, float x, float y,
