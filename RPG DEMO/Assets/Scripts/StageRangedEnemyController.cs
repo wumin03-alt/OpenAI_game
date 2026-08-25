@@ -37,6 +37,7 @@ public sealed class StageRangedEnemyController : MonoBehaviour
     private Rigidbody2D rb;
     private Health health;
     private Transform player;
+    private Transform target;
     private float shotCooldown;
     private float hitStunLeft;
     private int facing = -1;
@@ -66,6 +67,12 @@ public sealed class StageRangedEnemyController : MonoBehaviour
         ApplyFacing();
     }
 
+    /// <summary>방어 스테이지에서 플레이어 대신 공격할 대상을 지정합니다.</summary>
+    public void SetTarget(Transform newTarget)
+    {
+        target = newTarget;
+    }
+
     private void Update()
     {
         if (health != null && health.IsDead) return;
@@ -76,14 +83,14 @@ public sealed class StageRangedEnemyController : MonoBehaviour
             return;
         }
 
-        if (player == null) FindPlayer();
-        if (player == null) return;
+        if (target == null) FindPlayer();
+        if (target == null) return;
 
-        float distance = Vector2.Distance(transform.position, player.position);
+        float distance = Vector2.Distance(transform.position, target.position);
         shotCooldown -= Time.deltaTime;
 
         if (distance <= attackRange && shotCooldown <= 0f)
-            FireAtPlayer();
+            FireAtTarget();
     }
 
     private void FixedUpdate()
@@ -91,13 +98,13 @@ public sealed class StageRangedEnemyController : MonoBehaviour
         if (health != null && health.IsDead) return;
         if (hitStunLeft > 0f) return;
 
-        if (player == null)
+        if (target == null)
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             return;
         }
 
-        float dx = player.position.x - transform.position.x;
+        float dx = target.position.x - transform.position.x;
         if (Mathf.Abs(dx) > 0.05f)
         {
             facing = dx > 0f ? 1 : -1;
@@ -117,7 +124,7 @@ public sealed class StageRangedEnemyController : MonoBehaviour
         rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
     }
 
-    private void FireAtPlayer()
+    private void FireAtTarget()
     {
         shotCooldown = attackCooldown;
 
@@ -129,7 +136,7 @@ public sealed class StageRangedEnemyController : MonoBehaviour
         }
 
         Vector3 origin = firePoint.position;
-        Vector2 direction = (Vector2)(player.position - origin);
+        Vector2 direction = (Vector2)(target.position - origin);
         Projectile projectile = Instantiate(projectilePrefab, origin, Quaternion.identity);
         StageRangedProjectileArt.Apply(projectile);
         projectile.Launch(direction);
@@ -138,7 +145,10 @@ public sealed class StageRangedEnemyController : MonoBehaviour
     private void FindPlayer()
     {
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (playerObject != null) player = playerObject.transform;
+        if (playerObject == null) return;
+
+        player = playerObject.transform;
+        if (target == null) target = player;
     }
 
     private void OnDamaged()

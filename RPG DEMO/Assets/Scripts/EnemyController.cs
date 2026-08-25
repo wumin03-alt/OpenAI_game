@@ -180,38 +180,42 @@ public class EnemyController : MonoBehaviour
     // ───────────────────────── 근접 공격 ─────────────────────────
     private void TryMeleeAttack()
     {
-        if (!IsChasing || player == null || playerHealth == null || playerHealth.IsDead) return;
-        if (hitStunLeft > 0f || Time.time < nextAttackTime || !IsPlayerInAttackRange()) return;
+        Transform attackTarget = usesAssignedTarget ? target : player;
+        Health attackTargetHealth = usesAssignedTarget ? target?.GetComponent<Health>() : playerHealth;
+        Collider2D attackTargetCollider = usesAssignedTarget ? target?.GetComponent<Collider2D>() : playerCollider;
+
+        if (!IsChasing || attackTarget == null || attackTargetHealth == null || attackTargetHealth.IsDead) return;
+        if (hitStunLeft > 0f || Time.time < nextAttackTime
+            || !IsTargetInAttackRange(attackTarget, attackTargetCollider)) return;
 
         nextAttackTime = Time.time + attackInterval;
 
-        float hpBefore = playerHealth.CurrentHP;
-        playerHealth.TakeDamage(attackDamage);
+        float hpBefore = attackTargetHealth.CurrentHP;
+        attackTargetHealth.TakeDamage(attackDamage);
 
         // 패링/무적 등으로 실제 체력이 줄지 않았다면 넉백도 주지 않습니다.
-        if (playerHealth.CurrentHP >= hpBefore) return;
+        if (attackTargetHealth.CurrentHP >= hpBefore) return;
 
-        Rigidbody2D playerBody = player.GetComponent<Rigidbody2D>();
-        if (playerBody == null) return;
+        Rigidbody2D targetBody = attackTarget.GetComponent<Rigidbody2D>();
+        if (targetBody == null) return;
 
-        float direction = player.position.x >= transform.position.x ? 1f : -1f;
-        Vector2 velocity = playerBody.linearVelocity;
+        float direction = attackTarget.position.x >= transform.position.x ? 1f : -1f;
+        Vector2 velocity = targetBody.linearVelocity;
         velocity.x = 0f;
-        playerBody.linearVelocity = velocity;
-        playerBody.AddForce(new Vector2(direction * attackKnockbackForce, attackKnockbackUp),
-                            ForceMode2D.Impulse);
+        targetBody.linearVelocity = velocity;
+        targetBody.AddForce(new Vector2(direction * attackKnockbackForce, attackKnockbackUp), ForceMode2D.Impulse);
     }
 
-    private bool IsPlayerInAttackRange()
+    private bool IsTargetInAttackRange(Transform attackTarget, Collider2D attackTargetCollider)
     {
-        if (bodyCollider != null && playerCollider != null)
+        if (bodyCollider != null && attackTargetCollider != null)
         {
-            ColliderDistance2D distance = bodyCollider.Distance(playerCollider);
+            ColliderDistance2D distance = bodyCollider.Distance(attackTargetCollider);
             return distance.isOverlapped || distance.distance <= attackReach;
         }
 
         // 콜라이더 참조가 없는 비정상 프리팹에서도 완전히 공격 불능이 되지 않게 폴백합니다.
-        return Vector2.Distance(transform.position, player.position) <= stopDistance + attackReach;
+        return Vector2.Distance(transform.position, attackTarget.position) <= stopDistance + attackReach;
     }
 
     // ───────────────────────── 순찰 ─────────────────────────
