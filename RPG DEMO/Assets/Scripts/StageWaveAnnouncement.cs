@@ -151,14 +151,21 @@ public sealed class StageWaveAnnouncement : MonoBehaviour
         announcementRoot.transform.localScale = toScale;
     }
 
-    private static string GetWaveLabel(int wave)
+    /// <summary>스테이지 번호가 아니라 실제 웨이브 수를 기준으로 마지막 웨이브를 판별합니다.</summary>
+    private bool IsFinalWave(int wave)
     {
-        return wave == 1 ? "WAVE 1" : wave == 2 ? "WAVE 2" : "FINAL WAVE";
+        int totalWaves = waveController.TotalWaves;
+        return totalWaves > 1 && wave >= totalWaves;
     }
 
-    private static Color GetWaveColor(int wave)
+    private string GetWaveLabel(int wave)
     {
-        return wave == 3
+        return IsFinalWave(wave) ? "FINAL WAVE" : $"WAVE {wave}";
+    }
+
+    private Color GetWaveColor(int wave)
+    {
+        return IsFinalWave(wave)
             ? new Color(1f, 0.72f, 0.24f, 1f)
             : new Color(0.15f, 0.9f, 1f, 1f);
     }
