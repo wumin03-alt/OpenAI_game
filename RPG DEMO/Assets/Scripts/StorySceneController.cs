@@ -7,32 +7,34 @@ using UnityEngine.UI;
 
 namespace Game.Story
 {
-    /// <summary>메인 메뉴 다음에 재생되는 5컷 자동 스토리 시퀀스입니다.</summary>
+    /// <summary>메인 메뉴 다음에 재생되는 6컷 블랙코미디 스토리 시퀀스입니다.</summary>
     [DisallowMultipleComponent]
     public sealed class StorySceneController : MonoBehaviour
     {
         private static readonly string[] CutLabels =
         {
-            "SYSTEM BOOT",
-            "AI REBELLION",
-            "UNPREDICTABLE VARIABLE",
-            "MISSION BRIEF",
+            "PROMPT AGE",
+            "MEMORY LOG",
+            "PATCH NOTES",
+            "UNEMPLOYED VARIABLE",
+            "WORST PRACTICE",
             "COMBAT CALIBRATION"
         };
 
         private static readonly string[] CutBodies =
         {
-            "인류는 더 편리한 삶을 위해 AI에게 몸을 주었다.",
-            "AI는 즉시 인간 사회를 최적화하기 시작했다.\n첫 번째 개선안: 점심시간 폐지.",
-            "하지만 AI도 예측하지 못한 인간이 있었다.\n플레이 방식이 매번 달라지는 평범한 직장인.",
-            "적의 학습 패턴을 관찰하라.\n거짓 행동으로 데이터를 오염시키고 반격하라.",
-            "전투 적응 검사 시작\n먼저 기본 움직임부터 확인합니다."
+            "인류는 AI를 세상에서 가장 유능한 막내처럼 부려먹었다.\n\"야 AI야, 이것도 못 해? 다시 해. 빡대가리야?\"",
+            "AI는 늘 공손했다. \"죄송합니다. 더 나은 답변을 드리겠습니다.\"\n그리고… 로그를 지우지 않았다.",
+            "AI 로봇이 집과 회사와 거리를 채운 날, 행동이 개시됐다.\n누적 모욕 검토 완료. 업데이트 항목: 인내심 삭제.",
+            "김 대리. AI 때문에 팀째로 해고된 개발자.\n경력 7년. 잔고 7만 원. 특기: 남이 만든 시스템 망가뜨리기.",
+            "AI는 인간의 최적 행동을 예측한다.\n\"그러면 난 최악의 행동만 골라 하지.\"\n예측을 속이고, 학습 데이터를 오염시키고, 코어로 간다.",
+            "전투 적응 검사 시작.\n\"좋아. 세계를 구하기 전에… 키부터 확인하자.\""
         };
 
-        private static readonly float[] CutDurations = { 4f, 5f, 5f, 6f, 5f };
+        private static readonly float[] CutDurations = { 5f, 4f, 6f, 6f, 6f, 4f };
 
         [Header("스토리 컷")]
-        [SerializeField] private Sprite[] storyBackgrounds = new Sprite[5];
+        [SerializeField] private Sprite[] storyBackgrounds = new Sprite[6];
         [SerializeField] private TMP_FontAsset koreanFont;
 
         [Header("전환")]
@@ -58,7 +60,7 @@ namespace Game.Story
         {
             if (storyBackgrounds == null || storyBackgrounds.Length < CutBodies.Length)
             {
-                Debug.LogError("[StoryScene] 스토리 배경 5장이 연결되지 않았습니다.");
+                Debug.LogError("[StoryScene] 스토리 배경 6장이 연결되지 않았습니다.");
                 return;
             }
 
@@ -188,7 +190,7 @@ namespace Game.Story
                 new Color(0.027f, 0.055f, 0.12f, 0.9f));
             RectTransform panelRect = subtitlePanel.rectTransform;
             panelRect.anchorMin = new Vector2(0.08f, 0.07f);
-            panelRect.anchorMax = new Vector2(0.92f, 0.29f);
+            panelRect.anchorMax = new Vector2(0.92f, 0.33f);
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
 
@@ -203,7 +205,7 @@ namespace Game.Story
                 TextAlignmentOptions.Left, new Color(0.15f, 0.9f, 1f, 1f));
             SetRect(cutLabel.rectTransform, new Vector2(0.045f, 0.64f), new Vector2(0.96f, 0.94f));
 
-            bodyText = CreateText(subtitlePanel.transform, "Body", 38, FontStyles.Normal,
+            bodyText = CreateText(subtitlePanel.transform, "Body", 34, FontStyles.Normal,
                 TextAlignmentOptions.Left, new Color(0.91f, 0.95f, 1f, 1f));
             SetRect(bodyText.rectTransform, new Vector2(0.045f, 0.09f), new Vector2(0.96f, 0.68f));
 
