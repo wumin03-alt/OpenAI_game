@@ -53,21 +53,12 @@ public sealed class StageArtDirector : MonoBehaviour
         return 0;
     }
 
-    // 배경 텍스처는 Stage_Background_01~03 세 장뿐이라 Stage05~07은 이를 재사용합니다.
-    private static int BackgroundIndex(int stage)
-    {
-        if (stage == 5) return 1;
-        if (stage == 6) return 2;
-        if (stage == 7) return 3;
-        return stage;
-    }
-
     private void EnsureBackdrop()
     {
         if (backdropCreated) return;
 
         Camera stageCamera = Camera.main;
-        Texture2D texture = StageArtLibrary.LoadTexture($"StageArt/Stage_Background_0{BackgroundIndex(stageNumber)}");
+        Texture2D texture = StageArtLibrary.LoadTexture($"StageArt/Stage_Background_0{stageNumber}");
         if (stageCamera == null || texture == null) return;
 
         GameObject backdrop = new GameObject($"Stage0{stageNumber}_FinalBackdrop");
