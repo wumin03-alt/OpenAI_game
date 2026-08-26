@@ -12,7 +12,7 @@ public static class BossArenaPresentationSetup
 {
     private const string ScenePath = "Assets/Scenes/BossArena.unity";
     private const string ArtRoot = "Assets/Art/BossArena";
-    private const string FontSourcePath = "Assets/Art/Common/Fonts/NotoSansKR-Variable.ttf";
+    private const string FontSourcePath = "Assets/Art/Common/Fonts/Resources/NotoSansKR-Variable.ttf";
     private const string FontAssetPath = "Assets/Art/Common/Fonts/NotoSansKR-BossArena SDF.asset";
 
     [MenuItem("Tools/Boss Arena/Apply Korean AI Core Presentation")]

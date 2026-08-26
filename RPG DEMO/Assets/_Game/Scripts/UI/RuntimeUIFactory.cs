@@ -148,8 +148,13 @@ namespace Game.UI
             {
                 if (cachedFont == null)
                 {
-                    cachedFont = Font.CreateDynamicFontFromOSFont(
-                        new[] { "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans CJK KR", "Arial" }, 32);
+                    // OS 폰트는 실행 환경에 따라 한글 글리프를 만들지 못할 수 있으므로
+                    // 프로젝트에 포함된 한글 폰트(Noto Sans KR)를 최우선으로 사용한다.
+                    cachedFont = Resources.Load<Font>("NotoSansKR-Variable");
+
+                    if (cachedFont == null)
+                        cachedFont = Font.CreateDynamicFontFromOSFont(
+                            new[] { "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans CJK KR", "Arial" }, 32);
 
                     if (cachedFont == null)
                         cachedFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
