@@ -365,7 +365,12 @@ internal sealed class StageEnemyArtAnimator : MonoBehaviour
         Vector3 scale = targetRenderer.transform.localScale;
         float facing = Mathf.Sign(scale.x == 0f ? 1f : scale.x);
         if (kind == VisualKind.DefenseDog && body != null && Mathf.Abs(body.linearVelocity.x) > 0.05f)
+        {
             facing = Mathf.Sign(body.linearVelocity.x);
+            // Dog_Idle 시트는 왼쪽, Dog_Jump 시트는 오른쪽을 보고 그려져 있어
+            // 지상(걷기) 프레임에서만 미러 방향이 반대다.
+            if (ReferenceEquals(activeFrames, idleFrames)) facing = -facing;
+        }
         targetRenderer.transform.localScale = new Vector3(facing, 1f, 1f);
     }
 
