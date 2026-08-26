@@ -1,0 +1,442 @@
+fileFormatVersion: 2
+guid: 4679dbe33d523084a9bb6e1899cfdfe5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4646529230480680973
+    second: SPR_AICorePlatform_Variants_Raw_0
+  - first:
+      213: 3147280143350151198
+    second: SPR_AICorePlatform_Variants_Raw_1
+  - first:
+      213: -960331687493969013
+    second: SPR_AICorePlatform_Variants_Raw_2
+  - first:
+      213: 5151000273948579596
+    second: SPR_AICorePlatform_Variants_Raw_3
+  - first:
+      213: -1130469233124475905
+    second: SPR_AICorePlatform_Variants_Raw_4
+  - first:
+      213: -6486483720582931983
+    second: SPR_AICorePlatform_Variants_Raw_5
+  - first:
+      213: -5188238770891274065
+    second: SPR_AICorePlatform_Variants_Raw_6
+  - first:
+      213: -8526026268527721880
+    second: SPR_AICorePlatform_Variants_Raw_7
+  - first:
+      213: -1324512015690310052
+    second: SPR_AICorePlatform_Variants_Raw_8
+  - first:
+      213: 8725229559932910194
+    second: SPR_AICorePlatform_Variants_Raw_9
+  - first:
+      213: -3230882157449220991
+    second: SPR_AICorePlatform_Variants_Raw_10
+  - first:
+      213: 8786677171694280597
+    second: SPR_AICorePlatform_Variants_Raw_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_0
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 101
+        width: 695
+        height: 611
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f7dab28846348fb0800000000000000
+      internalID: -4646529230480680973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_1
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 644
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e18b6098d926dab20800000000000000
+      internalID: 3147280143350151198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_2
+      rect:
+        serializedVersion: 2
+        x: 458
+        y: 644
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8bde541b673ca2f0800000000000000
+      internalID: -960331687493969013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_3
+      rect:
+        serializedVersion: 2
+        x: 722
+        y: 168
+        width: 713
+        height: 540
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0715ae35770c7740800000000000000
+      internalID: 5151000273948579596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_4
+      rect:
+        serializedVersion: 2
+        x: 1066
+        y: 640
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffb7b12d834cf40f0800000000000000
+      internalID: -1130469233124475905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_5
+      rect:
+        serializedVersion: 2
+        x: 1078
+        y: 633
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f9dc494c616bf5a0800000000000000
+      internalID: -6486483720582931983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_6
+      rect:
+        serializedVersion: 2
+        x: 1460
+        y: 160
+        width: 697
+        height: 508
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa8cd1b835caff7b0800000000000000
+      internalID: -5188238770891274065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_7
+      rect:
+        serializedVersion: 2
+        x: 1768
+        y: 634
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86281c618487da980800000000000000
+      internalID: -8526026268527721880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_8
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 628
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5eda0cd6536e9de0800000000000000
+      internalID: -1324512015690310052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_9
+      rect:
+        serializedVersion: 2
+        x: 1070
+        y: 622
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27af9877e0e361970800000000000000
+      internalID: 8725229559932910194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_10
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 210
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18c6716bbc99923d0800000000000000
+      internalID: -3230882157449220991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SPR_AICorePlatform_Variants_Raw_11
+      rect:
+        serializedVersion: 2
+        x: 1727
+        y: 95
+        width: 22
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59f1fd6755c80f970800000000000000
+      internalID: 8786677171694280597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SPR_AICorePlatform_Variants_Raw_0: -4646529230480680973
+      SPR_AICorePlatform_Variants_Raw_1: 3147280143350151198
+      SPR_AICorePlatform_Variants_Raw_10: -3230882157449220991
+      SPR_AICorePlatform_Variants_Raw_11: 8786677171694280597
+      SPR_AICorePlatform_Variants_Raw_2: -960331687493969013
+      SPR_AICorePlatform_Variants_Raw_3: 5151000273948579596
+      SPR_AICorePlatform_Variants_Raw_4: -1130469233124475905
+      SPR_AICorePlatform_Variants_Raw_5: -6486483720582931983
+      SPR_AICorePlatform_Variants_Raw_6: -5188238770891274065
+      SPR_AICorePlatform_Variants_Raw_7: -8526026268527721880
+      SPR_AICorePlatform_Variants_Raw_8: -1324512015690310052
+      SPR_AICorePlatform_Variants_Raw_9: 8725229559932910194
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
