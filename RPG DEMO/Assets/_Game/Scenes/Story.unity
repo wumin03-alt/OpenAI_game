@@ -149,11 +149,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Story.StorySceneController
   storyBackgrounds:
-  - {fileID: 7342523057934556359, guid: fff4d23b8863bee49a464c16a323ecdf, type: 3}
-  - {fileID: -2977326897418515847, guid: 6e5c4e4052a8a734a8254b2fcebf1013, type: 3}
-  - {fileID: 1857869344357540622, guid: 566c8617061489a43bf39d5ea23f1051, type: 3}
-  - {fileID: 8089475049492959925, guid: f6524ca59fd08c64a9137b7f422f5af0, type: 3}
-  - {fileID: 4296831869523973455, guid: c8249fdcdafea7649b9669218fc783be, type: 3}
+  - {fileID: 21300000, guid: b223a78583ab1134c8c71cecd418407a, type: 3}
+  - {fileID: 21300000, guid: 802843841dd1fa7499b7d8e982c6fbc1, type: 3}
+  - {fileID: 21300000, guid: cd1d83b537b7eaf4683bfb021a49d1fe, type: 3}
+  - {fileID: 21300000, guid: 674a8ecf6a6d26f49bc17280e0a839be, type: 3}
+  - {fileID: 21300000, guid: c5d6d2b4c01dc9845b0c1fd84aca2302, type: 3}
+  - {fileID: 21300000, guid: c7f7717763a54ad4b88262dd2d0fd4b5, type: 3}
   koreanFont: {fileID: 11400000, guid: 70695baa547641548907010ea1096365, type: 2}
   tutorialSceneName: Tutorial
   fadeDuration: 0.45
