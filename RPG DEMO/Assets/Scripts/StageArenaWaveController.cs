@@ -59,6 +59,9 @@ public sealed class StageArenaWaveController : MonoBehaviour
 
     public int CurrentWave { get; private set; }
     public bool IsCleared { get; private set; }
+
+    /// <summary>정의된 총 웨이브 수입니다. 안내문이 마지막 웨이브를 판별하는 데만 사용합니다.</summary>
+    public int TotalWaves => waves != null ? waves.Length : 0;
     public event Action OnWaveCleared;
     public event Action OnStageCleared;
 
