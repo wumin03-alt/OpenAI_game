@@ -16,7 +16,7 @@
 |---:|---|---|
 | 0 | `Assets/_Game/Scenes/Bootstrap.unity` | 공용 시스템 설치 |
 | 1 | `Assets/_Game/Scenes/MainMenu.unity` | 시작/설정 메뉴 |
-| 2 | `Assets/_Game/Scenes/Story.unity` | 5컷 자동 스토리 도입 |
+| 2 | `Assets/_Game/Scenes/Story.unity` | 6컷 블랙코미디 자동 스토리 도입 |
 | 3 | `Assets/Scenes/Tutorial.unity` | 기본 전투 조작 안내 |
 | 4 | `Assets/Scenes/Stage01.unity` | 일반 스테이지 시작 |
 | 5 | `Assets/Scenes/Stage02.unity` | 일반 스테이지 |
